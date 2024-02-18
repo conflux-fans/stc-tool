@@ -1,8 +1,13 @@
 package core
 
-func Download() {
-	// downloader := transfer.NewDownloader(nodeClients...)
-	// if err := downloader.Download(downloadArgs.root, downloadArgs.file, downloadArgs.proof); err != nil {
-	// 	logrus.WithError(err).Fatal("Failed to download file")
-	// }
+import (
+	"github.com/sirupsen/logrus"
+	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
+)
+
+func Download(root string) {
+	downloader := transfer.NewDownloader(nodeClients...)
+	if err := downloader.Download(root, root, false); err != nil {
+		logrus.WithError(err).Fatal("Failed to download file")
+	}
 }

@@ -19,11 +19,15 @@ var decryptCmd = &cobra.Command{
 		encryptor, err := encrypt.GetEncryptor(cipher)
 		if err != nil {
 			fmt.Println("Failed to get encryptor", err)
+			return
 		}
 
-		err = encrypt.DecryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
+		outputFile, err := encrypt.DecryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
 		if err != nil {
 			fmt.Println("Failed to encrypt file", err)
+			return
 		}
+
+		fmt.Printf("Decrypted file path %s\n", outputFile)
 	},
 }

@@ -51,42 +51,50 @@ func DecryptBytes(e Encryptor, input, key []byte) ([]byte, error) {
 	return io.ReadAll(outputBuf)
 }
 
-func EncryptFile(e Encryptor, source, outputDirPath string, key []byte) error {
+func EncryptFile(e Encryptor, source, outputDirPath string, key []byte) (string, error) {
 	if err := os.MkdirAll(outputDirPath, 0755); err != nil {
-		return errors.WithMessage(err, "Failed to create directory")
+		return "", errors.WithMessage(err, "Failed to create directory")
 	}
 
 	sf, err := os.OpenFile(source, os.O_RDONLY, 0666)
 	if err != nil {
-		return errors.WithMessage(err, "Failed to open source file")
+		return "", errors.WithMessage(err, "Failed to open source file")
 	}
+	defer sf.Close()
 
-	of, err := os.OpenFile(outputDirPath+mustGetFileName(sf), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	outputhPath := outputDirPath + mustGetFileName(sf) + ".encrypt"
+
+	of, err := os.OpenFile(outputhPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		return errors.WithMessage(err, "Failed to create output file")
+		return "", errors.WithMessage(err, "Failed to create output file")
 	}
+	defer of.Close()
 
-	return e.Encrypt(sf, of, key)
+	return outputhPath, e.Encrypt(sf, of, key)
 }
 
-func DecryptFile(e Encryptor, source, outputDirPath string, key []byte) error {
+func DecryptFile(e Encryptor, source, outputDirPath string, key []byte) (string, error) {
 	// fmt.Printf("decrypt file source %s, out %s\n", source, outputDirPath)
 	if err := os.MkdirAll(outputDirPath, 0755); err != nil {
-		return errors.WithMessage(err, "Failed to create directory")
+		return "", errors.WithMessage(err, "Failed to create directory")
 	}
 
 	sf, err := os.OpenFile(source, os.O_RDONLY, 0666)
 	if err != nil {
-		return errors.WithMessage(err, "Failed to open source file")
+		return "", errors.WithMessage(err, "Failed to open source file")
 	}
+	defer sf.Close()
 	// fmt.Printf("sf name %s\n", mustGetFileName(sf))
 
-	of, err := os.OpenFile(outputDirPath+mustGetFileName(sf), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		return errors.WithMessage(err, "Failed to create output file")
-	}
+	outputhPath := outputDirPath + mustGetFileName(sf) + ".decrypt"
 
-	return e.Decrypt(sf, of, key)
+	of, err := os.OpenFile(outputhPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return "", errors.WithMessage(err, "Failed to create output file")
+	}
+	defer of.Close()
+
+	return outputhPath, e.Decrypt(sf, of, key)
 }
 
 func mustGetFileName(f *os.File) string {

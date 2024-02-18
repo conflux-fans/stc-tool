@@ -21,7 +21,13 @@ var batchuploadCmd = &cobra.Command{
 	Short: "batch upload texts",
 	Long:  `batch upload texts`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hash, err := core.BatchUpload(count, &core.EncryptOption{cipher, password})
+		opt, err := core.NewEncryptOption(cipher, password)
+		if err != nil {
+			logrus.WithError(err).Error("Failed to create encryption option")
+			return
+		}
+
+		hash, err := core.BatchUpload(count, opt)
 		if err != nil {
 			logrus.Error("Failed uploading:", err)
 		} else {
@@ -35,14 +41,4 @@ func init() {
 	batchuploadCmd.Flags().IntVarP(&count, "count", "c", 1, "upload count")
 	batchuploadCmd.Flags().StringVar(&cipher, "cipher", "", "cipher method")
 	batchuploadCmd.Flags().StringVar(&password, "password", "", "cipher password")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// batchuploadCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// batchuploadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

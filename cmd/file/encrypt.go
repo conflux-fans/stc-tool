@@ -21,7 +21,7 @@ var encryptCmd = &cobra.Command{
 			fmt.Println("Failed to get encryptor", err)
 		}
 
-		err = encrypt.EncryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
+		_, err = encrypt.EncryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
 		if err != nil {
 			fmt.Println("Failed to encrypt file", err)
 		}

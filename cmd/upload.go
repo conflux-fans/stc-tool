@@ -4,9 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // uploadCmd represents the upload command
@@ -15,20 +15,21 @@ var uploadCmd = &cobra.Command{
 	Short: "upload a file or text",
 	Long:  `upload a file or text`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("upload called")
+		opt, err := core.NewEncryptOption(cipher, password)
+		if err != nil {
+			logrus.WithError(err).Error("Failed to create encryption option")
+			return
+		}
+		if err := core.Upload(filePath, opt); err != nil {
+			logrus.WithError(err).Error("Failed to upload file")
+			return
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(uploadCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// uploadCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// uploadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	uploadCmd.Flags().StringVar(&cipher, "cipher", "", "cipher method")
+	uploadCmd.Flags().StringVar(&password, "password", "", "cipher password")
+	uploadCmd.Flags().StringVar(&filePath, "file", "", "file path")
 }

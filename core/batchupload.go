@@ -17,6 +17,22 @@ type EncryptOption struct {
 	Password string
 }
 
+func NewEncryptOption(method string, password string) (*EncryptOption, error) {
+	if method == "" && password == "" {
+		return nil, nil
+	}
+	if method == "" {
+		return nil, errors.New("Missing cipher method specified")
+	}
+	if password == "" {
+		return nil, errors.New("Missing password specified")
+	}
+	return &EncryptOption{
+		Method:   method,
+		Password: password,
+	}, nil
+}
+
 // TODO: count replace by source path?
 func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 
