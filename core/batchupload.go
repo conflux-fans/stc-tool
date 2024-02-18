@@ -68,7 +68,7 @@ func randomText(encryptOpt *EncryptOption) ([]byte, error) {
 		return nil, errors.WithMessage(err, "Failed to get encryptor")
 	}
 
-	ciphertext, err := encryptor.Encrypt(content, []byte(encryptOpt.Password))
+	ciphertext, err := encrypt.EncryptBytes(encryptor, content, []byte(encryptOpt.Password))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to encrypt")
 	}

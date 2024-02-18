@@ -17,13 +17,13 @@ var verifyCmd = &cobra.Command{
 	},
 }
 
-var file string
+var filePath string
 
 func init() {
 	rootCmd.AddCommand(verifyCmd)
 	verifyCmd.Flags().StringVar(&cipher, "cipher", "", "cipher method")
 	verifyCmd.Flags().StringVar(&password, "password", "", "cipher password")
-	verifyCmd.Flags().StringVar(&file, "file", "", "file path")
+	verifyCmd.Flags().StringVar(&filePath, "file", "", "file path")
 
 	// Here you will define your flags and configuration settings.
 

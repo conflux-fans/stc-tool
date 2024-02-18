@@ -1,12 +1,16 @@
 package empty
 
+import "io"
+
 type EmptyEncryptor struct {
 }
 
-func (a *EmptyEncryptor) Encrypt(input, key []byte) ([]byte, error) {
-	return input, nil
+func (a *EmptyEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) error {
+	_, err := io.Copy(output, input)
+	return err
 }
 
-func (a *EmptyEncryptor) Decrypt(ciphertext, key []byte) ([]byte, error) {
-	return ciphertext, nil
+func (a *EmptyEncryptor) Decrypt(input io.Reader, output io.Writer, key []byte) error {
+	_, err := io.Copy(output, input)
+	return err
 }

@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package file
 
 import (
 	"github.com/ethereum/go-ethereum/common"
@@ -11,12 +11,12 @@ import (
 )
 
 // queryCmd represents the query command
-var queryCmd = &cobra.Command{
-	Use:   "fileinfo",
+var infoCmd = &cobra.Command{
+	Use:   "file",
 	Short: "Get file info by hash",
 	Long:  `Get file info by hash`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fi, err := core.GetFileInfo(common.HexToHash(root))
+		fi, err := core.GetFileInfo(common.HexToHash(rootHash))
 		if err != nil {
 			logrus.WithError(err).Error("Failed to get file info")
 		} else {
@@ -26,13 +26,12 @@ var queryCmd = &cobra.Command{
 }
 
 var (
-	root string
+	rootHash string
 )
 
 func init() {
-	rootCmd.AddCommand(queryCmd)
-	queryCmd.Flags().StringVarP(&root, "root", "r", "", "root hash of content")
-	queryCmd.MarkFlagRequired("root")
+	fileCmd.Flags().StringVarP(&rootHash, "root", "r", "", "root hash of content")
+	fileCmd.MarkFlagRequired("root")
 
 	// Here you will define your flags and configuration settings.
 
