@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/zero-gravity-labs/zerog-storage-tool/cmd/file"
+	"github.com/zero-gravity-labs/zerog-storage-tool/cmd/template"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -27,5 +28,6 @@ func Execute() {
 }
 
 func init() {
-	file.InitFileCmds(rootCmd)
+	file.InitCmds(rootCmd)
+	template.InitCmds(rootCmd)
 }

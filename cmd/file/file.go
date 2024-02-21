@@ -21,7 +21,7 @@ var (
 	outputDirPath  string
 )
 
-func InitFileCmds(rootCmd *cobra.Command) {
+func InitCmds(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(fileCmd)
 	{
 		fileCmd.AddCommand(encryptCmd)
