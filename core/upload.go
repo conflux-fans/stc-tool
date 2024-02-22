@@ -9,9 +9,25 @@ import (
 	"github.com/zero-gravity-labs/zerog-storage-tool/utils/encryptutils"
 )
 
-func Upload(filepath string, opt *EncryptOption) error {
-	if opt != nil {
-		outPath, err := encryptutils.EncryptFile(filepath, opt.Method, opt.Password)
+type UploadOption struct {
+	EncryptOption *EncryptOption
+	Tag           string
+}
+
+func NewUploadOption(method string, password string, tag string) (*UploadOption, error) {
+	encryptOpt, err := NewEncryptOption(method, password)
+	if err != nil {
+		return nil, err
+	}
+	return &UploadOption{
+		EncryptOption: encryptOpt,
+		Tag:           tag,
+	}, nil
+}
+
+func Upload(filepath string, opt *UploadOption) error {
+	if opt.EncryptOption != nil {
+		outPath, err := encryptutils.EncryptFile(filepath, opt.EncryptOption.Method, opt.EncryptOption.Password)
 		if err != nil {
 			return errors.WithMessage(err, "Failed to encrypt file")
 		}
@@ -27,5 +43,7 @@ func Upload(filepath string, opt *EncryptOption) error {
 	if err != nil {
 		return err
 	}
-	return uploader.Upload(f)
+	return uploader.Upload(f, transfer.UploadOption{
+		Tags: []byte(opt.Tag),
+	})
 }

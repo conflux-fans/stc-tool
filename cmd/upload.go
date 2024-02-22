@@ -9,13 +9,18 @@ import (
 	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
+var (
+	tag string
+)
+
 // uploadCmd represents the upload command
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "upload a file or text",
 	Long:  `upload a file or text`,
 	Run: func(cmd *cobra.Command, args []string) {
-		opt, err := core.NewEncryptOption(cipher, password)
+		opt, err := core.NewUploadOption(cipher, password, tag)
+
 		if err != nil {
 			logrus.WithError(err).Error("Failed to create encryption option")
 			return
@@ -32,4 +37,7 @@ func init() {
 	uploadCmd.Flags().StringVar(&cipher, "cipher", "", "cipher method")
 	uploadCmd.Flags().StringVar(&password, "password", "", "cipher password")
 	uploadCmd.Flags().StringVar(&filePath, "file", "", "file path")
+	uploadCmd.Flags().StringVar(&tag, "tag", "", "file tag, for appending content to file")
+
+	uploadCmd.MarkFlagRequired("file")
 }
