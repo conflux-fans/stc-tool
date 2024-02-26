@@ -1,27 +1,31 @@
 package core
 
 import (
+	"encoding/json"
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
+	"github.com/zero-gravity-labs/zerog-storage-tool/db"
 	"github.com/zero-gravity-labs/zerog-storage-tool/utils/encryptutils"
 )
 
 type UploadOption struct {
 	EncryptOption *EncryptOption
-	Tag           string
+	// Tag           string
 }
 
-func NewUploadOption(method string, password string, tag string) (*UploadOption, error) {
+func NewUploadOption(method string, password string) (*UploadOption, error) {
 	encryptOpt, err := NewEncryptOption(method, password)
 	if err != nil {
 		return nil, err
 	}
 	return &UploadOption{
 		EncryptOption: encryptOpt,
-		Tag:           tag,
+		// Tag:           tag,
 	}, nil
 }
 
@@ -43,7 +47,37 @@ func Upload(filepath string, opt *UploadOption) error {
 	if err != nil {
 		return err
 	}
-	return uploader.Upload(f, transfer.UploadOption{
-		Tags: []byte(opt.Tag),
+
+	err = uploader.Upload(f, transfer.UploadOption{
+		// Tags: []byte(opt.Tag),
 	})
+
+	return err
+}
+
+func SaveFileKeyToDb(filepath string, name string) error {
+	// save db
+	fileNameKey := db.KeyFileName(name)
+	_, err := db.GetDB().Get([]byte(fileNameKey), nil)
+	if err == nil {
+		return errors.New("already existed")
+	}
+	if err != leveldb.ErrNotFound {
+		return errors.WithMessagef(err, "Failed to query %s", name)
+	}
+
+	rootHash, err := GetRootHash(filepath)
+	if err != nil {
+		return err
+	}
+	j, err := json.Marshal([]common.Hash{rootHash})
+	if err != nil {
+		return err
+	}
+
+	err = db.GetDB().Put([]byte(name), j, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }

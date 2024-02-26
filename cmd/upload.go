@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	tag string
+	tag  string
+	name string
 )
 
 // uploadCmd represents the upload command
@@ -19,7 +20,7 @@ var uploadCmd = &cobra.Command{
 	Short: "upload a file or text",
 	Long:  `upload a file or text`,
 	Run: func(cmd *cobra.Command, args []string) {
-		opt, err := core.NewUploadOption(cipher, password, tag)
+		opt, err := core.NewUploadOption(cipher, password)
 
 		if err != nil {
 			logrus.WithError(err).Error("Failed to create encryption option")
@@ -29,6 +30,10 @@ var uploadCmd = &cobra.Command{
 			logrus.WithError(err).Error("Failed to upload file")
 			return
 		}
+		if err := core.SaveFileKeyToDb(filePath, name); err != nil {
+			logrus.WithError(err).Error("Failed to save file key")
+			return
+		}
 	},
 }
 
@@ -36,8 +41,9 @@ func init() {
 	rootCmd.AddCommand(uploadCmd)
 	uploadCmd.Flags().StringVar(&cipher, "cipher", "", "cipher method")
 	uploadCmd.Flags().StringVar(&password, "password", "", "cipher password")
-	uploadCmd.Flags().StringVar(&filePath, "file", "", "file path")
-	uploadCmd.Flags().StringVar(&tag, "tag", "", "file tag, for appending content to file")
+	uploadCmd.PersistentFlags().StringVar(&filePath, "file", "", "file path")
+	uploadCmd.PersistentFlags().StringVar(&name, "name", "", "file name, for appending content to file")
+	// uploadCmd.Flags().StringVar(&tag, "tag", "", "file tag, for appending content to file")
 
 	uploadCmd.MarkFlagRequired("file")
 }

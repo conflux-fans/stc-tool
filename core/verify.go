@@ -3,6 +3,7 @@ package core
 import (
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
@@ -22,19 +23,25 @@ func Verify(filePath string, opt *EncryptOption) (bool, error) {
 		}()
 	}
 
-	f, err := ccore.Open(filePath)
+	// f, err := ccore.Open(filePath)
+	// if err != nil {
+	// 	return false, errors.WithMessage(err, "Failed to open file")
+	// }
+
+	// tree, err := ccore.MerkleTree(f)
+	// if err != nil {
+	// 	return false, errors.WithMessage(err, "Failed to calculate merkel tree root hash")
+	// }
+
+	rootHash, err := GetRootHash(filePath)
 	if err != nil {
-		return false, errors.WithMessage(err, "Failed to open file")
+		return false, err
 	}
 
-	tree, err := ccore.MerkleTree(f)
-	if err != nil {
-		return false, errors.WithMessage(err, "Failed to calculate merkel tree root hash")
-	}
-	logrus.WithField("root", tree.Root()).Info("Data merkle root calculated")
+	logrus.WithField("root", rootHash).Info("Data merkle root calculated")
 
 	// get file info by root
-	fi, err := GetFileInfo(tree.Root())
+	fi, err := GetFileInfo(rootHash)
 	if err != nil {
 		return false, errors.WithMessage(err, "Failed to get file info from remote")
 	}
@@ -50,4 +57,17 @@ func Verify(filePath string, opt *EncryptOption) (bool, error) {
 
 	logrus.Info("Document verification failed due to file upload is not finalized")
 	return false, nil
+}
+
+func GetRootHash(filePath string) (common.Hash, error) {
+	f, err := ccore.Open(filePath)
+	if err != nil {
+		return common.Hash{}, errors.WithMessage(err, "Failed to open file")
+	}
+
+	tree, err := ccore.MerkleTree(f)
+	if err != nil {
+		return common.Hash{}, errors.WithMessage(err, "Failed to calculate merkel tree root hash")
+	}
+	return tree.Root(), nil
 }

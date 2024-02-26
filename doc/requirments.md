@@ -16,10 +16,13 @@
 	•存证调 API, 加密 SDK, 验真 SDK，分享 SCAN 链接？
 	
 	- 命令：upload
+      	- 子命令：append
 		- 参数
+    		- 名称
 			- 文件路径
 			- 加密方法
 			- 密码
+			
 	- 命令：verify
 		- 参数
 			- 文件路径
@@ -40,7 +43,7 @@
 
 	- 命令：transferowner
 		- 参数 
-			- key
+			- streamID
 			- to
 
 
@@ -75,7 +78,7 @@
 •支持数据的灵活查询；
 
 	PLANA: MERKLE PROOF
-	PLANB:KV查询
+	PLANB: KV查询
 
 	- 命令：query
 		- 参数

@@ -5,10 +5,14 @@ go 1.20
 require (
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/openweb3/web3go v0.2.1-0.20221026093812-d63d83edcfec
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
+	github.com/stretchr/testify v1.8.4
 	github.com/zero-gravity-labs/zerog-storage-client v0.1.4
+	gotest.tools v2.2.0+incompatible
 )
 
 require (
@@ -18,6 +22,7 @@ require (
 	github.com/btcsuite/btcd v0.21.0-beta // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -42,9 +47,8 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/openweb3/go-rpc-provider v0.2.7 // indirect
 	github.com/openweb3/go-sdk-common v0.0.0-20220720074746-a7134e1d372c // indirect
-	github.com/openweb3/web3go v0.2.1-0.20221026093812-d63d83edcfec // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
@@ -70,5 +74,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools v2.2.0+incompatible // indirect
 )
