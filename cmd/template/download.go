@@ -14,8 +14,8 @@ import (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "download template",
-	Long:  `download template`,
+	Short: "Download template",
+	Long:  `Download template`,
 	Run: func(cmd *cobra.Command, args []string) {
 		filePath, err := core.DownloadTemplate(name)
 		if err != nil {

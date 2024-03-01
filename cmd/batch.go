@@ -10,8 +10,8 @@ import (
 // batchCmd represents the batch command
 var batchCmd = &cobra.Command{
 	Use:   "batch",
-	Short: "batch functions",
-	Long:  `batch functions, support batch upload`,
+	Short: "Batch functions",
+	Long:  `Batch functions, support batch upload`,
 }
 
 func init() {

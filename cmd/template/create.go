@@ -12,8 +12,8 @@ import (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "create a new template",
-	Long:  `create a new template`,
+	Short: "Create a new template",
+	Long:  `Create a new template`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := core.CreateTemplate(name, keys)
 		if err != nil {

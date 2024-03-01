@@ -9,14 +9,47 @@ import (
 )
 
 // append source file to dest name
-func AppendFile(source string, destName string) error {
-	if err := Upload(source, nil); err != nil {
+func AppendFile(streamName string, filepath string) error {
+	// get strem by name hash
+	streamId := streamIdByName(streamName)
+	iter := kvClientForPut.NewIterator(streamId)
+	// revert if exists
+	iter.SeekToLast()
+	if !iter.Valid() {
+		return errors.New("The name unexists")
+	}
+
+	lastKey := string(iter.KeyValue().Key)
+	lastFileId, err := parseStreamKey(lastKey)
+	if err != nil {
 		return err
 	}
 
-	return AppendFileKeyToDb(source, destName)
+	// otherwise upload file
+	if err := uploadFile(filepath, nil); err != nil {
+		return errors.New("Failed to upload file")
+	}
+	// write stream with key0 be file root hash
+
+	rootHash, err := GetRootHash(filepath)
+	if err != nil {
+		return errors.WithMessage(err, "Failed to get root hash")
+	}
+
+	batcher := kvClientForPut.Batcher()
+	batcher.Set(streamId,
+		[]byte(getStreamKey(lastFileId+1)),
+		[]byte(rootHash[:]),
+	)
+
+	err = batcher.Exec()
+	if err != nil {
+		return errors.WithMessage(err, "Failed to execute batcher")
+	}
+	return nil
 }
 
+// Note: useless
 func AppendFileKeyToDb(filepath string, name string) error {
 	// save db
 	fileNameKey := db.KeyFileName(name)

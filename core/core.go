@@ -10,23 +10,27 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/common/blockchain"
 	"github.com/zero-gravity-labs/zerog-storage-client/contract"
+	"github.com/zero-gravity-labs/zerog-storage-client/kv"
 	"github.com/zero-gravity-labs/zerog-storage-client/node"
 	"github.com/zero-gravity-labs/zerog-storage-tool/config"
 	"github.com/zero-gravity-labs/zerog-storage-tool/contracts"
 )
 
 var (
-	w3client       *web3go.Client
-	nodeClients    []*node.Client
-	flow           *contract.FlowContract
-	templates      *contracts.Templates
-	signerManager  *signers.SignerManager
-	defaultAccount common.Address
-	signerFn       bind.SignerFn
+	w3client            *web3go.Client
+	nodeClients         []*node.Client
+	kvClientForPut      *kv.Client
+	kvClientForIterator *kv.Client
+	flow                *contract.FlowContract
+	templates           *contracts.Templates
+	signerManager       *signers.SignerManager
+	defaultAccount      common.Address
+	signerFn            bind.SignerFn
 )
 
-func init() {
+func Init() {
 	cfg := config.Get()
+	// logrus.WithField("config", cfg).Info("Get config")
 
 	w3client = blockchain.MustNewWeb3(cfg.BlockChain.URL, cfg.PrivateKeys[0])
 	nodeClients = node.MustNewClients(cfg.StorageNodes)
@@ -46,6 +50,8 @@ func init() {
 		logrus.WithError(err).Fatal("Failed to create flow contract")
 		os.Exit(1)
 	}
+	kvClientForPut = kv.NewClient(nodeClients[0], flow)
+	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode), flow)
 
 	templateAddr := common.HexToAddress(cfg.BlockChain.TemplateContract)
 	backend, _signerFn := w3client.ToClientForContract()

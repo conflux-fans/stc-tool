@@ -17,8 +17,8 @@ var (
 // uploadCmd represents the upload command
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
-	Short: "upload a file or text",
-	Long:  `upload a file or text`,
+	Short: "Upload file",
+	Long:  `Upload file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt, err := core.NewUploadOption(cipher, password)
 
@@ -26,14 +26,14 @@ var uploadCmd = &cobra.Command{
 			logrus.WithError(err).Error("Failed to create encryption option")
 			return
 		}
-		if err := core.Upload(filePath, opt); err != nil {
+		if err := core.UploadByKv(name, filePath, opt); err != nil {
 			logrus.WithError(err).Error("Failed to upload file")
 			return
 		}
-		if err := core.SaveFileKeyToDb(filePath, name); err != nil {
-			logrus.WithError(err).Error("Failed to save file key")
-			return
-		}
+		// if err := core.SaveFileKeyToDb(filePath, name); err != nil {
+		// 	logrus.WithError(err).Error("Failed to save file key")
+		// 	return
+		// }
 	},
 }
 

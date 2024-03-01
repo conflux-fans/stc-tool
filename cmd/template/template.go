@@ -10,8 +10,8 @@ import (
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: "template opertaions",
-	Long:  `template opertaions`,
+	Short: "Template opertaions",
+	Long:  `Template opertaions`,
 }
 
 var (

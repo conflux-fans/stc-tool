@@ -14,13 +14,14 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "zerog-storage-tool",
-	Short: "zero storage tool",
-	Long:  `zerog storage tool for upload,batchupload,append content,download,verify,transfer owner,template manager`,
+	Short: "Zero storage tool",
+	Long:  `Zerog storage tool for upload,batchupload,append content,download,verify,transfer owner,template manager`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

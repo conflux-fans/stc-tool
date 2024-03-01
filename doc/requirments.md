@@ -88,3 +88,9 @@
 •支持异常数据的链上验真
 
 •支持为可信数据查询和通用的计算结果提供零知识证明
+
+
+
+stream 每次都是全量上传
+upload: 1.上传文件 2.创建stream，FILE0=>ROOTHASH
+append: 1.上传文件 2.在stream上追加 FILE1=>ROOTHASH

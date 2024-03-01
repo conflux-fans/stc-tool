@@ -15,8 +15,8 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list templates",
-	Long:  `list templates`,
+	Short: "List templates",
+	Long:  `List templates`,
 	Run: func(cmd *cobra.Command, args []string) {
 		templates, err := core.ListTemplate()
 		logrus.WithField("result", templates).WithError(err).Info("list templates")

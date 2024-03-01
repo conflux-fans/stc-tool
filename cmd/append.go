@@ -12,8 +12,8 @@ import (
 // appendCmd represents the append command
 var appendCmd = &cobra.Command{
 	Use:   "append",
-	Short: "append content to specified file",
-	Long:  `append content to specified file`,
+	Short: "Append content to specified file",
+	Long:  `Append content to specified file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("append called")
 	},

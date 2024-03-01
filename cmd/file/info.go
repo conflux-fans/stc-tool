@@ -13,8 +13,8 @@ import (
 // queryCmd represents the query command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Get file info by hash",
-	Long:  `Get file info by hash`,
+	Short: "Get file info by root hash",
+	Long:  `Get file info by root hash`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fi, err := core.GetFileInfo(common.HexToHash(rootHash))
 		if err != nil {

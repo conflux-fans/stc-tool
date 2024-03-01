@@ -18,8 +18,8 @@ var (
 // batchuploadCmd represents the batchupload command
 var batchuploadCmd = &cobra.Command{
 	Use:   "upload",
-	Short: "batch upload texts",
-	Long:  `batch upload texts`,
+	Short: "Batch upload texts",
+	Long:  `Batch upload texts`,
 	Run: func(cmd *cobra.Command, args []string) {
 		opt, err := core.NewEncryptOption(cipher, password)
 		if err != nil {

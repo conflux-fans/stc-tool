@@ -6,21 +6,37 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
+	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // transferOwnerCmd represents the transferOwner command
 var transferOwnerCmd = &cobra.Command{
 	Use:   "transferOwner",
-	Short: "transfer stream writter role",
-	Long:  `transfer stream writter role`,
+	Short: "Transfer stream admin",
+	Long:  `Transfer stream admin`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("transferOwner called")
+		if !common.IsHexAddress(owner) {
+			fmt.Println("owner is not valid address")
+			return
+		}
+		err := core.TransferOwner(name, common.HexToAddress(owner))
+		if err != nil {
+			fmt.Println("Failed to transfer owner: ", err)
+			return
+		}
+		fmt.Println("Successfully transferred ownership")
 	},
 }
+var (
+	owner string
+)
 
 func init() {
 	rootCmd.AddCommand(transferOwnerCmd)
+	transferOwnerCmd.PersistentFlags().StringVar(&name, "name", "", "file name to transfer ownership")
+	transferOwnerCmd.PersistentFlags().StringVar(&owner, "owner", "", "new owner")
 
 	// Here you will define your flags and configuration settings.
 

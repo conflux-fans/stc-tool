@@ -14,13 +14,13 @@ var downloadCmd = &cobra.Command{
 	Short: "Download file",
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.Download(root)
+		core.DownloadByKv(name)
 	},
 }
 
-var root string
+// var root string
 
 func init() {
 	rootCmd.AddCommand(downloadCmd)
-	downloadCmd.Flags().StringVarP(&root, "root", "r", "", "file merkle root")
+	downloadCmd.Flags().StringVarP(&name, "name", "r", "", "file merkle root")
 }

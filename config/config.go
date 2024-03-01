@@ -36,19 +36,21 @@ type Config struct {
 		TemplateContract string `yaml:"templateContract"`
 	} `yaml:"blockChain"`
 	StorageNodes []string `yaml:"storageNodes"`
+	KvNode       string   `yaml:"kvNode"`
 	PrivateKeys  []string `yaml:"privateKeys"`
 }
 
 var (
-	_config Config
+	_config    Config
+	configPath string = "./config.yaml"
 )
 
-func init() {
-	InitByFile("./config.yaml")
+func SetConfigFile(path string) {
+	configPath = path
 }
 
-func InitByFile(file string) {
-	_config = *initByFile[Config](file)
+func Init() {
+	_config = *initByFile[Config](configPath)
 }
 
 func Get() *Config {
