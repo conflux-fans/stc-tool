@@ -29,4 +29,5 @@ var encryptCmd = &cobra.Command{
 }
 
 func init() {
+	fileCmd.AddCommand(encryptCmd)
 }

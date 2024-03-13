@@ -23,12 +23,6 @@ var (
 
 func InitCmds(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(fileCmd)
-	{
-		fileCmd.AddCommand(encryptCmd)
-		fileCmd.AddCommand(decryptCmd)
-		fileCmd.AddCommand(infoCmd)
-	}
-
 	fileCmd.PersistentFlags().StringVar(&cipher, "cipher", "", "cipher method")
 	fileCmd.PersistentFlags().StringVar(&password, "password", "", "cipher password")
 	fileCmd.PersistentFlags().StringVar(&sourceFilePath, "source", "", "source file path")

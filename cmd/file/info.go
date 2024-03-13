@@ -30,6 +30,7 @@ var (
 )
 
 func init() {
+	fileCmd.AddCommand(infoCmd)
 	infoCmd.Flags().StringVarP(&rootHash, "root", "r", "", "root hash of content")
 	infoCmd.MarkFlagRequired("root")
 }

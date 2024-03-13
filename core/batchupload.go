@@ -75,7 +75,7 @@ func randomText(encryptOpt *EncryptOption) ([]byte, error) {
 	rnd := rand.Intn(10000)
 	content := []byte(fmt.Sprintf("%v - %d - hello world", time.Now().Format(time.RFC3339Nano), rnd))
 
-	if encryptOpt.Method == "" {
+	if encryptOpt == nil || encryptOpt.Method == "" {
 		return content, nil
 	}
 

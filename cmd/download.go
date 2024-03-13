@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // downloadCmd represents the download command
@@ -14,7 +13,7 @@ var downloadCmd = &cobra.Command{
 	Short: "Download file",
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.DownloadByKv(name)
+		// core.DownloadByKv(name)
 	},
 }
 
@@ -22,5 +21,4 @@ var downloadCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(downloadCmd)
-	downloadCmd.Flags().StringVarP(&name, "name", "r", "", "file merkle root")
 }

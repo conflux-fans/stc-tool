@@ -29,7 +29,7 @@ func (a *AesEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) er
 			return err
 		}
 
-		fmt.Println("read", n)
+		// fmt.Println("read", n)
 
 		paded := pad(buf[:n])
 		cipher.NewCBCEncrypter(block, iv).CryptBlocks(paded, paded)
@@ -38,7 +38,7 @@ func (a *AesEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) er
 			return err
 		}
 
-		fmt.Println("write", n)
+		// fmt.Println("write", n)
 	}
 
 	return nil

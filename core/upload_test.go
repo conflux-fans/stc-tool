@@ -13,10 +13,9 @@ func TestUploadStream(t *testing.T) {
 
 	Init()
 	// put
-	streamId := streamIdByName("test")
 	batcher := kvClientForPut.Batcher()
-	batcher.Set(streamId,
-		[]byte(getStreamKey(0)),
+	batcher.Set(STREAM_FILE,
+		[]byte("KEY0"),
 		[]byte("hello world"),
 	)
 
@@ -24,7 +23,7 @@ func TestUploadStream(t *testing.T) {
 	assert.NoError(t, err)
 
 	// query
-	iter := kvClientForIterator.NewIterator(streamId)
+	iter := kvClientForIterator.NewIterator(STREAM_FILE)
 	err = iter.SeekToFirst()
 	assert.NoError(t, err)
 

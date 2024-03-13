@@ -31,3 +31,7 @@ var decryptCmd = &cobra.Command{
 		fmt.Printf("Decrypted file path %s\n", outputFile)
 	},
 }
+
+func init() {
+	fileCmd.AddCommand(decryptCmd)
+}

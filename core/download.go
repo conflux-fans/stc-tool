@@ -3,11 +3,10 @@ package core
 import (
 	"fmt"
 	"os"
+	"strconv"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/zero-gravity-labs/zerog-storage-client/node"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 )
 
@@ -18,23 +17,36 @@ func DownloadFile(root string, savePath string) {
 	}
 }
 
-func DownloadByKv(streamName string) {
-	streamId := crypto.Keccak256Hash([]byte(streamName))
-	iter := kvClientForPut.NewIterator(streamId)
-
-	iter.SeekToFirst()
-	var kvs []*node.KeyValue
-	for iter.Valid() {
-		pair := iter.KeyValue()
-		fmt.Printf("%v: %v\n", string(pair.Key), string(pair.Data))
-		kvs = append(kvs, pair)
-		iter.Next()
+func DownloadDataByKv(name string) error {
+	// query size
+	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(fmt.Sprintf("%s:line", name)))
+	if err != nil {
+		return errors.WithMessage(err, "Failed to get file line size")
 	}
 
-	for _, kv := range kvs {
-		// download file
-		logrus.WithField("file index", kv.Key).Info("Downloading file")
-		os.MkdirAll(streamName, 0777)
-		DownloadFile(hexutil.Encode(kv.Data), streamName+string(kv.Key))
+	if v.Size == 0 {
+		return errors.New("Unexists name")
 	}
+
+	lineCountInStr := string(v.Data)
+	lineCount, _ := strconv.Atoi(lineCountInStr)
+
+	f, err := os.OpenFile(name+".zg", os.O_CREATE|os.O_RDWR, 0755)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	for i := 0; i < lineCount; i++ {
+		val, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(fmt.Sprintf("%s:%d", name, i)))
+		if err != nil {
+			return err
+		}
+		_, err = f.Write(val.Data)
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Printf("Download data %s to file %s.zg completed ", name, name)
+	return nil
 }
