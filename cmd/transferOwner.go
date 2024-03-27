@@ -17,26 +17,28 @@ var transferOwnerCmd = &cobra.Command{
 	Short: "Transfer stream admin",
 	Long:  `Transfer stream admin`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !common.IsHexAddress(owner) {
+		if !common.IsHexAddress(currentOwner) {
 			fmt.Println("owner is not valid address")
 			return
 		}
-		err := core.TransferOwner(name, common.HexToAddress(owner))
+		err := core.TransferOwner(name, common.HexToAddress(currentOwner), common.HexToAddress(newOwner))
 		if err != nil {
 			fmt.Println("Failed to transfer owner: ", err)
 			return
 		}
-		fmt.Println("Successfully transferred ownership")
+		fmt.Printf("Successfully transferred ownership of content %s from %v to %v\n", name, currentOwner, newOwner)
 	},
 }
 var (
-	owner string
+	currentOwner string
+	newOwner     string
 )
 
 func init() {
 	rootCmd.AddCommand(transferOwnerCmd)
-	transferOwnerCmd.PersistentFlags().StringVar(&name, "name", "", "file name to transfer ownership")
-	transferOwnerCmd.PersistentFlags().StringVar(&owner, "owner", "", "new owner")
+	transferOwnerCmd.PersistentFlags().StringVar(&name, "name", "", "content name to transfer ownership")
+	transferOwnerCmd.PersistentFlags().StringVar(&currentOwner, "from", "", "current owner")
+	transferOwnerCmd.PersistentFlags().StringVar(&newOwner, "to", "", "new owner")
 
 	// Here you will define your flags and configuration settings.
 

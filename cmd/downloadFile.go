@@ -4,6 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+	"path"
+
 	"github.com/spf13/cobra"
 	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
@@ -14,7 +17,9 @@ var downloadFileCmd = &cobra.Command{
 	Short: "Download file",
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.DownloadDataByKv(root)
+		savePath := path.Join(".", root+".zg")
+		core.DownloadFile(root, savePath)
+		fmt.Printf("Download file successfully, please find in %s\n", savePath)
 	},
 }
 

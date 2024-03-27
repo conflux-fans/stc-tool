@@ -5,7 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/openweb3/web3go"
+	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
 	"github.com/openweb3/web3go/signers"
 	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/common/blockchain"
@@ -17,46 +17,65 @@ import (
 )
 
 var (
-	w3client            *web3go.Client
-	nodeClients         []*node.Client
-	kvClientForPut      *kv.Client
-	kvClientForIterator *kv.Client
-	flow                *contract.FlowContract
-	templates           *contracts.Templates
-	signerManager       *signers.SignerManager
-	defaultAccount      common.Address
-	signerFn            bind.SignerFn
+	// w3client              *web3go.Client
+	nodeClients           []*node.Client
+	kvClientForIterator   *kv.Client
+	kvClientsForPut       map[common.Address]*kv.Client
+	defaultKvClientForPut *kv.Client
+	defaultFlow           *contract.FlowContract
+	templates             *contracts.Templates
+	defaultAccount        common.Address
+	signerFn              bind.SignerFn
+	// signerManager         *signers.SignerManager
+)
+
+var (
+	STREAM_FILE = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
 )
 
 func Init() {
 	cfg := config.Get()
 	// logrus.WithField("config", cfg).Info("Get config")
-
-	w3client = blockchain.MustNewWeb3(cfg.BlockChain.URL, cfg.PrivateKeys[0])
 	nodeClients = node.MustNewClients(cfg.StorageNodes)
+	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode, providers.Option{
+		Logger: os.Stdout,
+	}), defaultFlow)
 
-	var err error
-	signerManager, err = w3client.GetSignerManager()
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to get signer manager")
-		os.Exit(1)
+	genKvClientsForPut()
+	initTempalteContract()
+}
+
+func genKvClientsForPut() {
+	kvClientsForPut = make(map[common.Address]*kv.Client)
+	cfg := config.Get()
+
+	for i, pk := range cfg.PrivateKeys {
+		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk)
+		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
+		flow, err := contract.NewFlowContract(flowAddr, w3client)
+		if err != nil {
+			logrus.WithError(err).Fatal("Failed to create flow contract")
+			os.Exit(1)
+		}
+		kvClient := kv.NewClient(nodeClients[0], flow)
+		account := signers.MustNewPrivateKeySignerByString(pk).Address()
+		kvClientsForPut[account] = kvClient
+		if i == 0 {
+			defaultKvClientForPut = kvClient
+			defaultFlow = flow
+			defaultAccount = account
+		}
 	}
+}
 
-	defaultAccount = signerManager.List()[0].Address()
-
-	flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
-	flow, err = contract.NewFlowContract(flowAddr, w3client)
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to create flow contract")
-		os.Exit(1)
-	}
-	kvClientForPut = kv.NewClient(nodeClients[0], flow)
-	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode), flow)
-
+func initTempalteContract() {
+	cfg := config.Get()
+	w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, cfg.PrivateKeys[0])
 	templateAddr := common.HexToAddress(cfg.BlockChain.TemplateContract)
 	backend, _signerFn := w3client.ToClientForContract()
 	signerFn = _signerFn
 
+	var err error
 	templates, err = contracts.NewTemplates(templateAddr, backend)
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to create templates contract")

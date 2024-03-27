@@ -6,8 +6,13 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
+)
+
+var (
+	ERR_UNEXIST_CONTENT = errors.New("Unexists content name")
 )
 
 func DownloadFile(root string, savePath string) {
@@ -15,21 +20,21 @@ func DownloadFile(root string, savePath string) {
 	if err := downloader.Download(root, root, false); err != nil {
 		logrus.WithField("root", root).WithError(err).Fatal("Failed to download file")
 	}
+	// rename file
+	if err := os.Rename(root, savePath); err != nil {
+		logrus.WithField("root", root).WithError(err).Fatal("Failed to rename file")
+	}
 }
 
 func DownloadDataByKv(name string) error {
-	// query size
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(fmt.Sprintf("%s:line", name)))
+	logrus.WithField("name", name).Info("Start download content")
+
+	meta, err := GetContentMetadata(name)
 	if err != nil {
-		return errors.WithMessage(err, "Failed to get file line size")
+		return err
 	}
 
-	if v.Size == 0 {
-		return errors.New("Unexists name")
-	}
-
-	lineCountInStr := string(v.Data)
-	lineCount, _ := strconv.Atoi(lineCountInStr)
+	logrus.WithField("metadata", meta).Info("Get content metadata")
 
 	f, err := os.OpenFile(name+".zg", os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
@@ -37,16 +42,52 @@ func DownloadDataByKv(name string) error {
 	}
 	defer f.Close()
 
-	for i := 0; i < lineCount; i++ {
-		val, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(fmt.Sprintf("%s:%d", name, i)))
+	for _, k := range meta.LineKeys {
+		val, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(k))
 		if err != nil {
 			return err
 		}
+		logrus.WithField("key", k).WithField("val", val).Debug("Get line value")
 		_, err = f.Write(val.Data)
 		if err != nil {
 			return err
 		}
 	}
-	fmt.Printf("Download data %s to file %s.zg completed ", name, name)
+	logrus.Info(fmt.Sprintf("Download data %s to file %s.zg completed ", name, name))
 	return nil
+}
+
+type ContentMetadata struct {
+	LineSizeKey string
+	LineKeys    []string
+	LineSize    int
+}
+
+func GetContentMetadata(name string) (*ContentMetadata, error) {
+	// query size
+	lineSizeKey := keyLineCount(name)
+	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(lineSizeKey))
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get file line size")
+	}
+
+	if v.Size == 0 {
+		return nil, ERR_UNEXIST_CONTENT
+	}
+
+	lineCountInStr := string(v.Data)
+	lineCount, err := strconv.Atoi(lineCountInStr)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to convert")
+	}
+
+	lineKeys := lo.Map(make([]int, lineCount), func(v int, index int) string {
+		return keyLineIndex(name, index+1)
+	})
+
+	return &ContentMetadata{
+		LineSizeKey: lineSizeKey,
+		LineKeys:    lineKeys,
+		LineSize:    lineCount,
+	}, nil
 }

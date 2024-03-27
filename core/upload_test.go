@@ -13,7 +13,7 @@ func TestUploadStream(t *testing.T) {
 
 	Init()
 	// put
-	batcher := kvClientForPut.Batcher()
+	batcher := defaultKvClientForPut.Batcher()
 	batcher.Set(STREAM_FILE,
 		[]byte("KEY0"),
 		[]byte("hello world"),

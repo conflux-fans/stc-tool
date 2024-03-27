@@ -1,12 +1,15 @@
 module github.com/zero-gravity-labs/zerog-storage-tool
 
-go 1.20
+go 1.21
+
+toolchain go1.22.1
 
 require (
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openweb3/web3go v0.2.1-0.20221026093812-d63d83edcfec
 	github.com/pkg/errors v0.9.1
+	github.com/samber/lo v1.39.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
@@ -54,7 +57,6 @@ require (
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/samber/lo v1.39.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect

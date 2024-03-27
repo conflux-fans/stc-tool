@@ -1,21 +1,13 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/core"
-	"github.com/zero-gravity-labs/zerog-storage-tool/db"
-)
-
-var (
-	STREAM_FILE = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
 )
 
 const (
@@ -24,43 +16,41 @@ const (
 )
 
 // append source file to dest name
-func AppendData(name string, content string, force bool) error {
-	if len(content) > VALUE_MAX_SIZE {
+func AppendData(name string, data string, force bool) error {
+	if len(data) > VALUE_MAX_SIZE {
 		return errors.New("Exceed max size once uploadable")
 	}
+	logrus.WithField("name", name).Info("Start append content")
 
 	// split content to chunks
 	var chunks []string
-	for i := 0; i < len(content); i += CHUNK_SIZE {
-		end := lo.Min([]int{(i + 1) * CHUNK_SIZE, len(content)})
-		chunks = append(chunks, content[i*CHUNK_SIZE:end])
+	for i := 0; i < len(data); i += CHUNK_SIZE {
+		end := lo.Min([]int{(i + 1) * CHUNK_SIZE, len(data)})
+		chunks = append(chunks, data[i*CHUNK_SIZE:end])
 	}
 
-	// query size
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(fmt.Sprintf("%s:line", name)))
+	meta, err := GetContentMetadata(name)
 	if err != nil {
-		return errors.WithMessage(err, "Failed to get file line size")
-	}
-
-	lineCount := 0
-	if v.Size == 0 {
-		if !force {
-			return errors.New("Unexists name")
+		if !(err == ERR_UNEXIST_CONTENT && force) {
+			return err
 		}
-	} else {
-		// set key to name:line, value to chunk
-		lineCountInStr := string(v.Data)
-		lineCount, _ = strconv.Atoi(lineCountInStr)
+	}
+	if meta == nil {
+		meta = &ContentMetadata{
+			LineSizeKey: keyLineCount(name),
+			LineKeys:    []string{},
+			LineSize:    0,
+		}
 	}
 
-	batcher := kvClientForPut.Batcher()
+	batcher := defaultKvClientForPut.Batcher()
 	batcher.Set(STREAM_FILE,
-		[]byte(fmt.Sprintf("%s:line", name)),
-		[]byte(fmt.Sprintf("%d", lineCount+len(chunks))),
+		[]byte(meta.LineSizeKey),
+		[]byte(fmt.Sprintf("%d", meta.LineSize+len(chunks))),
 	)
 	for i, chunk := range chunks {
 		batcher.Set(STREAM_FILE,
-			[]byte(fmt.Sprintf("%s:%d", name, lineCount+i)),
+			[]byte(keyLineIndex(name, meta.LineSize+i)),
 			[]byte(chunk),
 		)
 	}
@@ -70,53 +60,12 @@ func AppendData(name string, content string, force bool) error {
 		return errors.WithMessage(err, "Failed to execute batcher")
 	}
 
-	logrus.WithField("line", len(chunks)).Info("Append content completed")
+	logrus.WithField("name", name).WithField("line", len(chunks)).Info("Append content completed")
 
 	return nil
-
-	// iter := kvClientForPut.NewIterator(FILE_STREAM)
-	// // revert if exists
-	// iter.SeekToLast()
-	// if !iter.Valid() {
-	// 	return errors.New("The name unexists")
-	// }
-
-	// lastKey := string(iter.KeyValue().Key)
-	// lastFileId, err := parseStreamKey(lastKey)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// otherwise upload file
-	// if err := uploadFile(filePath, nil); err != nil {
-	// 	return errors.New("Failed to upload file")
-	// }
-	// // write stream with key0 be file root hash
-
-	// rootHash, err := GetRootHash(filePath)
-	// if err != nil {
-	// 	return errors.WithMessage(err, "Failed to get root hash")
-	// }
-
-	// batcher := kvClientForPut.Batcher()
-	// batcher.Set(FILE_STREAM,
-	// 	[]byte(getStreamKey(lastFileId+1)),
-	// 	[]byte(rootHash[:]),
-	// )
-
-	// err = batcher.Exec()
-	// if err != nil {
-	// 	return errors.WithMessage(err, "Failed to execute batcher")
-	// }
-	// return nil
 }
 
 func AppendFromFile(name string, filePath string, force bool) error {
-	// read file
-	// if err := UploadFile(filePath, nil); err != nil {
-	// 	return errors.New("Failed to upload file")
-	// }
-
 	f, err := openFile(filePath)
 	if err != nil {
 		return err
@@ -164,73 +113,41 @@ func openFile(name string) (*os.File, error) {
 	return file, nil
 }
 
-// func AppendFromFile(name string, filePath string) error {
-// 	// get strem by name hash
-// 	// streamId := streamIdByName(streamName)
-// 	iter := kvClientForPut.NewIterator(FILE_STREAM)
-// 	// revert if exists
-// 	iter.SeekToLast()
-// 	if !iter.Valid() {
-// 		return errors.New("The name unexists")
+func keyLineCount(name string) string {
+	return fmt.Sprintf("%s:line", name)
+}
+
+func keyLineIndex(name string, index int) string {
+	return fmt.Sprintf("%s:%d", name, index)
+}
+
+// // Note: useless
+// func AppendFileKeyToDb(filepath string, name string) error {
+// 	// save db
+// 	fileNameKey := db.KeyFileName(name)
+// 	value, err := db.GetDB().Get([]byte(fileNameKey), nil)
+// 	if err != nil {
+// 		return errors.WithMessagef(err, "Failed to query %s", name)
 // 	}
 
-// 	lastKey := string(iter.KeyValue().Key)
-// 	lastFileId, err := parseStreamKey(lastKey)
+// 	var roots []common.Hash
+// 	if err := json.Unmarshal(value, &roots); err != nil {
+// 		return err
+// 	}
+
+// 	rootHash, err := GetRootHash(filepath)
 // 	if err != nil {
 // 		return err
 // 	}
 
-// 	// otherwise upload file
-// 	if err := uploadFile(filePath, nil); err != nil {
-// 		return errors.New("Failed to upload file")
-// 	}
-// 	// write stream with key0 be file root hash
-
-// 	rootHash, err := GetRootHash(filePath)
+// 	j, err := json.Marshal(append(roots, rootHash))
 // 	if err != nil {
-// 		return errors.WithMessage(err, "Failed to get root hash")
+// 		return err
 // 	}
 
-// 	batcher := kvClientForPut.Batcher()
-// 	batcher.Set(FILE_STREAM,
-// 		[]byte(getStreamKey(lastFileId+1)),
-// 		[]byte(rootHash[:]),
-// 	)
-
-// 	err = batcher.Exec()
+// 	err = db.GetDB().Put([]byte(name), j, nil)
 // 	if err != nil {
-// 		return errors.WithMessage(err, "Failed to execute batcher")
+// 		return err
 // 	}
 // 	return nil
 // }
-
-// Note: useless
-func AppendFileKeyToDb(filepath string, name string) error {
-	// save db
-	fileNameKey := db.KeyFileName(name)
-	value, err := db.GetDB().Get([]byte(fileNameKey), nil)
-	if err != nil {
-		return errors.WithMessagef(err, "Failed to query %s", name)
-	}
-
-	var roots []common.Hash
-	if err := json.Unmarshal(value, &roots); err != nil {
-		return err
-	}
-
-	rootHash, err := GetRootHash(filepath)
-	if err != nil {
-		return err
-	}
-
-	j, err := json.Marshal(append(roots, rootHash))
-	if err != nil {
-		return err
-	}
-
-	err = db.GetDB().Put([]byte(name), j, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}

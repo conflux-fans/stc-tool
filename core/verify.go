@@ -23,16 +23,6 @@ func Verify(filePath string, opt *EncryptOption) (bool, error) {
 		}()
 	}
 
-	// f, err := ccore.Open(filePath)
-	// if err != nil {
-	// 	return false, errors.WithMessage(err, "Failed to open file")
-	// }
-
-	// tree, err := ccore.MerkleTree(f)
-	// if err != nil {
-	// 	return false, errors.WithMessage(err, "Failed to calculate merkel tree root hash")
-	// }
-
 	rootHash, err := GetRootHash(filePath)
 	if err != nil {
 		return false, err
