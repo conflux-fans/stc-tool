@@ -1,43 +1,35 @@
 package core
 
-import (
-	"fmt"
+// func TransferOwner(name string, from common.Address, to common.Address) error {
+// 	// get all keys
+// 	logrus.WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-)
+// 	meta, err := GetContentMetadata(name)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func TransferOwner(name string, from common.Address, to common.Address) error {
-	// get all keys
-	logrus.WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
+// 	keys := append(meta.LineKeys, meta.LineSizeKey)
 
-	meta, err := GetContentMetadata(name)
-	if err != nil {
-		return err
-	}
+// 	logrus.WithField("length", len(keys)).Info("Get content related keys")
 
-	keys := append(meta.LineKeys, meta.LineSizeKey)
+// 	// check is all writer, if not
+// 	for _, k := range keys {
+// 		isWriter, err := kvClientForIterator.IsWriterOfKey(defaultAccount, STREAM_FILE, []byte(k))
+// 		if err != nil {
+// 			return errors.WithMessage(err, "Failed to check if owner")
+// 		}
+// 		if !isWriter {
+// 			return fmt.Errorf("not the writer of key %s", k)
+// 		}
+// 	}
 
-	logrus.WithField("length", len(keys)).Info("Get content related keys")
+// 	batcher := kvClientsForPut[from].Batcher()
 
-	// check is all writer, if not
-	for _, k := range keys {
-		isWriter, err := kvClientForIterator.IsWriterOfKey(defaultAccount, STREAM_FILE, []byte(k))
-		if err != nil {
-			return errors.WithMessage(err, "Failed to check if owner")
-		}
-		if !isWriter {
-			return fmt.Errorf("not the writer of key %s", k)
-		}
-	}
+// 	for _, k := range keys {
+// 		batcher.GrantSpecialWriteRole(STREAM_FILE, []byte(k), to)
+// 		batcher.RenounceSpecialWriteRole(STREAM_FILE, []byte(k))
+// 	}
 
-	batcher := kvClientsForPut[from].Batcher()
-
-	for _, k := range keys {
-		batcher.GrantSpecialWriteRole(STREAM_FILE, []byte(k), to)
-		batcher.RenounceSpecialWriteRole(STREAM_FILE, []byte(k))
-	}
-
-	return batcher.Exec()
-}
+// 	return batcher.Exec()
+// }

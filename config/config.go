@@ -38,11 +38,17 @@ type Config struct {
 	StorageNodes []string `yaml:"storageNodes"`
 	KvNode       string   `yaml:"kvNode"`
 	PrivateKeys  []string `yaml:"privateKeys"`
+	Log          string   `yaml:"log"`
 }
 
 var (
 	_config    Config
 	configPath string = "./config.yaml"
+)
+
+const (
+	DEBUG = "debug"
+	INFO  = "info"
 )
 
 func SetConfigFile(path string) {

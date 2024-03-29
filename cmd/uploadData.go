@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
@@ -16,20 +17,24 @@ var uploadDataCmd = &cobra.Command{
 	Short: "Upload as data",
 	Long:  `Upload as data`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if !common.IsHexAddress(account) {
+			fmt.Println("account is not valid address")
+			return
+		}
+
 		if data != "" {
-			if err := core.UploadDataByKv(name, data); err != nil {
+			if err := core.UploadDataByKv(common.HexToAddress(account), name, data); err != nil {
 				fmt.Println("Faild to append content:", err)
 			}
 			return
 		}
 
 		if filePath != "" {
-			if err := core.UploadDataByKv(name, filePath); err != nil {
+			if err := core.UploadDataByKv(common.HexToAddress(account), name, filePath); err != nil {
 				fmt.Println("Faild to append content from file:", err)
 			}
 			return
 		}
-
 	},
 }
 
@@ -38,6 +43,7 @@ func init() {
 	uploadDataCmd.Flags().StringVar(&filePath, "file", "", "file path of content to upload")
 	uploadDataCmd.Flags().StringVar(&data, "data", "", "append content")
 	uploadDataCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
+	uploadDataCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
 	uploadDataCmd.MarkFlagsOneRequired("data", "file")
 	// Here you will define your flags and configuration settings.
 

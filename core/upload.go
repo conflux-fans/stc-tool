@@ -3,6 +3,7 @@ package core
 import (
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
@@ -27,7 +28,7 @@ func NewUploadOption(method string, password string) (*UploadOption, error) {
 }
 
 // Upload data
-func UploadDataByKv(name string, data string) error {
+func UploadDataByKv(account common.Address, name string, data string) error {
 	logrus.WithField("name", name).Info("Ready to upload data")
 
 	// revert if exists
@@ -35,7 +36,7 @@ func UploadDataByKv(name string, data string) error {
 		return err
 	}
 
-	if err := AppendData(name, data, true); err != nil {
+	if err := appendData(account, name, data, true); err != nil {
 		return err
 	}
 
@@ -43,12 +44,12 @@ func UploadDataByKv(name string, data string) error {
 	return nil
 }
 
-func UploadDataFromFile(name string, filePath string) error {
+func UploadDataFromFile(account common.Address, name string, filePath string) error {
 	if err := checkDataNameExists(name); err != nil {
 		return err
 	}
 
-	if err := AppendFromFile(name, filePath, true); err != nil {
+	if err := appendFromFile(account, name, filePath, true); err != nil {
 		return err
 	}
 

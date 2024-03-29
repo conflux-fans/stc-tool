@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
@@ -15,8 +16,12 @@ const (
 	VALUE_MAX_SIZE = CHUNK_SIZE * 100
 )
 
-// append source file to dest name
-func AppendData(name string, data string, force bool) error {
+func AppendData(account common.Address, name string, data string) error {
+	return appendData(account, name, data, false)
+}
+
+// append source file to dest name, force means create new content
+func appendData(account common.Address, name string, data string, force bool) error {
 	if len(data) > VALUE_MAX_SIZE {
 		return errors.New("Exceed max size once uploadable")
 	}
@@ -43,21 +48,43 @@ func AppendData(name string, data string, force bool) error {
 		}
 	}
 
-	batcher := defaultKvClientForPut.Batcher()
-	batcher.Set(STREAM_FILE,
-		[]byte(meta.LineSizeKey),
-		[]byte(fmt.Sprintf("%d", meta.LineSize+len(chunks))),
-	)
+	// error if not writer
+	if !force {
+		isWriter := CheckIsContentWriter(name, defaultAccount)
+		if !isWriter {
+			return fmt.Errorf("account %v is not writer of content", defaultAccount)
+		}
+	}
+	adminBatcher := adminKvClientForPut.Batcher()
+	batcher := kvClientsForPut[account].Batcher()
+
+	lineSizeKey := []byte(meta.LineSizeKey)
+	lineSizeVal := []byte(fmt.Sprintf("%d", meta.LineSize+len(chunks)))
+
+	batcher.Set(STREAM_FILE, lineSizeKey, lineSizeVal)
+	adminBatcher.SetKeyToSpecial(STREAM_FILE, lineSizeKey).GrantSpecialWriteRole(STREAM_FILE, lineSizeKey, account)
+
+	logrus.WithField("line size key", string(lineSizeKey)).Info("Set line size kv")
+
 	for i, chunk := range chunks {
-		batcher.Set(STREAM_FILE,
-			[]byte(keyLineIndex(name, meta.LineSize+i)),
-			[]byte(chunk),
-		)
+		key := []byte(keyLineIndex(name, meta.LineSize+i))
+
+		batcher.Set(STREAM_FILE, key, []byte(chunk))
+		adminBatcher.SetKeyToSpecial(STREAM_FILE, []byte(key)).GrantSpecialWriteRole(STREAM_FILE, []byte(key), account)
+
+		logrus.WithField("key", string(key)).Info("Set line kv")
 	}
 
+	logrus.WithField("name", name).Info("Set content keys to special keys")
+	err = adminBatcher.Exec()
+	if err != nil {
+		return errors.WithMessage(err, "Failed to set speicial key by admin batcher")
+	}
+
+	logrus.WithField("name", name).Info("Set content values")
 	err = batcher.Exec()
 	if err != nil {
-		return errors.WithMessage(err, "Failed to execute batcher")
+		return errors.WithMessage(err, "Failed to set values of content")
 	}
 
 	logrus.WithField("name", name).WithField("line", len(chunks)).Info("Append content completed")
@@ -65,7 +92,10 @@ func AppendData(name string, data string, force bool) error {
 	return nil
 }
 
-func AppendFromFile(name string, filePath string, force bool) error {
+func AppendFromFile(account common.Address, name string, filePath string) error {
+	return appendFromFile(account, name, filePath, false)
+}
+func appendFromFile(account common.Address, name string, filePath string, force bool) error {
 	f, err := openFile(filePath)
 	if err != nil {
 		return err
@@ -82,7 +112,7 @@ func AppendFromFile(name string, filePath string, force bool) error {
 			return nil
 		}
 
-		if err = AppendData(name, string(buffer[:n]), force); err != nil {
+		if err = appendData(account, name, string(buffer[:n]), force); err != nil {
 			return err
 		}
 	}

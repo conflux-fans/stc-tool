@@ -11,8 +11,15 @@ import (
 )
 
 func main() {
-	logrus.SetLevel(logrus.DebugLevel)
 	config.Init()
+	cfg := config.Get()
+
+	logLevel, err := logrus.ParseLevel(cfg.Log)
+	if err != nil {
+		panic(err)
+	}
+	logrus.SetLevel(logLevel)
+
 	core.Init()
 	cmd.Execute()
 }

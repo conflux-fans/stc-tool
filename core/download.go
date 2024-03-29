@@ -82,7 +82,7 @@ func GetContentMetadata(name string) (*ContentMetadata, error) {
 	}
 
 	lineKeys := lo.Map(make([]int, lineCount), func(v int, index int) string {
-		return keyLineIndex(name, index+1)
+		return keyLineIndex(name, index)
 	})
 
 	return &ContentMetadata{

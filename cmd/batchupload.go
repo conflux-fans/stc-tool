@@ -20,21 +20,7 @@ var batchuploadCmd = &cobra.Command{
 	Short: "Batch upload texts",
 	Long:  `Batch upload texts`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// opt, err := core.NewEncryptOption(cipher, password)
-		// if err != nil {
-		// 	logrus.WithError(err).Error("Failed to create encryption option")
-		// 	return
-		// }
-
-		// hash, err := core.BatchUpload(count, opt)
-		// if err != nil {
-		// 	logrus.Error("Failed uploading:", err)
-		// } else {
-		// 	logrus.WithField("hash", hash).Info("Upload success")
-		// }
-
 		core.BatchUploadByKv(count)
-
 	},
 }
 

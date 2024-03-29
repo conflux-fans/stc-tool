@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -14,6 +15,10 @@ import (
 	"github.com/zero-gravity-labs/zerog-storage-client/kv"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt"
+)
+
+const (
+	ONE_BATCH_COUNT = 20000
 )
 
 type EncryptOption struct {
@@ -38,28 +43,41 @@ func NewEncryptOption(method string, password string) (*EncryptOption, error) {
 }
 
 func BatchUploadByKv(count int) {
+	limit := len(kvClientsForPut) * ONE_BATCH_COUNT
+	if count > limit {
+		fmt.Printf("Exceed limit, the max limit batch upload count is %ds\n", count)
+	}
 	// name be time, gen 100000 kv
-	name := fmt.Sprintf("%d", time.Now().Unix())
-
+	name := fmt.Sprintf("BATCH-TEST-%d", time.Now().Unix())
 	batchers := []*kv.Batcher{}
 
 	// execute, every segment 1000 kv\
+	// kvClientForPutList := lo.Values(kvClientsForPut)
 	for i := 0; i < count; {
-		batcher := defaultKvClientForPut.Batcher()
+		account := accounts[i/ONE_BATCH_COUNT]
+		batcher := kvClientsForPut[account].Batcher()
+		if i == 0 {
+			batcher.Set(STREAM_FILE, []byte(keyLineCount(name)), []byte(fmt.Sprintf("%d", count)))
+		}
 
-		end := lo.Min([]int{count, i + 100000})
+		// check account is writer, panic if not
+		if isWriter := CheckIsStreamWriter(account); !isWriter {
+			fmt.Printf("Failed to batch upload: Account %s is not stream writer\n", account)
+			os.Exit(1)
+		}
+
+		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
 		for j := i; j < end; j++ {
-			batcher.Set(STREAM_FILE,
-				[]byte(keyLineIndex(name, j)),
-				[]byte(fmt.Sprintf("%d", j)),
-			)
+			k, v := []byte(keyLineIndex(name, j)), []byte(fmt.Sprintf("%d", j))
+			batcher.Set(STREAM_FILE, k, v)
+			logrus.WithField("key", string(k)).WithField("value", string(v)).Debug("set key")
 		}
 		batchers = append(batchers, batcher)
 		i = end
 	}
 
-	logrus.WithField("len", len(batchers)).Info("Generated Datas")
 	start := time.Now()
+	logrus.WithField("time", start).WithField("name", name).WithField("len", len(batchers)).Info("Generated Datas")
 
 	var w sync.WaitGroup
 	var errs []error
@@ -74,12 +92,13 @@ func BatchUploadByKv(count int) {
 		}(b)
 	}
 	w.Wait()
+
 	if len(errs) > 0 {
 		logrus.WithError(errs[0]).WithField("count", count).Info("Failed to batch upload")
 		return
 	} else {
 		timeUse := time.Since(start)
-		logrus.WithField("time use", timeUse).WithField("count", count).Info("Batch upload completed")
+		logrus.WithField("name", name).WithField("time use", timeUse).WithField("tps", count/int(timeUse/time.Second)).WithField("count", count).Info("Batch upload completed")
 	}
 
 	// query last
@@ -97,9 +116,53 @@ func BatchUploadByKv(count int) {
 		}
 		fmt.Print("\n")
 		logrus.WithField("value", string(v.Data)).Info("Batch upload verified")
-		break
+		return
 	}
+	fmt.Print("\n")
+	fmt.Println("Failed to verify in 100 seconds")
 }
+
+// func panicIfNotStreamWriter(account common.Address) {
+// 	isWriter, err := kvClientForIterator.IsWriterOfStream(account, STREAM_FILE)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	if !isWriter {
+// 		panic(fmt.Sprintf("account %v is not writer", account))
+// 	}
+// }
+
+// func mustCheckIsContentWriter(account common.Address, name string) bool {
+// 	meta, err := GetContentMetadata(name)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, []byte(meta.LineSizeKey))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	if !isWriter {
+// 		panic(fmt.Sprintf("%v is not writer of key %s", account, meta.LineSizeKey))
+// 	}
+
+// 	var w sync.WaitGroup
+// 	for _, lk := range meta.LineKeys {
+// 		go func(_lk string) {
+// 			w.Add(1)
+// 			defer w.Done()
+
+// 			isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, []byte(lk))
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 			if !isWriter {
+// 				panic(fmt.Sprintf("%v is not writer of key %s", account, _lk))
+// 			}
+// 		}(lk)
+// 	}
+// 	w.Wait()
+// 	return true
+// }
 
 // TODO: count replace by source path?
 func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {

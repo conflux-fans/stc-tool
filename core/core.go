@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -18,14 +19,15 @@ import (
 
 var (
 	// w3client              *web3go.Client
-	nodeClients           []*node.Client
-	kvClientForIterator   *kv.Client
-	kvClientsForPut       map[common.Address]*kv.Client
-	defaultKvClientForPut *kv.Client
-	defaultFlow           *contract.FlowContract
-	templates             *contracts.Templates
-	defaultAccount        common.Address
-	signerFn              bind.SignerFn
+	nodeClients         []*node.Client
+	kvClientForIterator *kv.Client
+	kvClientsForPut     map[common.Address]*kv.Client
+	accounts            []common.Address
+	adminKvClientForPut *kv.Client
+	defaultFlow         *contract.FlowContract
+	templates           *contracts.Templates
+	defaultAccount      common.Address
+	signerFn            bind.SignerFn
 	// signerManager         *signers.SignerManager
 )
 
@@ -37,12 +39,16 @@ func Init() {
 	cfg := config.Get()
 	// logrus.WithField("config", cfg).Info("Get config")
 	nodeClients = node.MustNewClients(cfg.StorageNodes)
-	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode, providers.Option{
-		Logger: os.Stdout,
-	}), defaultFlow)
+
+	providerOpt := providers.Option{}
+	if cfg.Log == config.DEBUG {
+		providerOpt.Logger = os.Stdout
+	}
+	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode, providerOpt), defaultFlow)
 
 	genKvClientsForPut()
 	initTempalteContract()
+	grantAllAccountWriter()
 }
 
 func genKvClientsForPut() {
@@ -51,6 +57,10 @@ func genKvClientsForPut() {
 
 	for i, pk := range cfg.PrivateKeys {
 		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk)
+		if cfg.Log == config.DEBUG {
+			w3client.SetProvider(providers.NewLoggerProvider(w3client.Provider(), os.Stdout))
+		}
+
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
 		flow, err := contract.NewFlowContract(flowAddr, w3client)
 		if err != nil {
@@ -59,9 +69,10 @@ func genKvClientsForPut() {
 		}
 		kvClient := kv.NewClient(nodeClients[0], flow)
 		account := signers.MustNewPrivateKeySignerByString(pk).Address()
+		accounts = append(accounts, account)
 		kvClientsForPut[account] = kvClient
 		if i == 0 {
-			defaultKvClientForPut = kvClient
+			adminKvClientForPut = kvClient
 			defaultFlow = flow
 			defaultAccount = account
 		}
@@ -80,5 +91,11 @@ func initTempalteContract() {
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to create templates contract")
 		os.Exit(1)
+	}
+}
+
+func grantAllAccountWriter() {
+	if err := GrantStreamWriter(accounts...); err != nil {
+		panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))
 	}
 }

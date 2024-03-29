@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
@@ -16,15 +17,20 @@ var appendCmd = &cobra.Command{
 	Short: "Append content to specified file",
 	Long:  `Append content to specified file`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if !common.IsHexAddress(account) {
+			fmt.Println("account is not valid address")
+			return
+		}
+
 		if data != "" {
-			if err := core.AppendData(name, data, false); err != nil {
+			if err := core.AppendData(common.HexToAddress(account), name, data); err != nil {
 				fmt.Println("Faild to append content:", err)
 			}
 			return
 		}
 
 		if filePath != "" {
-			if err := core.AppendFromFile(name, filePath, false); err != nil {
+			if err := core.AppendFromFile(common.HexToAddress(account), name, filePath); err != nil {
 				fmt.Println("Faild to append content from file:", err)
 			}
 			return
@@ -33,7 +39,8 @@ var appendCmd = &cobra.Command{
 }
 
 var (
-	data string
+	data    string
+	account string
 )
 
 func init() {
@@ -41,5 +48,6 @@ func init() {
 	appendCmd.Flags().StringVar(&filePath, "file", "", "file path of content to upload")
 	appendCmd.Flags().StringVar(&data, "data", "", "append content")
 	appendCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
+	appendCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
 	appendCmd.MarkFlagsOneRequired("data", "file")
 }
