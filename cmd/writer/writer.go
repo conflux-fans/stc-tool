@@ -10,8 +10,8 @@ import (
 // ownerCmd represents the owner command
 var ownerCmd = &cobra.Command{
 	Use:   "owner",
-	Short: "owner operations",
-	Long:  `owner operations`,
+	Short: "Owner operations",
+	Long:  `Owner operations`,
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }

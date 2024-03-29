@@ -13,8 +13,8 @@ import (
 // downloadDataCmd represents the downloadData command
 var downloadDataCmd = &cobra.Command{
 	Use:   "data",
-	Short: "Download data",
-	Long:  `Download data`,
+	Short: "Download content",
+	Long:  `Download content`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := core.DownloadDataByKv(name); err != nil {
 			fmt.Printf("Failed to download data %s: %v\n", name, err)

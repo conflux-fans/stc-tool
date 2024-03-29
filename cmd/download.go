@@ -10,10 +10,9 @@ import (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download file",
-	Long:  `Download file`,
+	Short: "Download file or content",
+	Long:  `Download file or content`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// core.DownloadByKv(name)
 	},
 }
 

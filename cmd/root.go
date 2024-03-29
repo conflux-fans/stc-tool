@@ -16,7 +16,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "zerog-storage-tool",
 	Short: "Zero storage tool",
-	Long:  `Zerog storage tool for upload,batchupload,append content,download,verify,transfer owner,template manager`,
+	Long:  `Zerog storage tool for upload, append, verify, batchupload, owner manager and template manager`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

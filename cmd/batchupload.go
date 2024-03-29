@@ -17,8 +17,8 @@ var (
 // batchuploadCmd represents the batchupload command
 var batchuploadCmd = &cobra.Command{
 	Use:   "upload",
-	Short: "Batch upload texts",
-	Long:  `Batch upload texts`,
+	Short: "Batch upload content",
+	Long:  `Batch upload content`,
 	Run: func(cmd *cobra.Command, args []string) {
 		core.BatchUploadByKv(count)
 	},

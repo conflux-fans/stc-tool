@@ -15,8 +15,8 @@ var (
 // uploadCmd represents the upload command
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
-	Short: "Upload file or data",
-	Long:  `Upload file or data`,
+	Short: "Upload file or content",
+	Long:  `Upload file or content`,
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }
