@@ -60,19 +60,20 @@ log_sync_start_block_number = 164900000
 # 工具命令
 
 ```
+Zerog storage tool for upload, append, verify, batchupload, owner manager and template manager
 
 Usage:
   zerog-storage-tool [command]
 
 Available Commands:
   append      Append content to specified file
-  batch       Batch functions
-  download    Download file
+  batch       Batch operations
+  download    Download file or content
   file        File operations
   help        Help about any command
-  owner       owner operations
+  owner       Owner operations
   template    Template opertaions
-  upload      Upload file or data
+  upload      Upload file or content
   verify      Verify file
 
 Flags:
