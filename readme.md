@@ -60,7 +60,7 @@ log_sync_start_block_number = 164900000
 # 工具命令
 
 ```
-Zerog storage tool for upload, append, verify, batchupload, owner manager and template manager
+Storage cli for upload, append, verify, batchupload, owner manager and template manager
 
 Usage:
   storage-cli [command]
