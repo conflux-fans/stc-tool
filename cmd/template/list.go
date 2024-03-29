@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/conflux-fans/storage-cli/core"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // listCmd represents the list command

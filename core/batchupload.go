@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -14,7 +15,6 @@ import (
 	"github.com/zero-gravity-labs/zerog-storage-client/core"
 	"github.com/zero-gravity-labs/zerog-storage-client/kv"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
-	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt"
 )
 
 const (

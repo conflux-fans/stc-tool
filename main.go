@@ -4,10 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
+	"github.com/conflux-fans/storage-cli/cmd"
+	"github.com/conflux-fans/storage-cli/config"
+	"github.com/conflux-fans/storage-cli/core"
 	"github.com/sirupsen/logrus"
-	"github.com/zero-gravity-labs/zerog-storage-tool/cmd"
-	"github.com/zero-gravity-labs/zerog-storage-tool/config"
-	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 func main() {

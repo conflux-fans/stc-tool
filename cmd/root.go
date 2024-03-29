@@ -6,17 +6,17 @@ package cmd
 import (
 	"os"
 
+	"github.com/conflux-fans/storage-cli/cmd/file"
+	"github.com/conflux-fans/storage-cli/cmd/template"
+	"github.com/conflux-fans/storage-cli/cmd/writer"
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/cmd/file"
-	"github.com/zero-gravity-labs/zerog-storage-tool/cmd/template"
-	"github.com/zero-gravity-labs/zerog-storage-tool/cmd/writer"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "zerog-storage-tool",
-	Short: "Zero storage tool",
-	Long:  `Zerog storage tool for upload, append, verify, batchupload, owner manager and template manager`,
+	Use:   "storage-cli",
+	Short: "Storage cli",
+	Long:  `Storage cli for upload, append, verify, batchupload, owner manager and template manager`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -3,11 +3,11 @@ package core
 import (
 	"os"
 
+	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
-	"github.com/zero-gravity-labs/zerog-storage-tool/utils/encryptutils"
 )
 
 func Verify(filePath string, opt *EncryptOption) (bool, error) {

@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/conflux-fans/storage-cli/config"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/zero-gravity-labs/zerog-storage-tool/config"
 )
 
 func TestUploadStream(t *testing.T) {
-	config.SetConfigFile("/Users/dayong/myspace/mywork/zerog-storage-tool/config.yaml")
+	config.SetConfigFile("/Users/dayong/myspace/mywork/storage-cli/config.yaml")
 	config.Init()
 
 	Init()

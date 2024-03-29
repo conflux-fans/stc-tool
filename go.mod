@@ -1,4 +1,4 @@
-module github.com/zero-gravity-labs/zerog-storage-tool
+module github.com/conflux-fans/storage-cli
 
 go 1.21
 

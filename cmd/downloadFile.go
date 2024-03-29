@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/conflux-fans/storage-cli/core"
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // downloadFileCmd represents the downloadFile command

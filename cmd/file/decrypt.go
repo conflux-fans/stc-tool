@@ -6,8 +6,8 @@ package file
 import (
 	"fmt"
 
+	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt"
 )
 
 // decryptCmd represents the decrypt command

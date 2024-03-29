@@ -63,7 +63,7 @@ log_sync_start_block_number = 164900000
 Zerog storage tool for upload, append, verify, batchupload, owner manager and template manager
 
 Usage:
-  zerog-storage-tool [command]
+  storage-cli [command]
 
 Available Commands:
   append      Append content to specified file
@@ -77,7 +77,7 @@ Available Commands:
   verify      Verify file
 
 Flags:
-  -h, --help   help for zerog-storage-tool
+  -h, --help   help for storage-cli
 
-Use "zerog-storage-tool [command] --help" for more information about a command.
+Use "storage-cli [command] --help" for more information about a command.
 ```

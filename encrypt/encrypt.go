@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/conflux-fans/storage-cli/encrypt/aes"
+	"github.com/conflux-fans/storage-cli/encrypt/empty"
 	"github.com/pkg/errors"
-	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt/aes"
-	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt/empty"
 )
 
 type Encryptor interface {

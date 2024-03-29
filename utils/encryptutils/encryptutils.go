@@ -1,8 +1,8 @@
 package encryptutils
 
 import (
+	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/pkg/errors"
-	"github.com/zero-gravity-labs/zerog-storage-tool/encrypt"
 )
 
 func EncryptFile(filePath string, method string, password string) (outputPath string, err error) {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/conflux-fans/storage-cli/config"
+	"github.com/conflux-fans/storage-cli/contracts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
@@ -13,8 +15,6 @@ import (
 	"github.com/zero-gravity-labs/zerog-storage-client/contract"
 	"github.com/zero-gravity-labs/zerog-storage-client/kv"
 	"github.com/zero-gravity-labs/zerog-storage-client/node"
-	"github.com/zero-gravity-labs/zerog-storage-tool/config"
-	"github.com/zero-gravity-labs/zerog-storage-tool/contracts"
 )
 
 var (

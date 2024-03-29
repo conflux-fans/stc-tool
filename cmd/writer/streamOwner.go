@@ -6,9 +6,9 @@ package writer
 import (
 	"fmt"
 
+	"github.com/conflux-fans/storage-cli/core"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
-	"github.com/zero-gravity-labs/zerog-storage-tool/core"
 )
 
 // streamOwnerCmd represents the streamOwner command
