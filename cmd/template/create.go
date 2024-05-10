@@ -5,7 +5,7 @@ package template
 
 import (
 	"github.com/conflux-fans/storage-cli/core"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := core.CreateTemplate(name, keys)
 		if err != nil {
-			logrus.WithError(err).Error("Failed to create template")
+			logger.Fail(err.Error())
 		}
 	},
 }

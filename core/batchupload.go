@@ -3,15 +3,14 @@ package core
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/conflux-fans/storage-cli/encrypt"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/core"
 	"github.com/zero-gravity-labs/zerog-storage-client/kv"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
@@ -42,10 +41,20 @@ func NewEncryptOption(method string, password string) (*EncryptOption, error) {
 	}, nil
 }
 
-func BatchUploadByKv(count int) {
+// logger.Get().WithField("name", name).WithField("time use", timeUse).WithField("tps", count/int(timeUse/time.Second)).WithField("count", count).Info("Batch upload completed")
+type BatchUploadResult struct {
+	Name    string
+	Count   int
+	UseTime time.Duration
+	TPS     int
+}
+
+func BatchUploadByKv(count int) error {
+	GrantAllAccountWriter()
+
 	limit := len(kvClientsForPut) * ONE_BATCH_COUNT
 	if count > limit {
-		fmt.Printf("Exceed limit, the max limit batch upload count is %ds\n", count)
+		return fmt.Errorf("Exceed limit, the max limit batch upload count is %ds\n", count)
 	}
 	// name be time, gen 100000 kv
 	name := fmt.Sprintf("BATCH-TEST-%d", time.Now().Unix())
@@ -62,22 +71,21 @@ func BatchUploadByKv(count int) {
 
 		// check account is writer, panic if not
 		if isWriter := CheckIsStreamWriter(account); !isWriter {
-			fmt.Printf("Failed to batch upload: Account %s is not stream writer\n", account)
-			os.Exit(1)
+			return fmt.Errorf("Failed to batch upload: Account %s is not stream writer\n", account)
 		}
 
 		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
 		for j := i; j < end; j++ {
 			k, v := []byte(keyLineIndex(name, j)), []byte(fmt.Sprintf("%d", j))
 			batcher.Set(STREAM_FILE, k, v)
-			logrus.WithField("key", string(k)).WithField("value", string(v)).Debug("set key")
+			logger.Get().WithField("key", string(k)).WithField("value", string(v)).Debug("set key")
 		}
 		batchers = append(batchers, batcher)
 		i = end
 	}
 
 	start := time.Now()
-	logrus.WithField("time", start).WithField("name", name).WithField("len", len(batchers)).Info("Generated Datas")
+	logger.Get().WithField("time", start).WithField("name", name).WithField("len", len(batchers)).Info("Generated Datas")
 
 	var w sync.WaitGroup
 	var errs []error
@@ -93,20 +101,30 @@ func BatchUploadByKv(count int) {
 	}
 	w.Wait()
 
+	var result BatchUploadResult
 	if len(errs) > 0 {
-		logrus.WithError(errs[0]).WithField("count", count).Info("Failed to batch upload")
-		return
+		// logger.Get().WithError(errs[0]).WithField("count", count).Info("Failed to batch upload")
+		return errors.WithMessage(errs[0], "Failed to batch upload")
 	} else {
 		timeUse := time.Since(start)
-		logrus.WithField("name", name).WithField("time use", timeUse).WithField("tps", count/int(timeUse/time.Second)).WithField("count", count).Info("Batch upload completed")
+		tps := count / int(timeUse/time.Second)
+		logger.Get().WithField("name", name).WithField("time use", timeUse).WithField("tps", tps).WithField("count", count).Info("Batch upload completed")
+
+		result = BatchUploadResult{
+			Name:    name,
+			UseTime: timeUse,
+			TPS:     tps,
+			Count:   count,
+		}
 	}
 
 	// query last
+
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
 		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineIndex(name, count-1)))
 		if err != nil {
-			logrus.WithError(err).Info("Failed to check upload state")
+			logger.Get().WithError(err).Info("Failed to check upload state")
 			time.Sleep(time.Millisecond * 100)
 			continue
 		}
@@ -114,12 +132,19 @@ func BatchUploadByKv(count int) {
 			time.Sleep(time.Millisecond * 100)
 			continue
 		}
+
 		fmt.Print("\n")
-		logrus.WithField("value", string(v.Data)).Info("Batch upload verified")
-		return
+		logger.Get().WithField("value", string(v.Data)).Info("Batch upload verified")
+		logger.SuccessfWithParams(map[string]string{
+			"Name":     result.Name,
+			"Use Time": result.UseTime.String(),
+			"TPS":      fmt.Sprintf("%d", result.TPS),
+			"Count":    fmt.Sprintf("%d", result.Count),
+		}, "Batch upload completed and verified")
+		return nil
 	}
-	fmt.Print("\n")
-	fmt.Println("Failed to verify in 100 seconds")
+	logger.Fail("Failed to verify in 100 seconds")
+	return nil
 }
 
 // func panicIfNotStreamWriter(account common.Address) {

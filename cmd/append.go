@@ -4,9 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
@@ -18,20 +17,20 @@ var appendCmd = &cobra.Command{
 	Long:  `Append content to specified file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !common.IsHexAddress(account) {
-			fmt.Println("account is not valid address")
+			logger.Failf("account %s is not valid address", account)
 			return
 		}
 
 		if data != "" {
 			if err := core.AppendData(common.HexToAddress(account), name, data); err != nil {
-				fmt.Println("Faild to append content:", err)
+				logger.Fail(err.Error())
 			}
 			return
 		}
 
 		if filePath != "" {
 			if err := core.AppendFromFile(common.HexToAddress(account), name, filePath); err != nil {
-				fmt.Println("Faild to append content from file:", err)
+				logger.Fail(err.Error())
 			}
 			return
 		}

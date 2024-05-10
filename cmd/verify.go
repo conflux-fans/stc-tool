@@ -4,8 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/conflux-fans/storage-cli/core"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -17,16 +19,21 @@ var verifyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		opt, err := core.NewEncryptOption(cipher, password)
 		if err != nil {
-			logrus.WithError(err).Error("Failed to create options")
+			logger.Failf("Failed to create options: %s", err.Error())
 			return
 		}
 		isPassed, err := core.Verify(filePath, opt)
 		if err != nil {
-			logrus.WithError(err).Error("Failed to verify file")
+			fmt.Println(err.Error())
+			logger.Failf("Failed to verify file: %s", err.Error())
+			fmt.Println()
 			return
 		}
-		logrus.WithField("Passed", isPassed).Info("Document verification completed")
+		// logger.Get().WithField("Passed", isPassed).Info("Document verification completed")
 
+		logger.SuccessfWithParams(map[string]string{
+			"Is Pass": fmt.Sprintf("%v", isPassed),
+		}, "Document verification completed")
 	},
 }
 

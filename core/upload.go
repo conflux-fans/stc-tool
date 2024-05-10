@@ -3,10 +3,10 @@ package core
 import (
 	"os"
 
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 )
@@ -29,7 +29,7 @@ func NewUploadOption(method string, password string) (*UploadOption, error) {
 
 // Upload data
 func UploadDataByKv(account common.Address, name string, data string) error {
-	logrus.WithField("name", name).Info("Ready to upload data")
+	logger.Get().WithField("name", name).Info("Ready to upload data")
 
 	// revert if exists
 	if err := checkDataNameExists(name); err != nil {
@@ -40,7 +40,7 @@ func UploadDataByKv(account common.Address, name string, data string) error {
 		return err
 	}
 
-	logrus.WithField("name", name).Info("Upload data completed")
+	logger.Get().WithField("name", name).Info("Upload data completed")
 	return nil
 }
 
@@ -53,7 +53,7 @@ func UploadDataFromFile(account common.Address, name string, filePath string) er
 		return err
 	}
 
-	logrus.WithField("name", name).Info("Upload data completed")
+	logger.Get().WithField("name", name).Info("Upload data completed")
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
@@ -18,7 +19,7 @@ func loadViper[T any]() *T {
 	if err != nil {             // Handle errors reading the config file
 		log.Fatalln(fmt.Errorf("fatal error config file: %w", err))
 	}
-	fmt.Printf("viper use config file: %v\n", viper.ConfigFileUsed())
+	logger.Get().WithField("file", viper.ConfigFileUsed()).Debug("Viper use config file")
 
 	var _config T
 	if err := viper.Unmarshal(&_config, func(dc *mapstructure.DecoderConfig) {

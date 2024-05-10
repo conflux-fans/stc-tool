@@ -4,10 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"path"
 
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var downloadFileCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		savePath := path.Join(".", root+".zg")
 		core.DownloadFile(root, savePath)
-		fmt.Printf("Download file successfully, please find in %s\n", savePath)
+		logger.Failf("Download file successfully, please find in %s\n", savePath)
 	},
 }
 

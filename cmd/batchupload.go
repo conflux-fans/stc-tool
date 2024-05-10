@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,10 @@ var batchuploadCmd = &cobra.Command{
 	Short: "Batch upload content",
 	Long:  `Batch upload content`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.BatchUploadByKv(count)
+		err := core.BatchUploadByKv(count)
+		if err != nil {
+			logger.Fail(err.Error())
+		}
 	},
 }
 

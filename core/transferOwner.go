@@ -2,7 +2,7 @@ package core
 
 // func TransferOwner(name string, from common.Address, to common.Address) error {
 // 	// get all keys
-// 	logrus.WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
+// 	logger.Get().WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
 
 // 	meta, err := GetContentMetadata(name)
 // 	if err != nil {
@@ -11,7 +11,7 @@ package core
 
 // 	keys := append(meta.LineKeys, meta.LineSizeKey)
 
-// 	logrus.WithField("length", len(keys)).Info("Get content related keys")
+// 	logger.Get().WithField("length", len(keys)).Info("Get content related keys")
 
 // 	// check is all writer, if not
 // 	for _, k := range keys {

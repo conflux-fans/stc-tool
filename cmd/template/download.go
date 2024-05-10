@@ -4,10 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package template
 
 import (
-	"fmt"
-
 	"github.com/conflux-fans/storage-cli/core"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +17,10 @@ var downloadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filePath, err := core.DownloadTemplate(name)
 		if err != nil {
-			logrus.WithError(err).Error("Failed to download template")
+			logger.Get().WithError(err).Error("Failed to download template")
 			return
 		}
-		fmt.Printf("Template file is saved to %s\n", filePath)
+		logger.Successf("Template file is saved to %s\n", filePath)
 	},
 }
 

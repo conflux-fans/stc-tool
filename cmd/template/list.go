@@ -4,11 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package template
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/conflux-fans/storage-cli/core"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +16,13 @@ var listCmd = &cobra.Command{
 	Long:  `List templates`,
 	Run: func(cmd *cobra.Command, args []string) {
 		templates, err := core.ListTemplate()
-		logrus.WithField("result", templates).WithError(err).Info("list templates")
+		logger.Get().WithField("result", templates).WithError(err).Info("list templates")
 		if err != nil {
-			logrus.WithError(err).Error("Failed to create template")
-		} else {
-			fmt.Printf("Templates: %v\n", strings.Join(templates, ", "))
+			logger.Fail(err.Error())
+			return
 		}
+		// params := map[string]string{"Templates: %v\n": strings.Join(templates, ", ")}
+		logger.SuccessfWithList(templates, "Get templates")
 	},
 }
 

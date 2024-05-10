@@ -4,9 +4,11 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package file
 
 import (
+	"encoding/json"
+
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,10 +20,12 @@ var infoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fi, err := core.GetFileInfo(common.HexToHash(rootHash))
 		if err != nil {
-			logrus.WithError(err).Error("Failed to get file info")
-		} else {
-			logrus.WithField("fi", fi).Info("Get file info completed")
+			logger.Get().WithError(err).Error("Failed to get file info")
+			return
 		}
+		j, _ := json.MarshalIndent(fi, "", "  ")
+		// logger.SuccessfWithParams(map[string]string{"FileInfo": string(j)}, "Get file info completed")
+		logger.Successf(string(j), "Get file info completed")
 	},
 }
 

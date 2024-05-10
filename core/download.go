@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 )
 
@@ -18,23 +18,23 @@ var (
 func DownloadFile(root string, savePath string) {
 	downloader := transfer.NewDownloader(nodeClients...)
 	if err := downloader.Download(root, root, false); err != nil {
-		logrus.WithField("root", root).WithError(err).Fatal("Failed to download file")
+		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to download file")
 	}
 	// rename file
 	if err := os.Rename(root, savePath); err != nil {
-		logrus.WithField("root", root).WithError(err).Fatal("Failed to rename file")
+		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to rename file")
 	}
 }
 
 func DownloadDataByKv(name string) error {
-	logrus.WithField("name", name).Info("Start download content")
+	logger.Get().WithField("name", name).Info("Start download content")
 
 	meta, err := GetContentMetadata(name)
 	if err != nil {
 		return err
 	}
 
-	logrus.WithField("metadata", meta).Info("Get content metadata")
+	logger.Get().WithField("metadata", meta).Info("Get content metadata")
 
 	f, err := os.OpenFile(name+".zg", os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
@@ -47,13 +47,13 @@ func DownloadDataByKv(name string) error {
 		if err != nil {
 			return err
 		}
-		logrus.WithField("key", k).WithField("val", val).Debug("Get line value")
+		logger.Get().WithField("key", k).WithField("val", val).Debug("Get line value")
 		_, err = f.Write(val.Data)
 		if err != nil {
 			return err
 		}
 	}
-	logrus.Info(fmt.Sprintf("Download data %s to file %s.zg completed ", name, name))
+	logger.Get().Info(fmt.Sprintf("Download data %s to file %s.zg completed ", name, name))
 	return nil
 }
 

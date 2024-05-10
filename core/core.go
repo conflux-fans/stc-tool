@@ -3,14 +3,15 @@ package core
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/contracts"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
 	"github.com/openweb3/web3go/signers"
-	"github.com/sirupsen/logrus"
 	"github.com/zero-gravity-labs/zerog-storage-client/common/blockchain"
 	"github.com/zero-gravity-labs/zerog-storage-client/contract"
 	"github.com/zero-gravity-labs/zerog-storage-client/kv"
@@ -29,6 +30,7 @@ var (
 	defaultAccount      common.Address
 	signerFn            bind.SignerFn
 	// signerManager         *signers.SignerManager
+	grantWriterOnce sync.Once
 )
 
 var (
@@ -37,7 +39,7 @@ var (
 
 func Init() {
 	cfg := config.Get()
-	// logrus.WithField("config", cfg).Info("Get config")
+	// logger.Get().WithField("config", cfg).Info("Get config")
 	nodeClients = node.MustNewClients(cfg.StorageNodes)
 
 	providerOpt := providers.Option{}
@@ -48,7 +50,7 @@ func Init() {
 
 	genKvClientsForPut()
 	initTempalteContract()
-	grantAllAccountWriter()
+	// GrantAllAccountWriter()
 }
 
 func genKvClientsForPut() {
@@ -64,7 +66,7 @@ func genKvClientsForPut() {
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
 		flow, err := contract.NewFlowContract(flowAddr, w3client)
 		if err != nil {
-			logrus.WithError(err).Fatal("Failed to create flow contract")
+			logger.Get().WithError(err).Fatal("Failed to create flow contract")
 			os.Exit(1)
 		}
 		kvClient := kv.NewClient(nodeClients[0], flow)
@@ -89,13 +91,16 @@ func initTempalteContract() {
 	var err error
 	templates, err = contracts.NewTemplates(templateAddr, backend)
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to create templates contract")
+		logger.Get().WithError(err).Fatal("Failed to create templates contract")
 		os.Exit(1)
 	}
 }
 
-func grantAllAccountWriter() {
-	if err := GrantStreamWriter(accounts...); err != nil {
-		panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))
-	}
+func GrantAllAccountWriter() {
+	grantWriterOnce.Do(func() {
+		if err := GrantStreamWriter(accounts...); err != nil {
+			panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))
+		}
+	})
+	// logger.Get().Info("Granted all")
 }

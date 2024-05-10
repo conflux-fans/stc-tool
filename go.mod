@@ -7,6 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/openweb3/go-rpc-provider v0.2.7
 	github.com/openweb3/web3go v0.2.1-0.20221026093812-d63d83edcfec
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
@@ -49,7 +50,6 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0 // indirect
 	github.com/miguelmota/go-ethereum-hdwallet v0.1.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/openweb3/go-rpc-provider v0.2.7 // indirect
 	github.com/openweb3/go-sdk-common v0.0.0-20220720074746-a7134e1d372c // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

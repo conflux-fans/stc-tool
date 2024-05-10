@@ -4,9 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +16,7 @@ var downloadDataCmd = &cobra.Command{
 	Long:  `Download content`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := core.DownloadDataByKv(name); err != nil {
-			fmt.Printf("Failed to download data %s: %v\n", name, err)
+			logger.Failf("Failed to download content %s: %v\n", name, err)
 		}
 	},
 }

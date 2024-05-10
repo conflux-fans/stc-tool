@@ -4,9 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package file
 
 import (
-	"fmt"
-
 	"github.com/conflux-fans/storage-cli/encrypt"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -18,17 +17,17 @@ var decryptCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		encryptor, err := encrypt.GetEncryptor(cipher)
 		if err != nil {
-			fmt.Println("Failed to get encryptor", err)
+			logger.Failf("Failed to get encryptor %v", err)
 			return
 		}
 
 		outputFile, err := encrypt.DecryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
 		if err != nil {
-			fmt.Println("Failed to encrypt file", err)
+			logger.Failf("Failed to encrypt file %v", err)
 			return
 		}
 
-		fmt.Printf("Decrypted file path %s\n", outputFile)
+		logger.Successf("Decrypted file path %s\n", outputFile)
 	},
 }
 

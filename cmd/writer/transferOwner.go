@@ -4,9 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package writer
 
 import (
-	"fmt"
-
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
@@ -18,19 +17,23 @@ var transferOwnerCmd = &cobra.Command{
 	Long:  `Transfer content ownership`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !common.IsHexAddress(currentOwner) {
-			fmt.Println("from is not valid address")
+			logger.Failf("from %v is not valid address", currentOwner)
 			return
 		}
 		if !common.IsHexAddress(newOwner) {
-			fmt.Println("to is not valid address")
+			logger.Failf("to %v is not valid address", newOwner)
 			return
 		}
 		err := core.TransferWriter(name, common.HexToAddress(currentOwner), common.HexToAddress(newOwner))
 		if err != nil {
-			fmt.Println("Failed to transfer owner: ", err)
+			logger.Fail(err.Error())
 			return
 		}
-		fmt.Printf("Successfully transferred ownership of content %s from %v to %v\n", name, currentOwner, newOwner)
+		logger.SuccessfWithParams(map[string]string{
+			"Name": name,
+			"From": currentOwner,
+			"To":   newOwner,
+		}, "Successfully transferred content ownership")
 	},
 }
 var (

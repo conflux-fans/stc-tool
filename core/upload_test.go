@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/conflux-fans/storage-cli/config"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +19,7 @@ func TestUploadStream(t *testing.T) {
 	batcher := adminKvClientForPut.Batcher()
 	key := []byte(fmt.Sprintf("TEST-KEY-%d", time.Now().Unix()))
 
-	logrus.WithField("key", string(key)).Info("Start put")
+	logger.Get().WithField("key", string(key)).Info("Start put")
 
 	batcher.Set(STREAM_FILE, key, []byte("hello world")).
 		SetKeyToSpecial(STREAM_FILE, key).

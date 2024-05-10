@@ -7,6 +7,7 @@ import (
 	"github.com/conflux-fans/storage-cli/cmd"
 	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,7 +19,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logrus.SetLevel(logLevel)
+	logger.Get().SetLevel(logLevel)
 
 	core.Init()
 	cmd.Execute()

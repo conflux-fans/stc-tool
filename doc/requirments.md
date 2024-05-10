@@ -10,12 +10,16 @@
 		- 输出log
 		- 输出结果，统计时间
 
+```sh
+go run . batch upload -c 100000
+```
+
 
 •具备数据的存证、加密、验真、分享等治理能力
 
 	•存证调 API, 加密 SDK, 验真 SDK，分享 SCAN 链接？
 	
-	- 命令：upload
+	- 命令：upload 
       	- 子命令：file
 		- 参数
 			- 文件路径
@@ -43,6 +47,15 @@
         	- 查询文件是否存在
         	- 需要查所有者？
 
+```sh
+go run . upload content --name data2 --content hello --account 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
+
+go run . upload file --file ./main.go --cipher aes --password 1234567812345678
+
+go run . append --name data2 --data " world" --account 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
+
+go run . verify --file ./main.go --cipher aes --password 1234567812345678
+```
 
 •具备数据的生命周期全程确认和确权功能
 
@@ -55,6 +68,10 @@
 			- streamID
 			- to
 
+```sh
+go run . owner content --account 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b --name data2 
+go run . owner transfer --name data1 --from 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b --to 0xe61646FD48adF644404f373D984B14C877957F7c 
+```
 
 •支持上链存证模板自定义；
 
@@ -72,6 +89,14 @@
 			- 步骤
 				- 从合约读取对应字段数组创建csv文件
 
+```sh
+ go run . template list  
+
+ go run . template create --name test4 --keys name,age    
+
+ go run . template download --name test4
+```
+
 •支持数据上链和自动重传;
 
 	GO CLIENT，己经有/
@@ -82,6 +107,10 @@
 	- 命令：append
 		- 参数
 			- tag
+
+```sh
+go run . append --name data1 --data " world" --account 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
+```
 
 
 •支持数据的灵活查询；
@@ -117,3 +146,9 @@ append: 1.上传文件 2.在stream上追加 FILE1=>ROOTHASH
 4. 待讨论方案
    1. 支持异常数据的链上验真
    2. 支持为可信数据查询和通用的计算结果提供零知识证明
+
+# 5.9会议
+
+1. 优化日志
+2. bug 修复
+3. 确定卡住的问题是否能修复，是否需要现场部署环境

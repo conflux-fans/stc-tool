@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/sirupsen/logrus"
 )
 
 func CheckIsStreamWriter(account common.Address) bool {
@@ -36,7 +36,7 @@ func CheckIsContentWriter(name string, account common.Address) bool {
 				panic(err)
 			}
 			if !_isWriter {
-				logrus.WithField("key", string(_lk)).Info("Account is not writer of key")
+				logger.Get().WithField("key", string(_lk)).Info("Account is not writer of key")
 				isWriter = false
 			}
 		}(lk)
@@ -58,21 +58,22 @@ func GrantStreamWriter(accounts ...common.Address) error {
 		allAreWriter = isWriter && allAreWriter
 	}
 	if allAreWriter {
-		logrus.Info("All accounts are writer of stream")
+		logger.Get().Info("All accounts are writer of stream")
 		return nil
 	}
 
-	logrus.WithField("accounts", accounts).Info("Grant stream writer to accounts")
+	logger.Get().WithField("accounts", accounts).Info("Grant stream writer to accounts")
 	batcher := adminKvClientForPut.Batcher()
 	for _, account := range accounts {
 		batcher.GrantWriteRole(STREAM_FILE, account)
 	}
+	logger.Get().Info("Grant writers done")
 	return batcher.Exec()
 }
 
 func TransferWriter(name string, from common.Address, to common.Address) error {
 	// get all keys
-	logrus.WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
+	logger.Get().WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
 	isWriter := CheckIsContentWriter(name, from)
 	if !isWriter {
 		return fmt.Errorf("account %v not the writer of content %v", from, name)

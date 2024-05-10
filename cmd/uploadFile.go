@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"github.com/conflux-fans/storage-cli/core"
-	"github.com/sirupsen/logrus"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -18,11 +18,11 @@ var uploadFileCmd = &cobra.Command{
 		opt, err := core.NewUploadOption(cipher, password)
 
 		if err != nil {
-			logrus.WithError(err).Error("Failed to create encryption option")
+			logger.Failf("Failed to create encryption option %v", err)
 			return
 		}
 		if err := core.UploadFile(filePath, opt); err != nil {
-			logrus.WithError(err).Error("Failed to upload file")
+			logger.Fail(err.Error())
 			return
 		}
 	},

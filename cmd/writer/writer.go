@@ -22,5 +22,4 @@ var (
 
 func InitCmds(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(ownerCmd)
-
 }

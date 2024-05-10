@@ -4,18 +4,18 @@ import (
 	"os"
 	"strings"
 
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func CreateTemplate(name string, keys []string) error {
-	logrus.WithField("name", name).WithField("keys", keys).Info("create template")
+	logger.Get().WithField("name", name).WithField("keys", keys).Info("create template")
 	tx, err := templates.AddTemplate(&bind.TransactOpts{Signer: signerFn, From: defaultAccount}, name, keys)
 	if err != nil {
 		return err
 	}
-	logrus.WithField("tx", tx.Hash()).Info("template created")
+	logger.Get().WithField("tx", tx.Hash()).Info("template created")
 	return nil
 }
 
@@ -26,7 +26,7 @@ func DownloadTemplate(name string) (string, error) {
 	if err != nil {
 		return "", errors.WithMessage(err, "Failed to get template from remote")
 	}
-	logrus.WithField("keys", keys).Info("get template keys")
+	logger.Get().WithField("keys", keys).Info("get template keys")
 
 	lines := append([]string{header}, keys...)
 	content := strings.Join(lines, "\n")
@@ -50,7 +50,7 @@ func DeleteTemplate(name string) error {
 	if err != nil {
 		return err
 	}
-	logrus.WithField("tx", tx.Hash()).Info("template deleted")
+	logger.Get().WithField("tx", tx.Hash()).Info("template deleted")
 	return nil
 }
 

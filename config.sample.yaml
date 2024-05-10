@@ -1,6 +1,6 @@
 blockChain:
   url: "https://evmtestnet.confluxrpc.com/6XWH2kDUX4wcKVN1VThMpjhhwerkTMZR8GYjk3S8Ti6GhM8qw7TJXDuT4sJWsM8MNmz2oxLsWAbjDUELaeAG4QA9Y"
-  flowContract: "0x5aD3e69f3bBa0576244574c7d6393c25ED24F326"
+  flowContract: "0x4669F0C4Aae83dDCefB4269064C28c98fB02E1ca"
   templateContract: "0x34Ab680c8De93aA0742EF5843520E86239B954EF"
 storageNodes:
   - "http://127.0.0.1:11100"
