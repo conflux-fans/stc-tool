@@ -7,21 +7,21 @@ import (
 )
 
 func Fail(desc string) {
-	fmt.Println("\n😞 \x1b[31mFAIL\x1b[0m: " + desc)
+	fmt.Println("\n❌ \x1b[31mFAIL\x1b[0m: " + desc + "\n")
 }
 
 func Failf(descFormat string, a ...any) {
-	fmt.Printf("\n😞 \x1b[31mFAIL\x1b[0m: "+descFormat, a...)
+	fmt.Printf("\n❌ \x1b[31mFAIL\x1b[0m: "+descFormat+"\n", a...)
 }
 
 func FailfWithParams(params map[string]string, descFormat string, a ...any) {
 	result := resultByParams(params)
-	fmt.Printf("\n😞 \x1b[31mFAIL\x1b[0m: == "+descFormat+" ==\n", a...)
+	fmt.Printf("\n❌ \x1b[31mFAIL\x1b[0m: == "+descFormat+" ==\n", a...)
 	fmt.Println(result)
 }
 
 func Success(desc string) {
-	fmt.Println("\n✅ \x1b[32mSUCCESS\x1b[0m: == " + desc + " ==")
+	fmt.Println("\n✅ \x1b[32mSUCCESS\x1b[0m: == " + desc + " ==\n")
 }
 
 func Successf(descFormat string, a ...any) {
@@ -36,7 +36,6 @@ func SuccessWithResult(result string, descFormat string, a ...any) {
 func SuccessfWithParams(params map[string]string, descFormat string, a ...any) {
 	result := resultByParams(params)
 	SuccessWithResult(result, descFormat, a...)
-	fmt.Printf("\n")
 }
 
 func SuccessfWithList[T any](list []T, descFormat string, a ...any) {
@@ -46,7 +45,6 @@ func SuccessfWithList[T any](list []T, descFormat string, a ...any) {
 		result += fmt.Sprintf("    - %v\n", v)
 	}
 	SuccessWithResult(result, descFormat, a...)
-	fmt.Printf("\n")
 }
 
 func resultByParams(params map[string]string) string {
@@ -73,7 +71,7 @@ func Get() *logrus.Logger {
 	logger.SetLevel(logrus.InfoLevel)
 
 	// 创建一个自定义的 Hook，并添加到 Logger 中
-	logger.AddHook(&prefixHook{Prefix: "[TOOL]"})
+	logger.AddHook(&prefixHook{Prefix: "\x1b[42m[TOOL]\x1b[0m"})
 	return logger
 }
 

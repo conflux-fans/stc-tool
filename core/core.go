@@ -5,6 +5,10 @@ import (
 	"os"
 	"sync"
 
+	"github.com/0glabs/0g-storage-client/common/blockchain"
+	"github.com/0glabs/0g-storage-client/contract"
+	"github.com/0glabs/0g-storage-client/kv"
+	"github.com/0glabs/0g-storage-client/node"
 	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/contracts"
 	"github.com/conflux-fans/storage-cli/logger"
@@ -12,10 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
 	"github.com/openweb3/web3go/signers"
-	"github.com/zero-gravity-labs/zerog-storage-client/common/blockchain"
-	"github.com/zero-gravity-labs/zerog-storage-client/contract"
-	"github.com/zero-gravity-labs/zerog-storage-client/kv"
-	"github.com/zero-gravity-labs/zerog-storage-client/node"
 )
 
 var (
@@ -96,7 +96,7 @@ func initTempalteContract() {
 	}
 }
 
-func GrantAllAccountWriter() {
+func GrantAllAccountStreamWriter() {
 	grantWriterOnce.Do(func() {
 		if err := GrantStreamWriter(accounts...); err != nil {
 			panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))

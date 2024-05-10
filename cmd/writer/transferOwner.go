@@ -24,6 +24,9 @@ var transferOwnerCmd = &cobra.Command{
 			logger.Failf("to %v is not valid address", newOwner)
 			return
 		}
+
+		core.GrantAllAccountStreamWriter()
+
 		err := core.TransferWriter(name, common.HexToAddress(currentOwner), common.HexToAddress(newOwner))
 		if err != nil {
 			logger.Fail(err.Error())

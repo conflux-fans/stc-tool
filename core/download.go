@@ -5,10 +5,10 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/0glabs/0g-storage-client/transfer"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 )
 
 var (

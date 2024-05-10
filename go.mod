@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.22.1
 
 require (
+	github.com/0glabs/0g-storage-client v0.1.15
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openweb3/go-rpc-provider v0.2.7
@@ -16,7 +17,6 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-	github.com/zero-gravity-labs/zerog-storage-client v0.1.4
 	gotest.tools v2.2.0+incompatible
 )
 

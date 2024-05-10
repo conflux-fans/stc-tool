@@ -6,18 +6,19 @@ import (
 	"sync"
 	"time"
 
+	"github.com/0glabs/0g-storage-client/core"
+	"github.com/0glabs/0g-storage-client/kv"
+	"github.com/0glabs/0g-storage-client/transfer"
 	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/zero-gravity-labs/zerog-storage-client/core"
-	"github.com/zero-gravity-labs/zerog-storage-client/kv"
-	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	ONE_BATCH_COUNT = 20000
+	ONE_BATCH_COUNT = 30000
 )
 
 type EncryptOption struct {
@@ -50,7 +51,7 @@ type BatchUploadResult struct {
 }
 
 func BatchUploadByKv(count int) error {
-	GrantAllAccountWriter()
+	GrantAllAccountStreamWriter()
 
 	limit := len(kvClientsForPut) * ONE_BATCH_COUNT
 	if count > limit {
@@ -60,7 +61,7 @@ func BatchUploadByKv(count int) error {
 	name := fmt.Sprintf("BATCH-TEST-%d", time.Now().Unix())
 	batchers := []*kv.Batcher{}
 
-	// execute, every segment 1000 kv\
+	// execute, every segment 20000 kv\
 	// kvClientForPutList := lo.Values(kvClientsForPut)
 	for i := 0; i < count; {
 		account := accounts[i/ONE_BATCH_COUNT]
@@ -70,8 +71,12 @@ func BatchUploadByKv(count int) error {
 		}
 
 		// check account is writer, panic if not
-		if isWriter := CheckIsStreamWriter(account); !isWriter {
-			return fmt.Errorf("Failed to batch upload: Account %s is not stream writer\n", account)
+		isWriter, err := CheckIsStreamWriter(account)
+		if err != nil {
+			return err
+		}
+		if !isWriter {
+			return fmt.Errorf("Account %s is not stream writer", account)
 		}
 
 		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
@@ -120,6 +125,7 @@ func BatchUploadByKv(count int) error {
 
 	// query last
 
+	logrus.Info("Start verify ...")
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
 		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineIndex(name, count-1)))
@@ -134,10 +140,10 @@ func BatchUploadByKv(count int) error {
 		}
 
 		fmt.Print("\n")
-		logger.Get().WithField("value", string(v.Data)).Info("Batch upload verified")
+		logger.Get().WithField("last value", string(v.Data)).Info("Batch upload verified")
 		logger.SuccessfWithParams(map[string]string{
 			"Name":     result.Name,
-			"Use Time": result.UseTime.String(),
+			"Duration": result.UseTime.String(),
 			"TPS":      fmt.Sprintf("%d", result.TPS),
 			"Count":    fmt.Sprintf("%d", result.Count),
 		}, "Batch upload completed and verified")
@@ -202,7 +208,7 @@ func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 			return common.Hash{}, err
 		}
 
-		data := core.NewDataInMemory(text)
+		data, _ := core.NewDataInMemory(text)
 		datas = append(datas, data)
 
 		tree, err := core.MerkleTree(data)
@@ -214,7 +220,7 @@ func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 
 	// save text and root to file
 	report.StartTime = time.Now()
-	hash, err := uploader.BatchUpload(datas, false)
+	hash, _, err := uploader.BatchUpload(datas, false)
 	if err != nil {
 		return common.Hash{}, errors.WithMessage(err, "Failed to batch upload")
 	}

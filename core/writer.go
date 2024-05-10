@@ -6,20 +6,21 @@ import (
 
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 )
 
-func CheckIsStreamWriter(account common.Address) bool {
+func CheckIsStreamWriter(account common.Address) (bool, error) {
 	isWriter, err := kvClientForIterator.IsWriterOfStream(account, STREAM_FILE)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
-	return isWriter
+	return isWriter, nil
 }
 
-func CheckIsContentWriter(name string, account common.Address) bool {
+func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 	meta, err := GetContentMetadata(name)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
 	keys := append(meta.LineKeys, meta.LineSizeKey)
@@ -48,13 +49,16 @@ func CheckIsContentWriter(name string, account common.Address) bool {
 			}
 		}
 	}
-	return isWriter
+	return isWriter, nil
 }
 
 func GrantStreamWriter(accounts ...common.Address) error {
 	allAreWriter := true
 	for _, account := range accounts {
-		isWriter := CheckIsStreamWriter(account)
+		isWriter, err := CheckIsStreamWriter(account)
+		if err != nil {
+			return errors.WithMessage(err, "failed to check stream writer")
+		}
 		allAreWriter = isWriter && allAreWriter
 	}
 	if allAreWriter {
@@ -74,9 +78,13 @@ func GrantStreamWriter(accounts ...common.Address) error {
 func TransferWriter(name string, from common.Address, to common.Address) error {
 	// get all keys
 	logger.Get().WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
-	isWriter := CheckIsContentWriter(name, from)
+	isWriter, err := CheckIsContentWriter(name, from)
+	if err != nil {
+		return errors.WithMessage(err, "failed to check if content owner")
+	}
+
 	if !isWriter {
-		return fmt.Errorf("account %v not the writer of content %v", from, name)
+		return fmt.Errorf("account %v is not the writer of content %v", from, name)
 	}
 
 	meta, err := GetContentMetadata(name)

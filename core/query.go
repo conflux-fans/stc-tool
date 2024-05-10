@@ -1,8 +1,8 @@
 package core
 
 import (
+	"github.com/0glabs/0g-storage-client/node"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/zero-gravity-labs/zerog-storage-client/node"
 )
 
 func GetFileInfo(root common.Hash) (*node.FileInfo, error) {

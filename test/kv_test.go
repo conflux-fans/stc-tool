@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/0glabs/0g-storage-client/common/blockchain"
+	"github.com/0glabs/0g-storage-client/contract"
+	"github.com/0glabs/0g-storage-client/kv"
+	"github.com/0glabs/0g-storage-client/node"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	"github.com/zero-gravity-labs/zerog-storage-client/common/blockchain"
-	"github.com/zero-gravity-labs/zerog-storage-client/contract"
-	"github.com/zero-gravity-labs/zerog-storage-client/kv"
-	"github.com/zero-gravity-labs/zerog-storage-client/node"
 )
 
 func TestKvUpdate(t *testing.T) {
@@ -48,7 +48,7 @@ func TestKvUpdate(t *testing.T) {
 		fmt.Printf("%v: %v\n", string(pair.Key), string(pair.Data))
 		iter.Next()
 	}
-	
+
 	// upload another key
 	batcher.Set(streamID,
 		[]byte("TESTKEY1"),

@@ -1,14 +1,15 @@
 package core
 
 import (
+	"fmt"
 	"os"
 
+	ccore "github.com/0glabs/0g-storage-client/core"
+	"github.com/0glabs/0g-storage-client/transfer"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	ccore "github.com/zero-gravity-labs/zerog-storage-client/core"
-	"github.com/zero-gravity-labs/zerog-storage-client/transfer"
 )
 
 type UploadOption struct {
@@ -64,7 +65,7 @@ func checkDataNameExists(name string) error {
 		return errors.WithMessage(err, "Failed to get file line size")
 	}
 	if v.Size != 0 {
-		return errors.New("The name already exists")
+		return fmt.Errorf("the name %s already exists", name)
 	}
 	return nil
 }

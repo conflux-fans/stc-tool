@@ -34,6 +34,10 @@ var uploadDataCmd = &cobra.Command{
 			}
 			return
 		}
+
+		logger.SuccessfWithParams(map[string]string{
+			"Name": name,
+		}, "Upload content completed")
 	},
 }
 

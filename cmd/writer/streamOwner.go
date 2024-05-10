@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package writer
 
 import (
+	"fmt"
+
 	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
@@ -20,13 +22,16 @@ var streamOwnerCmd = &cobra.Command{
 			logger.Failf("account %v is not valid address", account)
 			return
 		}
-		isWriter := core.CheckIsStreamWriter(common.HexToAddress(account))
-		// fmt.Printf("Account %v is stream writer ? %v\n", account, isWriter)
-		if isWriter {
-			logger.Successf("Account %v is stream writer", account)
-		} else {
-			logger.Successf("Account %v isn't stream writer", account)
+		isWriter, err := core.CheckIsStreamWriter(common.HexToAddress(account))
+		if err != nil {
+			logger.Fail(err.Error())
+			return
 		}
+
+		logger.SuccessfWithParams(map[string]string{
+			"Account": account,
+			"Result":  fmt.Sprintf("%v", isWriter),
+		}, "Check if account is writer of stream completed")
 	},
 }
 

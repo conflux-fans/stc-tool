@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/0glabs/0g-storage-client/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/zero-gravity-labs/zerog-storage-client/core"
 )
 
 const (
@@ -50,7 +50,10 @@ func appendData(account common.Address, name string, data string, force bool) er
 
 	// error if not writer
 	if !force {
-		isWriter := CheckIsContentWriter(name, account)
+		isWriter, err := CheckIsContentWriter(name, account)
+		if err != nil {
+			return err
+		}
 		if !isWriter {
 			return fmt.Errorf("account %v is not writer of content", account)
 		}
