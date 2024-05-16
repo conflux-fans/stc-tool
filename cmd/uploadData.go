@@ -24,15 +24,15 @@ var uploadDataCmd = &cobra.Command{
 		if data != "" {
 			if err := core.UploadDataByKv(common.HexToAddress(account), name, data); err != nil {
 				logger.Fail(err.Error())
+				return
 			}
-			return
 		}
 
 		if filePath != "" {
 			if err := core.UploadDataByKv(common.HexToAddress(account), name, filePath); err != nil {
 				logger.Fail(err.Error())
+				return
 			}
-			return
 		}
 
 		logger.SuccessfWithParams(map[string]string{

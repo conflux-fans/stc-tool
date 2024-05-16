@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -79,6 +80,13 @@ func genKvClientsForPut() {
 			defaultAccount = account
 		}
 	}
+}
+
+func getKvClientBatcher(account common.Address) (*kv.Batcher, error) {
+	if kvClientsForPut[account] == nil {
+		return nil, errors.New("No kv client for account")
+	}
+	return kvClientsForPut[account].Batcher(), nil
 }
 
 func initTempalteContract() {

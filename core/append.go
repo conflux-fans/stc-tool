@@ -59,7 +59,10 @@ func appendData(account common.Address, name string, data string, force bool) er
 		}
 	}
 	adminBatcher := adminKvClientForPut.Batcher()
-	batcher := kvClientsForPut[account].Batcher()
+	batcher, err := getKvClientBatcher(account)
+	if err != nil {
+		return errors.WithMessage(err, "Failed to get kv client")
+	}
 
 	lineSizeKey := []byte(meta.LineSizeKey)
 	lineSizeVal := []byte(fmt.Sprintf("%d", meta.LineSize+len(chunks)))

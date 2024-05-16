@@ -14,7 +14,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -55,7 +54,7 @@ func BatchUploadByKv(count int) error {
 
 	limit := len(kvClientsForPut) * ONE_BATCH_COUNT
 	if count > limit {
-		return fmt.Errorf("Exceed limit, the max limit batch upload count is %ds\n", count)
+		return fmt.Errorf("exceed limit, the max limit batch upload count is %d", limit)
 	}
 	// name be time, gen 100000 kv
 	name := fmt.Sprintf("BATCH-TEST-%d", time.Now().Unix())
@@ -76,7 +75,7 @@ func BatchUploadByKv(count int) error {
 			return err
 		}
 		if !isWriter {
-			return fmt.Errorf("Account %s is not stream writer", account)
+			return fmt.Errorf("account %s is not stream writer", account)
 		}
 
 		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
@@ -124,8 +123,7 @@ func BatchUploadByKv(count int) error {
 	}
 
 	// query last
-
-	logrus.Info("Start verify ...")
+	fmt.Print("\x1b[36mINFO\x1b[0m[0000] \x1b[42m[TOOL]\x1b[0m Start verify ...")
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
 		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineIndex(name, count-1)))

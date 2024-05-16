@@ -40,6 +40,18 @@ func TestAlign(t *testing.T) {
 	}
 
 	// 输出格式化后的字符串
-	fmt.Printf(format)
+	fmt.Println(format)
 
+}
+
+func TestColors(t *testing.T) {
+	fmt.Println("\x1b[31mINFO[0000] 31 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[32mINFO[0000] 32 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[33mINFO[0000] 33 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[34mINFO[0000] 34 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[35mINFO[0000] 35 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[36mINFO[0000] 36 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[37mINFO[0000] 37 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[38mINFO[0000] 38 \x1b[0m Start verify ...")
+	fmt.Println("\x1b[39mINFO[0000] 39 \x1b[0m Start verify ...")
 }

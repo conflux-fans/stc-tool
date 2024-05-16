@@ -11,7 +11,7 @@
 		- 输出结果，统计时间
 
 ```sh
-go run . batch upload -c 100000
+go run . batch upload -c 300000
 ```
 
 

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
@@ -71,8 +72,37 @@ func GrantStreamWriter(accounts ...common.Address) error {
 	for _, account := range accounts {
 		batcher.GrantWriteRole(STREAM_FILE, account)
 	}
+
+	err := batcher.Exec()
+	if err != nil {
+		return err
+	}
+
+	if err = waitStreamWriterConfirm(accounts[len(accounts)-1]); err != nil {
+		return err
+	}
+
 	logger.Get().Info("Grant writers done")
-	return batcher.Exec()
+
+	return nil
+}
+
+func waitStreamWriterConfirm(account common.Address) error {
+	logger.Get().Info("Wait write setting")
+	for i := 0; i < 100; i++ {
+		time.Sleep(time.Second)
+		isWriter, err := CheckIsStreamWriter(account)
+		if isWriter {
+			return nil
+		}
+
+		if i == 100-1 {
+			if err != nil {
+				return errors.WithMessage(err, "failed to grant stream writer")
+			}
+		}
+	}
+	return errors.New("failed to grant stream writer")
 }
 
 func TransferWriter(name string, from common.Address, to common.Address) error {
