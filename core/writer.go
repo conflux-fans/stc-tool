@@ -117,6 +117,10 @@ func TransferWriter(name string, from common.Address, to common.Address) error {
 		return fmt.Errorf("account %v is not the writer of content %v", from, name)
 	}
 
+	if from == to {
+		return fmt.Errorf("from account should not same with to account")
+	}
+
 	meta, err := GetContentMetadata(name)
 	if err != nil {
 		return err

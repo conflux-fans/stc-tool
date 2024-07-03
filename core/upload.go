@@ -5,6 +5,7 @@ import (
 	"os"
 
 	ccore "github.com/0glabs/0g-storage-client/core"
+	"github.com/0glabs/0g-storage-client/core/merkle"
 	"github.com/0glabs/0g-storage-client/transfer"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
@@ -94,4 +95,64 @@ func UploadFile(filepath string, opt *UploadOption) error {
 	})
 
 	return err
+}
+
+// upload data and return segments merkle tree and chunks merle tree
+func UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
+	uploader := transfer.NewUploader(defaultFlow, nodeClients)
+	dataInMemory, err := ccore.NewDataInMemory(data)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = uploader.Upload(dataInMemory)
+	if err != nil && err.Error() != "Data already exists on ZeroGStorage network" {
+		return nil, nil, err
+	}
+
+	segmentsTree, err := ccore.MerkleTree(dataInMemory)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	chunksTree, err := getChunksTree(data)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return segmentsTree, chunksTree, nil
+}
+
+func getChunksTree(data []byte) (*merkle.Tree, error) {
+	dataInMemory, err := ccore.NewDataInMemory(data)
+	if err != nil {
+		return nil, err
+	}
+
+	batch := ccore.DefaultSegmentSize
+	buf, err := ccore.ReadAt(dataInMemory, batch, 0, dataInMemory.PaddedSize())
+	if err != nil {
+		return nil, err
+	}
+	return buildChunksTree(buf), nil
+}
+
+func buildChunksTree(chunks []byte, emptyChunksPadded ...uint64) *merkle.Tree {
+	var builder merkle.TreeBuilder
+
+	// append chunks
+	for offset, dataLen := 0, len(chunks); offset < dataLen; offset += ccore.DefaultChunkSize {
+		chunk := chunks[offset : offset+ccore.DefaultChunkSize]
+		builder.Append(chunk)
+	}
+
+	// append empty chunks
+	if len(emptyChunksPadded) > 0 && emptyChunksPadded[0] > 0 {
+		for i := uint64(0); i < emptyChunksPadded[0]; i++ {
+			builder.AppendHash(ccore.EmptyChunkHash)
+		}
+	}
+
+	tree := builder.Build()
+	return tree
 }

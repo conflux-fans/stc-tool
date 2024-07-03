@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/0glabs/0g-storage-client/common/blockchain"
 	"github.com/0glabs/0g-storage-client/contract"
@@ -13,9 +14,11 @@ import (
 	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/contracts"
 	"github.com/conflux-fans/storage-cli/logger"
+	"github.com/conflux-fans/storage-cli/zkclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
+	"github.com/openweb3/web3go"
 	"github.com/openweb3/web3go/signers"
 )
 
@@ -24,6 +27,7 @@ var (
 	nodeClients         []*node.Client
 	kvClientForIterator *kv.Client
 	kvClientsForPut     map[common.Address]*kv.Client
+	zkClient            *zkclient.Client
 	accounts            []common.Address
 	adminKvClientForPut *kv.Client
 	defaultFlow         *contract.FlowContract
@@ -42,6 +46,12 @@ func Init() {
 	cfg := config.Get()
 	// logger.Get().WithField("config", cfg).Info("Get config")
 	nodeClients = node.MustNewClients(cfg.StorageNodes)
+	zkClient = zkclient.MustNewClientWithOption(cfg.ZkNode, web3go.ClientOption{
+		Option: providers.Option{
+			Logger:         os.Stdout,
+			RequestTimeout: time.Minute,
+		},
+	})
 
 	providerOpt := providers.Option{}
 	if cfg.Log == config.DEBUG {

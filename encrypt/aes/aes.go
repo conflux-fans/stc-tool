@@ -3,8 +3,9 @@ package aes
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"fmt"
 	"io"
+
+	"github.com/conflux-fans/storage-cli/logger"
 )
 
 type AesEncryptor struct {
@@ -70,7 +71,7 @@ func (a *AesEncryptor) Decrypt(input io.Reader, output io.Writer, key []byte) er
 			return err
 		}
 
-		fmt.Println("read", n, "end", end)
+		logger.Get().WithField("size", n).WithField("end", end).Info("read data")
 
 		chunk := buf[:n]
 		cipher.NewCBCDecrypter(block, iv).CryptBlocks(chunk, chunk)
@@ -84,7 +85,8 @@ func (a *AesEncryptor) Decrypt(input io.Reader, output io.Writer, key []byte) er
 			return err
 		}
 
-		fmt.Println("write", n)
+		// fmt.Println("write", n)
+		logger.Get().WithField("size", n).Info("write to output")
 	}
 	return nil
 }

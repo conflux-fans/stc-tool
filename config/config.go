@@ -38,6 +38,7 @@ type Config struct {
 	} `yaml:"blockChain"`
 	StorageNodes []string `yaml:"storageNodes"`
 	KvNode       string   `yaml:"kvNode"`
+	ZkNode       string   `yaml:"zkNode"`
 	PrivateKeys  []string `yaml:"privateKeys"`
 	Log          string   `yaml:"log"`
 }

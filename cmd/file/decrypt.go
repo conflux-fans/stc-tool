@@ -21,13 +21,17 @@ var decryptCmd = &cobra.Command{
 			return
 		}
 
+		if outputDirPath == "" {
+			outputDirPath = "./"
+		}
+
 		outputFile, err := encrypt.DecryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
 		if err != nil {
 			logger.Failf("Failed to encrypt file %v", err)
 			return
 		}
 
-		logger.Successf("Decrypted file path %s\n", outputFile)
+		logger.SuccessWithResult(outputFile, "Decrypted file to below path")
 	},
 }
 
