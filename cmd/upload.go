@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	tag  string
-	name string
+	name          string
+	fileOfContent string
 )
 
 // uploadCmd represents the upload command
@@ -23,5 +23,4 @@ var uploadCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(uploadCmd)
-	// uploadCmd.Flags().StringVar(&tag, "tag", "", "file tag, for appending content to file")
 }

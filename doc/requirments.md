@@ -126,6 +126,13 @@ go run . append --name data1 --data " world" --account 0xd68D7A9639FaaDed2a60025
 •支持异常数据的链上验真
 
 •支持为可信数据查询和通用的计算结果提供零知识证明
+```sh
+go run . zk proof -v '{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}' -t 20240101
+
+go run . download file --root 0x77e190a4fc3b9fc18892f4578e9ec9c302aa9901bf8e8572804bc8cdd1acfb97 
+
+go run . file decrypt --source ./0x77e190a4fc3b9fc18892f4578e9ec9c302aa9901bf8e8572804bc8cdd1acfb97.zg --cipher aes --password 1234567812345678
+```
 
 
 

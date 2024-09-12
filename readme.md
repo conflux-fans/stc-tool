@@ -4,7 +4,7 @@
 
 ## 部署合约并设置到所有环境中
 
-``` 
+```sh
 git clone https://github.com/wangdayong228/0g-storage-contracts.git
 cd zerog-storage-contracts
 git checkout add-template
@@ -18,7 +18,7 @@ renew 命令做了以下工作
 ### 2. 配置 zg-node
 
 配置文件
-```
+```conf
 log_config_file = "log_config"
 network_libp2p_port = 11000
 network_discovery_port = 11000
@@ -38,7 +38,7 @@ log_sync_start_block_number = 164900000
 ### 3. 配置 zg-kv
 
 配置文件
-```
+```conf
 stream_ids = ["000000000000000000000000000000000000000000000000000000000000f2bd", "000000000000000000000000000000000000000000000000000000000000f009", "0000000000000000000000000000000000000000000000000000000000016879", "0000000000000000000000000000000000000000000000000000000000002e3d"]
 
 
@@ -65,7 +65,7 @@ log_sync_start_block_number = 164900000
 
 ### 4. 配置本工具 storage-tool
 
-```
+```yaml
 
 blockChain:
   url: "https://etest-rpc.nftrainbow.cn/JwtQFtZXar"
@@ -91,7 +91,7 @@ log : info # info,debug
 
 # 工具命令
 
-```
+```sh
 Storage cli for upload, append, verify, batchupload, owner manager and template manager
 
 Usage:

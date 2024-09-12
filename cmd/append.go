@@ -21,8 +21,8 @@ var appendCmd = &cobra.Command{
 			return
 		}
 
-		if data != "" {
-			if err := core.AppendData(common.HexToAddress(account), name, data); err != nil {
+		if content != "" {
+			if err := core.AppendData(common.HexToAddress(account), name, content); err != nil {
 				logger.Fail(err.Error())
 			}
 			return
@@ -38,14 +38,14 @@ var appendCmd = &cobra.Command{
 }
 
 var (
-	data    string
+	content string
 	account string
 )
 
 func init() {
 	rootCmd.AddCommand(appendCmd)
 	appendCmd.Flags().StringVar(&filePath, "file", "", "file path of content to upload")
-	appendCmd.Flags().StringVar(&data, "data", "", "append content")
+	appendCmd.Flags().StringVar(&content, "data", "", "append content")
 	appendCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
 	appendCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
 	appendCmd.MarkFlagsOneRequired("data", "file")

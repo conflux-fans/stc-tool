@@ -5,38 +5,40 @@ import (
 	"os"
 
 	"github.com/0glabs/0g-storage-client/core"
+	"github.com/conflux-fans/storage-cli/constants"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
 
-const (
-	CHUNK_SIZE     = 4096
-	VALUE_MAX_SIZE = CHUNK_SIZE * 100
-)
-
 func AppendData(account common.Address, name string, data string) error {
-	return appendData(account, name, data, false)
+	return appendDataOrCreate(account, name, data, false)
 }
 
-// append source file to dest name, force means create new content
-func appendData(account common.Address, name string, data string, force bool) error {
-	if len(data) > VALUE_MAX_SIZE {
+// appendDataOrCreate 向现有内容追加数据或在指定时创建新内容
+//
+// 参数:
+//   - account: 操作账户地址
+//   - name: 内容名称
+//   - data: 要追加的数据
+//   - createIfNotExist: 如果内容不存在是否创建新内容
+func appendDataOrCreate(account common.Address, name string, data string, createIfNotExist bool) error {
+	if len(data) > constants.VALUE_MAX_SIZE {
 		return errors.New("Exceed max size once uploadable")
 	}
 	logger.Get().WithField("name", name).Info("Start append content")
 
 	// split content to chunks
 	var chunks []string
-	for i := 0; i < len(data); i += CHUNK_SIZE {
-		end := lo.Min([]int{(i + 1) * CHUNK_SIZE, len(data)})
-		chunks = append(chunks, data[i*CHUNK_SIZE:end])
+	for i := 0; i < len(data); i += constants.CHUNK_SIZE {
+		end := lo.Min([]int{(i + 1) * constants.CHUNK_SIZE, len(data)})
+		chunks = append(chunks, data[i*constants.CHUNK_SIZE:end])
 	}
 
 	meta, err := GetContentMetadata(name)
 	if err != nil {
-		if !(err == ERR_UNEXIST_CONTENT && force) {
+		if !(err == ERR_UNEXIST_CONTENT && createIfNotExist) {
 			return err
 		}
 	}
@@ -49,7 +51,7 @@ func appendData(account common.Address, name string, data string, force bool) er
 	}
 
 	// error if not writer
-	if !force {
+	if !createIfNotExist {
 		isWriter, err := CheckIsContentWriter(name, account)
 		if err != nil {
 			return err
@@ -99,9 +101,16 @@ func appendData(account common.Address, name string, data string, force bool) er
 }
 
 func AppendFromFile(account common.Address, name string, filePath string) error {
-	return appendFromFile(account, name, filePath, false)
+	return appendFromFileOrCreate(account, name, filePath, false)
 }
-func appendFromFile(account common.Address, name string, filePath string, force bool) error {
+
+// appendFromFileOrCreate 将文件内容追加到指定名称的目标中
+// 参数:
+//   - account: 账户地址
+//   - name: 目标名称
+//   - filePath: 要追加的文件路径
+//   - force: 如果为true,则在目标不存在时创建新的目标并追加内容
+func appendFromFileOrCreate(account common.Address, name string, filePath string, force bool) error {
 	f, err := openFile(filePath)
 	if err != nil {
 		return err
@@ -109,7 +118,7 @@ func appendFromFile(account common.Address, name string, filePath string, force 
 
 	// split by VALUE_MAX_SIZE
 	for {
-		buffer := make([]byte, 1024)
+		buffer := make([]byte, constants.VALUE_MAX_SIZE)
 		n, err := f.Read(buffer)
 		if err != nil {
 			return err
@@ -118,7 +127,7 @@ func appendFromFile(account common.Address, name string, filePath string, force 
 			return nil
 		}
 
-		if err = appendData(account, name, string(buffer[:n]), force); err != nil {
+		if err = appendDataOrCreate(account, name, string(buffer[:n]), force); err != nil {
 			return err
 		}
 	}
@@ -143,8 +152,8 @@ func openFile(name string) (*os.File, error) {
 		return nil, core.ErrFileEmpty
 	}
 
-	if info.Size() > VALUE_MAX_SIZE {
-		return nil, fmt.Errorf("file size exceeds maximum size %d", VALUE_MAX_SIZE)
+	if info.Size() > constants.VALUE_MAX_SIZE {
+		return nil, fmt.Errorf("file size exceeds maximum size %d", constants.VALUE_MAX_SIZE)
 	}
 	return file, nil
 }
@@ -156,34 +165,3 @@ func keyLineCount(name string) string {
 func keyLineIndex(name string, index int) string {
 	return fmt.Sprintf("%s:%d", name, index)
 }
-
-// // Note: useless
-// func AppendFileKeyToDb(filepath string, name string) error {
-// 	// save db
-// 	fileNameKey := db.KeyFileName(name)
-// 	value, err := db.GetDB().Get([]byte(fileNameKey), nil)
-// 	if err != nil {
-// 		return errors.WithMessagef(err, "Failed to query %s", name)
-// 	}
-
-// 	var roots []common.Hash
-// 	if err := json.Unmarshal(value, &roots); err != nil {
-// 		return err
-// 	}
-
-// 	rootHash, err := GetRootHash(filepath)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	j, err := json.Marshal(append(roots, rootHash))
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = db.GetDB().Put([]byte(name), j, nil)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }

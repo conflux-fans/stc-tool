@@ -38,7 +38,7 @@ func UploadDataByKv(account common.Address, name string, data string) error {
 		return err
 	}
 
-	if err := appendData(account, name, data, true); err != nil {
+	if err := appendDataOrCreate(account, name, data, true); err != nil {
 		return err
 	}
 
@@ -51,7 +51,7 @@ func UploadDataFromFile(account common.Address, name string, filePath string) er
 		return err
 	}
 
-	if err := appendFromFile(account, name, filePath, true); err != nil {
+	if err := appendFromFileOrCreate(account, name, filePath, true); err != nil {
 		return err
 	}
 

@@ -53,7 +53,7 @@ func ZkProof(vc string, birthdateThreshold string) (*zkclient.ProveOutput, error
 	// 	return "", err
 	// }
 
-	// gen proof
+	// TODO: gen proof
 	lemma := chunksTree.ProofAt(0).Lemma
 	PathElements := lemma[:len(lemma)-1]
 
