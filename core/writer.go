@@ -24,7 +24,7 @@ func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 		return false, err
 	}
 
-	keys := append(meta.LineKeys, meta.LineSizeKey)
+	keys := append(meta.LineKeys(), meta.LineCountKey)
 	isWriter := true
 
 	var w sync.WaitGroup
@@ -126,7 +126,7 @@ func TransferWriter(name string, from common.Address, to common.Address) error {
 		return err
 	}
 
-	keys := append(meta.LineKeys, meta.LineSizeKey)
+	keys := append(meta.LineKeys(), meta.LineCountKey)
 	batcher := kvClientsForPut[from].Batcher()
 
 	for _, k := range keys {

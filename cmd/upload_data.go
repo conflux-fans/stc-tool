@@ -22,14 +22,14 @@ var uploadContentCmd = &cobra.Command{
 		}
 
 		if content != "" {
-			if err := core.UploadDataByKv(common.HexToAddress(account), name, content); err != nil {
+			if err := core.DefaultUploader().UploadDataFromContent(common.HexToAddress(account), name, content); err != nil {
 				logger.Fail(err.Error())
 				return
 			}
 		}
 
 		if filePath != "" {
-			if err := core.UploadDataByKv(common.HexToAddress(account), name, fileOfContent); err != nil {
+			if err := core.DefaultUploader().UploadDataFromFile(common.HexToAddress(account), name, fileOfContent); err != nil {
 				logger.Fail(err.Error())
 				return
 			}

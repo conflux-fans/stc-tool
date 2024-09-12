@@ -25,7 +25,7 @@ func TestZkProof(t *testing.T) {
 func TestGetChunksTree(t *testing.T) {
 	data := make([]byte, 257)
 	// vc := `{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}`
-	tree, err := getChunksTree(data)
+	tree, err := DefaultUploader().getChunksTree(data)
 	assert.NoError(t, err)
 
 	fmt.Printf("root %v\n", tree.Root())
@@ -44,7 +44,7 @@ func TestUploadData(t *testing.T) {
 	assert.NoError(t, err)
 
 	data := _vc.Hash()
-	segTree, trunksTree, err := UploadData(data[:])
+	segTree, trunksTree, err := DefaultUploader().UploadData(data[:])
 	assert.NoError(t, err)
 
 	fmt.Printf("seg tree root: %v\n", segTree.Root())

@@ -94,7 +94,7 @@ func genKvClientsForPut() {
 
 func getKvClientBatcher(account common.Address) (*kv.Batcher, error) {
 	if kvClientsForPut[account] == nil {
-		return nil, errors.New("No kv client for account")
+		return nil, errors.New("no kv client for account")
 	}
 	return kvClientsForPut[account].Batcher(), nil
 }

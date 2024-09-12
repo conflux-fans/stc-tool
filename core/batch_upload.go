@@ -151,48 +151,6 @@ func BatchUploadByKv(count int) error {
 	return nil
 }
 
-// func panicIfNotStreamWriter(account common.Address) {
-// 	isWriter, err := kvClientForIterator.IsWriterOfStream(account, STREAM_FILE)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	if !isWriter {
-// 		panic(fmt.Sprintf("account %v is not writer", account))
-// 	}
-// }
-
-// func mustCheckIsContentWriter(account common.Address, name string) bool {
-// 	meta, err := GetContentMetadata(name)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, []byte(meta.LineSizeKey))
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	if !isWriter {
-// 		panic(fmt.Sprintf("%v is not writer of key %s", account, meta.LineSizeKey))
-// 	}
-
-// 	var w sync.WaitGroup
-// 	for _, lk := range meta.LineKeys {
-// 		go func(_lk string) {
-// 			w.Add(1)
-// 			defer w.Done()
-
-// 			isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, []byte(lk))
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 			if !isWriter {
-// 				panic(fmt.Sprintf("%v is not writer of key %s", account, _lk))
-// 			}
-// 		}(lk)
-// 	}
-// 	w.Wait()
-// 	return true
-// }
-
 // TODO: count replace by source path?
 func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 

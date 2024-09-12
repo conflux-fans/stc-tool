@@ -11,6 +11,7 @@ import (
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type UploadOption struct {
@@ -29,29 +30,24 @@ func NewUploadOption(method string, password string) (*UploadOption, error) {
 	}, nil
 }
 
+var uploader Uploader
+
+type Uploader struct{}
+
+func DefaultUploader() *Uploader {
+	return &uploader
+}
+
 // Upload data
-func UploadDataByKv(account common.Address, name string, data string) error {
+func (u *Uploader) UploadDataFromContent(account common.Address, name string, data string) error {
 	logger.Get().WithField("name", name).Info("Ready to upload data")
 
 	// revert if exists
-	if err := checkDataNameExists(name); err != nil {
+	if err := u.checkDataNameExists(name); err != nil {
 		return err
 	}
 
-	if err := appendDataOrCreate(account, name, data, true); err != nil {
-		return err
-	}
-
-	logger.Get().WithField("name", name).Info("Upload data completed")
-	return nil
-}
-
-func UploadDataFromFile(account common.Address, name string, filePath string) error {
-	if err := checkDataNameExists(name); err != nil {
-		return err
-	}
-
-	if err := appendFromFileOrCreate(account, name, filePath, true); err != nil {
+	if err := DefaultAppender().appendDataOrCreate(account, name, data, true); err != nil {
 		return err
 	}
 
@@ -59,7 +55,20 @@ func UploadDataFromFile(account common.Address, name string, filePath string) er
 	return nil
 }
 
-func checkDataNameExists(name string) error {
+func (u *Uploader) UploadDataFromFile(account common.Address, name string, filePath string) error {
+	if err := u.checkDataNameExists(name); err != nil {
+		return err
+	}
+
+	if err := DefaultAppender().appendDataFromFileOrCreate(account, name, filePath, true); err != nil {
+		return err
+	}
+
+	logger.Get().WithField("name", name).Info("Upload data completed")
+	return nil
+}
+
+func (u *Uploader) checkDataNameExists(name string) error {
 	// revert if exists
 	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineCount(name)))
 	if err != nil {
@@ -71,11 +80,11 @@ func checkDataNameExists(name string) error {
 	return nil
 }
 
-func UploadFile(filepath string, opt *UploadOption) error {
+func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree, error) {
 	if opt.EncryptOption != nil {
 		outPath, err := encryptutils.EncryptFile(filepath, opt.EncryptOption.Method, opt.EncryptOption.Password)
 		if err != nil {
-			return errors.WithMessage(err, "Failed to encrypt file")
+			return nil, errors.WithMessage(err, "Failed to encrypt file")
 		}
 		filepath = outPath
 		defer func() {
@@ -87,18 +96,25 @@ func UploadFile(filepath string, opt *UploadOption) error {
 
 	f, err := ccore.Open(filepath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = uploader.Upload(f, transfer.UploadOption{
-		// Tags: []byte(opt.Tag),
-	})
+	// Calculate file merkle root.
+	tree, err := ccore.MerkleTree(f)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to create data merkle tree")
+	}
+	logrus.WithField("root", tree.Root()).Info("Data merkle root calculated")
 
-	return err
+	if err = uploader.Upload(f); err != nil {
+		return nil, err
+	}
+
+	return tree, nil
 }
 
 // upload data and return segments merkle tree and chunks merle tree
-func UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
+func (u *Uploader) UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
 	uploader := transfer.NewUploader(defaultFlow, nodeClients)
 	dataInMemory, err := ccore.NewDataInMemory(data)
 	if err != nil {
@@ -115,7 +131,7 @@ func UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
 		return nil, nil, err
 	}
 
-	chunksTree, err := getChunksTree(data)
+	chunksTree, err := u.getChunksTree(data)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -123,7 +139,7 @@ func UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
 	return segmentsTree, chunksTree, nil
 }
 
-func getChunksTree(data []byte) (*merkle.Tree, error) {
+func (u *Uploader) getChunksTree(data []byte) (*merkle.Tree, error) {
 	dataInMemory, err := ccore.NewDataInMemory(data)
 	if err != nil {
 		return nil, err
@@ -134,10 +150,10 @@ func getChunksTree(data []byte) (*merkle.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buildChunksTree(buf), nil
+	return u.buildChunksTree(buf), nil
 }
 
-func buildChunksTree(chunks []byte, emptyChunksPadded ...uint64) *merkle.Tree {
+func (u *Uploader) buildChunksTree(chunks []byte, emptyChunksPadded ...uint64) *merkle.Tree {
 	var builder merkle.TreeBuilder
 
 	// append chunks

@@ -22,14 +22,14 @@ var appendCmd = &cobra.Command{
 		}
 
 		if content != "" {
-			if err := core.AppendData(common.HexToAddress(account), name, content); err != nil {
+			if err := core.DefaultAppender().AppendDataFromContent(common.HexToAddress(account), name, content); err != nil {
 				logger.Fail(err.Error())
 			}
 			return
 		}
 
 		if filePath != "" {
-			if err := core.AppendFromFile(common.HexToAddress(account), name, filePath); err != nil {
+			if err := core.DefaultAppender().AppendDataFromFile(common.HexToAddress(account), name, filePath); err != nil {
 				logger.Fail(err.Error())
 			}
 			return

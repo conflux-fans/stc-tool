@@ -3,12 +3,10 @@ package core
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/0glabs/0g-storage-client/transfer"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 )
 
 var (
@@ -42,7 +40,7 @@ func DownloadDataByKv(name string) error {
 	}
 	defer f.Close()
 
-	for _, k := range meta.LineKeys {
+	for _, k := range meta.LineKeys() {
 		val, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(k))
 		if err != nil {
 			return err
@@ -55,39 +53,4 @@ func DownloadDataByKv(name string) error {
 	}
 	logger.Get().Info(fmt.Sprintf("Download data %s to file %s.zg completed ", name, name))
 	return nil
-}
-
-type ContentMetadata struct {
-	LineSizeKey string
-	LineKeys    []string
-	LineSize    int
-}
-
-func GetContentMetadata(name string) (*ContentMetadata, error) {
-	// query size
-	lineSizeKey := keyLineCount(name)
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(lineSizeKey))
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to get file line size")
-	}
-
-	if v.Size == 0 {
-		return nil, ERR_UNEXIST_CONTENT
-	}
-
-	lineCountInStr := string(v.Data)
-	lineCount, err := strconv.Atoi(lineCountInStr)
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to convert")
-	}
-
-	lineKeys := lo.Map(make([]int, lineCount), func(v int, index int) string {
-		return keyLineIndex(name, index)
-	})
-
-	return &ContentMetadata{
-		LineSizeKey: lineSizeKey,
-		LineKeys:    lineKeys,
-		LineSize:    lineCount,
-	}, nil
 }

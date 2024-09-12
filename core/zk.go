@@ -22,7 +22,7 @@ func ZkProof(vc string, birthdateThreshold string) (*zkclient.ProveOutput, error
 		return nil, errors.WithMessage(err, "failed to encrypt vc")
 	}
 
-	segTree, _, err := UploadData(zkclient.PadToSector(encryptedVc))
+	segTree, _, err := DefaultUploader().UploadData(zkclient.PadToSector(encryptedVc))
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func ZkProof(vc string, birthdateThreshold string) (*zkclient.ProveOutput, error
 
 	// upload vc hash
 	data := _vc.Hash()
-	_, chunksTree, err := UploadData(zkclient.PadToSector(data[:]))
+	_, chunksTree, err := DefaultUploader().UploadData(zkclient.PadToSector(data[:]))
 	if err != nil {
 		return nil, err
 	}
