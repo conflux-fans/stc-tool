@@ -7,6 +7,7 @@ import (
 	ccore "github.com/0glabs/0g-storage-client/core"
 	"github.com/0glabs/0g-storage-client/core/merkle"
 	"github.com/0glabs/0g-storage-client/transfer"
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
@@ -39,7 +40,7 @@ func DefaultUploader() *Uploader {
 }
 
 // Upload data
-func (u *Uploader) UploadDataFromContent(account common.Address, name string, data string) error {
+func (u *Uploader) UploadByName(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
 	logger.Get().WithField("name", name).Info("Ready to upload data")
 
 	// revert if exists
@@ -47,7 +48,7 @@ func (u *Uploader) UploadDataFromContent(account common.Address, name string, da
 		return err
 	}
 
-	if err := DefaultAppender().appendDataOrCreate(account, name, data, true); err != nil {
+	if err := DefaultAppender().appendExtendOrCreate(account, name, dataType, data, true); err != nil {
 		return err
 	}
 
@@ -55,22 +56,26 @@ func (u *Uploader) UploadDataFromContent(account common.Address, name string, da
 	return nil
 }
 
-func (u *Uploader) UploadDataFromFile(account common.Address, name string, filePath string) error {
-	if err := u.checkDataNameExists(name); err != nil {
-		return err
-	}
+// func (u *Uploader) UploadDataFromFile(account common.Address, name string, filePath string) error {
+// 	if err := u.checkDataNameExists(name); err != nil {
+// 		return err
+// 	}
 
-	if err := DefaultAppender().appendDataFromFileOrCreate(account, name, filePath, true); err != nil {
-		return err
-	}
+// 	if err := DefaultAppender().appendDataFromFileOrCreate(account, name, filePath, true); err != nil {
+// 		return err
+// 	}
 
-	logger.Get().WithField("name", name).Info("Upload data completed")
-	return nil
-}
+// 	logger.Get().WithField("name", name).Info("Upload data completed")
+// 	return nil
+// }
 
 func (u *Uploader) checkDataNameExists(name string) error {
 	// revert if exists
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineCount(name)))
+	m := ContentMetadata{
+		Name: name,
+	}
+
+	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(m.LineTotalKey()))
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get file line size")
 	}
@@ -114,7 +119,7 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 }
 
 // upload data and return segments merkle tree and chunks merle tree
-func (u *Uploader) UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
+func (u *Uploader) UploadString(data []byte) (*merkle.Tree, *merkle.Tree, error) {
 	uploader := transfer.NewUploader(defaultFlow, nodeClients)
 	dataInMemory, err := ccore.NewDataInMemory(data)
 	if err != nil {
@@ -137,6 +142,21 @@ func (u *Uploader) UploadData(data []byte) (*merkle.Tree, *merkle.Tree, error) {
 	}
 
 	return segmentsTree, chunksTree, nil
+}
+
+func (u *Uploader) UploadIteratorData(data ccore.IterableData) (*merkle.Tree, error) {
+	uploader := transfer.NewUploader(defaultFlow, nodeClients)
+	err := uploader.Upload(data)
+	if err != nil {
+		return nil, err
+	}
+
+	segmentsTree, err := ccore.MerkleTree(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return segmentsTree, nil
 }
 
 func (u *Uploader) getChunksTree(data []byte) (*merkle.Tree, error) {

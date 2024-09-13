@@ -24,16 +24,16 @@ func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 		return false, err
 	}
 
-	keys := append(meta.LineKeys(), meta.LineCountKey)
 	isWriter := true
 
+	keys := meta.AllKeys()
 	var w sync.WaitGroup
 	for i, lk := range keys {
 		w.Add(1)
-		go func(_lk string) {
+		go func(_lk []byte) {
 			defer w.Done()
 
-			_isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, []byte(_lk))
+			_isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, _lk)
 			if err != nil {
 				panic(err)
 			}
@@ -41,7 +41,7 @@ func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 				logger.Get().WithField("key", string(_lk)).Info("Account is not writer of key")
 				isWriter = false
 			}
-		}(lk)
+		}([]byte(lk))
 
 		if i%20 == 0 || i == len(keys)-1 {
 			w.Wait()
@@ -126,7 +126,7 @@ func TransferWriter(name string, from common.Address, to common.Address) error {
 		return err
 	}
 
-	keys := append(meta.LineKeys(), meta.LineCountKey)
+	keys := meta.AllKeys()
 	batcher := kvClientsForPut[from].Batcher()
 
 	for _, k := range keys {

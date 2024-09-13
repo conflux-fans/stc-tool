@@ -44,7 +44,7 @@ func TestUploadData(t *testing.T) {
 	assert.NoError(t, err)
 
 	data := _vc.Hash()
-	segTree, trunksTree, err := DefaultUploader().UploadData(data[:])
+	segTree, trunksTree, err := DefaultUploader().UploadString(data[:])
 	assert.NoError(t, err)
 
 	fmt.Printf("seg tree root: %v\n", segTree.Root())

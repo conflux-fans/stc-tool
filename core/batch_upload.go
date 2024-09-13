@@ -9,6 +9,7 @@ import (
 	"github.com/0glabs/0g-storage-client/core"
 	"github.com/0glabs/0g-storage-client/kv"
 	"github.com/0glabs/0g-storage-client/transfer"
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
@@ -61,12 +62,16 @@ func BatchUploadByKv(count int) error {
 	batchers := []*kv.Batcher{}
 
 	// execute, every segment 20000 kv\
-	// kvClientForPutList := lo.Values(kvClientsForPut)
+	m := ContentMetadata{
+		Name:           name,
+		ExtendDataType: enums.EXTEND_DATA_TEXT,
+		LineTotal:      count,
+	}
 	for i := 0; i < count; {
 		account := accounts[i/ONE_BATCH_COUNT]
 		batcher := kvClientsForPut[account].Batcher()
 		if i == 0 {
-			batcher.Set(STREAM_FILE, []byte(keyLineCount(name)), []byte(fmt.Sprintf("%d", count)))
+			batcher.Set(STREAM_FILE, []byte(m.LineTotalKey()), []byte(fmt.Sprintf("%d", m.LineTotal)))
 		}
 
 		// check account is writer, panic if not
@@ -80,7 +85,7 @@ func BatchUploadByKv(count int) error {
 
 		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
 		for j := i; j < end; j++ {
-			k, v := []byte(keyLineIndex(name, j)), []byte(fmt.Sprintf("%d", j))
+			k, v := []byte(m.LineIndexKey(j)), []byte(fmt.Sprintf("%d", j))
 			batcher.Set(STREAM_FILE, k, v)
 			logger.Get().WithField("key", string(k)).WithField("value", string(v)).Debug("set key")
 		}
@@ -126,7 +131,7 @@ func BatchUploadByKv(count int) error {
 	fmt.Print("\x1b[36mINFO\x1b[0m[0000] \x1b[42m[TOOL]\x1b[0m Start verify ...")
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
-		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(keyLineIndex(name, count-1)))
+		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(m.LineIndexKey(count-1)))
 		if err != nil {
 			logger.Get().WithError(err).Info("Failed to check upload state")
 			time.Sleep(time.Millisecond * 100)

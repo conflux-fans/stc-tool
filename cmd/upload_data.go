@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// uploadContentCmd represents the uploadData command
-var uploadContentCmd = &cobra.Command{
+// uploadByNameCmd represents the uploadData command
+var uploadByNameCmd = &cobra.Command{
 	Use:   "content",
 	Short: "Upload content",
 	Long:  `Upload content`,
@@ -22,14 +22,24 @@ var uploadContentCmd = &cobra.Command{
 		}
 
 		if content != "" {
-			if err := core.DefaultUploader().UploadDataFromContent(common.HexToAddress(account), name, content); err != nil {
+			dataType, data, err := core.DefaultExtendDataConverter().ByContent([]byte(content))
+			if err != nil {
+				logger.Fail(err.Error())
+				return
+			}
+			if err := core.DefaultUploader().UploadByName(common.HexToAddress(account), name, dataType, data); err != nil {
 				logger.Fail(err.Error())
 				return
 			}
 		}
 
-		if filePath != "" {
-			if err := core.DefaultUploader().UploadDataFromFile(common.HexToAddress(account), name, fileOfContent); err != nil {
+		if fileOfContent != "" {
+			dataType, data, err := core.DefaultExtendDataConverter().ByFile(fileOfContent)
+			if err != nil {
+				logger.Fail(err.Error())
+				return
+			}
+			if err := core.DefaultUploader().UploadByName(common.HexToAddress(account), name, dataType, data); err != nil {
 				logger.Fail(err.Error())
 				return
 			}
@@ -42,10 +52,10 @@ var uploadContentCmd = &cobra.Command{
 }
 
 func init() {
-	uploadCmd.AddCommand(uploadContentCmd)
-	uploadContentCmd.Flags().StringVar(&fileOfContent, "file", "", "file path of content to upload")
-	uploadContentCmd.Flags().StringVar(&content, "content", "", "content be uploaded")
-	uploadContentCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
-	uploadContentCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
-	uploadContentCmd.MarkFlagsOneRequired("content", "file")
+	uploadCmd.AddCommand(uploadByNameCmd)
+	uploadByNameCmd.Flags().StringVar(&fileOfContent, "file", "", "file path of content to upload")
+	uploadByNameCmd.Flags().StringVar(&content, "content", "", "content be uploaded")
+	uploadByNameCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
+	uploadByNameCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
+	uploadByNameCmd.MarkFlagsOneRequired("content", "file")
 }

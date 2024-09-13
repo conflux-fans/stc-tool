@@ -8,6 +8,12 @@ import (
 type ExtendDataConverter struct {
 }
 
+var extendDataConverter ExtendDataConverter
+
+func DefaultExtendDataConverter() *ExtendDataConverter {
+	return &extendDataConverter
+}
+
 func (p *ExtendDataConverter) ByContent(data []byte) (enums.ExtendDataType, ccore.IterableData, error) {
 	_data, err := ccore.NewDataInMemory(data)
 	if err != nil {

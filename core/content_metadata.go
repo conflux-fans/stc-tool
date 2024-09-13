@@ -10,47 +10,76 @@ import (
 )
 
 type ContentMetadata struct {
-	LineCountKey string
-	LineCount    int
-	ExtendData   enums.ExtendDataType
-	OwnerTokenID uint64
+	Name           string
+	LineTotal      int
+	ExtendDataType enums.ExtendDataType
+	OwnerTokenID   uint64
 }
 
 func GetContentMetadata(name string) (*ContentMetadata, error) {
+
+	m := &ContentMetadata{
+		Name: name,
+	}
 	// query size
-	lineSizeKey := keyLineCount(name)
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(lineSizeKey))
+	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(m.LineTotalKey()))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to get file line size")
 	}
-
 	if v.Size == 0 {
 		return nil, ERR_UNEXIST_CONTENT
 	}
 
-	lineCountInStr := string(v.Data)
-	lineCount, err := strconv.Atoi(lineCountInStr)
+	m.LineTotal, err = strconv.Atoi(string(v.Data))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to convert")
 	}
 
-	return &ContentMetadata{
-		LineCountKey: lineSizeKey,
-		LineCount:    lineCount,
-	}, nil
+	v, err = kvClientForIterator.GetValue(STREAM_FILE, []byte(m.ExtendDataTypeKey()))
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get file extend data type")
+	}
+	m.ExtendDataType, err = enums.ParseExtendDataType(string(v.Data))
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to parse extend data type")
+	}
+
+	v, err = kvClientForIterator.GetValue(STREAM_FILE, []byte(m.ExtendDataOwnerTokenIDKey()))
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get file extend data owner token id")
+	}
+	m.OwnerTokenID, err = strconv.ParseUint(string(v.Data), 10, 64)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to convert")
+	}
+
+	return m, nil
 }
 
 func (m *ContentMetadata) LineKeys() []string {
-	lineKeys := lo.Map(make([]int, m.LineCount), func(v int, index int) string {
-		return keyLineIndex(m.LineCountKey, index)
+	lineKeys := lo.Map(make([]int, m.LineTotal), func(v int, index int) string {
+		return m.LineIndexKey(index)
 	})
 	return lineKeys
 }
 
-func keyLineCount(name string) string {
-	return fmt.Sprintf("%s:line", name)
+func (m *ContentMetadata) LineTotalKey() string {
+	return fmt.Sprintf("%s:line", m.Name)
 }
 
-func keyLineIndex(name string, index int) string {
-	return fmt.Sprintf("%s:%d", name, index)
+func (m *ContentMetadata) LineIndexKey(index int) string {
+	return fmt.Sprintf("%s:%d", m.Name, index)
+}
+
+func (m *ContentMetadata) ExtendDataTypeKey() string {
+	return fmt.Sprintf("%s:type", m.Name)
+}
+
+func (m *ContentMetadata) ExtendDataOwnerTokenIDKey() string {
+	return fmt.Sprintf("%s:owner_token_id", m.Name)
+}
+
+func (m *ContentMetadata) AllKeys() []string {
+	keys := append(m.LineKeys(), m.LineTotalKey(), m.ExtendDataTypeKey(), m.ExtendDataOwnerTokenIDKey())
+	return keys
 }

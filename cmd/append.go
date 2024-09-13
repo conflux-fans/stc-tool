@@ -4,7 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
@@ -22,16 +21,16 @@ var appendCmd = &cobra.Command{
 		}
 
 		if content != "" {
-			if err := core.DefaultAppender().AppendDataFromContent(common.HexToAddress(account), name, content); err != nil {
-				logger.Fail(err.Error())
-			}
+			// if err := core.DefaultAppender().AppendDataFromContent(common.HexToAddress(account), name, content); err != nil {
+			// 	logger.Fail(err.Error())
+			// }
 			return
 		}
 
 		if filePath != "" {
-			if err := core.DefaultAppender().AppendDataFromFile(common.HexToAddress(account), name, filePath); err != nil {
-				logger.Fail(err.Error())
-			}
+			// if err := core.DefaultAppender().AppendDataFromFile(common.HexToAddress(account), name, filePath); err != nil {
+			// 	logger.Fail(err.Error())
+			// }
 			return
 		}
 	},
