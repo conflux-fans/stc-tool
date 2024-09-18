@@ -30,6 +30,7 @@ var (
 func init() {
 	downloadCmd.AddCommand(downloadFileCmd)
 	downloadFileCmd.Flags().StringVarP(&root, "root", "r", "", "file merkle root")
+	downloadFileCmd.MarkFlagRequired("root")
 
 	// Here you will define your flags and configuration settings.
 

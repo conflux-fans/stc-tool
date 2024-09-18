@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/conflux-fans/storage-cli/constants/enums"
+	"github.com/conflux-fans/storage-cli/pkg/utils/commonutils"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
@@ -82,4 +83,8 @@ func (m *ContentMetadata) ExtendDataOwnerTokenIDKey() string {
 func (m *ContentMetadata) AllKeys() []string {
 	keys := append(m.LineKeys(), m.LineTotalKey(), m.ExtendDataTypeKey(), m.ExtendDataOwnerTokenIDKey())
 	return keys
+}
+
+func (m *ContentMetadata) ToMap() map[string]string {
+	return commonutils.StructToStringMap(m)
 }

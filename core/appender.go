@@ -56,9 +56,16 @@ func (a *Appender) appendExtendOrCreate(account common.Address, name string, dat
 
 	logger.Get().WithField("name", name).Info("Start append content")
 
-	meta, err := a.GenMeta(account, name, createIfNotExist)
+	meta, err := a.GetMeta(account, name)
 	if err != nil {
-		return err
+		if errors.Cause(err) == ERR_UNEXIST_CONTENT && createIfNotExist {
+			meta = &ContentMetadata{
+				Name:           name,
+				ExtendDataType: dataType,
+			}
+		} else {
+			return err
+		}
 	}
 
 	switch dataType {
@@ -70,33 +77,32 @@ func (a *Appender) appendExtendOrCreate(account common.Address, name string, dat
 	return nil
 }
 
-func (a *Appender) GenMeta(account common.Address, name string, createIfNotExist bool) (*ContentMetadata, error) {
+func (a *Appender) GetMeta(account common.Address, name string) (*ContentMetadata, error) {
 	meta, err := GetContentMetadata(name)
 	if err != nil {
-		if err == ERR_UNEXIST_CONTENT && createIfNotExist {
-			meta = &ContentMetadata{
-				Name: name,
-			}
-		} else {
-			return nil, err
-		}
-	} else {
-		if !createIfNotExist {
-			isWriter, err := CheckIsContentWriter(name, account)
-			if err != nil {
-				return nil, err
-			}
-			if !isWriter {
-				return nil, fmt.Errorf("account %v is not writer of content", account)
-			}
-		}
-		// 如果是 pointer 类型，报错
-		if meta.ExtendDataType == enums.EXTEND_DATA_POINTER {
-			return nil, errors.New("pointer type content not support append")
-		}
+		return nil, errors.WithMessage(err, "获取内容元数据失败")
+	}
+
+	if err := a.checkWritePermission(name, account); err != nil {
+		return nil, err
+	}
+
+	if meta.ExtendDataType == enums.EXTEND_DATA_POINTER {
+		return nil, errors.New("指针类型内容不支持追加操作")
 	}
 
 	return meta, nil
+}
+
+func (a *Appender) checkWritePermission(name string, account common.Address) error {
+	isWriter, err := CheckIsContentWriter(name, account)
+	if err != nil {
+		return fmt.Errorf("检查写入权限时出错: %w", err)
+	}
+	if !isWriter {
+		return fmt.Errorf("账户 %v 不是内容的写入者", account)
+	}
+	return nil
 }
 
 func (a *Appender) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
@@ -126,6 +132,8 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 
 	iterator := data.Iterate(0, int64(constants.CHUNK_SIZE), false)
 
+	entries := make(map[string]string)
+
 	i := 0
 	for {
 		exist, err := iterator.Next()
@@ -137,6 +145,7 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 		}
 		chunk := iterator.Current()
 		key := []byte(meta.LineIndexKey(meta.LineTotal + i))
+		entries[string(key)] = string(chunk)
 		batcher.Set(STREAM_FILE, key, chunk)
 		logger.Get().WithField("key", string(key)).Info("Set line kv")
 		i++
@@ -144,10 +153,15 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 	logger.Get().WithField("name", name).Info("Set content values")
 
 	lineTotalVal := []byte(fmt.Sprintf("%d", meta.LineTotal+i))
+	entries[string(meta.LineTotalKey())] = string(lineTotalVal)
 	batcher.Set(STREAM_FILE, []byte(meta.LineTotalKey()), lineTotalVal)
+
+	entries[string(meta.ExtendDataTypeKey())] = string(meta.ExtendDataType.String())
 	batcher.Set(STREAM_FILE, []byte(meta.ExtendDataTypeKey()), []byte(meta.ExtendDataType.String()))
+
+	entries[string(meta.ExtendDataOwnerTokenIDKey())] = fmt.Sprintf("%d", meta.OwnerTokenID)
 	batcher.Set(STREAM_FILE, []byte(meta.ExtendDataOwnerTokenIDKey()), []byte(fmt.Sprintf("%d", meta.OwnerTokenID)))
-	logger.Get().Info("Set line metadata kvs")
+	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
 
 	err = batcher.Exec()
 	if err != nil {
@@ -159,7 +173,7 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 	return nil
 }
 
-func (a *Appender) uploadLines(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
+func (a *Appender) uploadStringLines(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
 
 	batcher, err := getKvClientBatcher(account)
 	if err != nil {

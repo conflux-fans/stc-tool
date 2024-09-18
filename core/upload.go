@@ -40,11 +40,11 @@ func DefaultUploader() *Uploader {
 }
 
 // Upload data
-func (u *Uploader) UploadByName(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
-	logger.Get().WithField("name", name).Info("Ready to upload data")
+func (u *Uploader) UploadExtend(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
+	logger.Get().WithField("name", name).Info("Ready to upload content")
 
 	// revert if exists
-	if err := u.checkDataNameExists(name); err != nil {
+	if err := u.checkExtendNameExists(name); err != nil {
 		return err
 	}
 
@@ -69,7 +69,7 @@ func (u *Uploader) UploadByName(account common.Address, name string, dataType en
 // 	return nil
 // }
 
-func (u *Uploader) checkDataNameExists(name string) error {
+func (u *Uploader) checkExtendNameExists(name string) error {
 	// revert if exists
 	m := ContentMetadata{
 		Name: name,
