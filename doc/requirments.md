@@ -1,5 +1,6 @@
 # FIXME:
-transfer.Uploader 上传现在支持一个 zgnode
+- transfer.Uploader 上传现在支持一个 zgnode
+- dataInMemory会自动 padding，即使设置了 false，导致上传/下载的内容都是 padding 的
 
 •10000条/秒
 
