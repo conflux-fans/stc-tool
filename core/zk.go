@@ -69,8 +69,9 @@ func ZkProof(vc string, birthdateThreshold string) (*zkclient.ProveOutput, error
 		return nil, err
 	}
 
-	// get flow root
-	flowRoot, err := defaultFlow.Root(nil)
+	//TODO: get flow root
+	// flowRoot, err := defaultFlow.Root(nil)
+	flowRoot := common.Hash{}
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -75,7 +76,7 @@ func (u *Uploader) checkExtendNameExists(name string) error {
 		Name: name,
 	}
 
-	v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(m.LineTotalKey()))
+	v, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.LineTotalKey()))
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get file line size")
 	}
@@ -97,7 +98,10 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 		}()
 	}
 
-	uploader := transfer.NewUploader(defaultFlow, nodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	if err != nil {
+		return nil, err
+	}
 
 	f, err := ccore.Open(filepath)
 	if err != nil {
@@ -111,7 +115,7 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 	}
 	logrus.WithField("root", tree.Root()).Info("Data merkle root calculated")
 
-	if err = uploader.Upload(f); err != nil {
+	if _, err = uploader.Upload(context.Background(), f); err != nil {
 		return nil, err
 	}
 
@@ -120,13 +124,16 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 
 // upload data and return segments merkle tree and chunks merle tree
 func (u *Uploader) UploadString(data []byte) (*merkle.Tree, *merkle.Tree, error) {
-	uploader := transfer.NewUploader(defaultFlow, nodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	if err != nil {
+		return nil, nil, err
+	}
 	dataInMemory, err := ccore.NewDataInMemory(data)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = uploader.Upload(dataInMemory)
+	_, err = uploader.Upload(context.Background(), dataInMemory)
 	if err != nil && err.Error() != "Data already exists on ZeroGStorage network" {
 		return nil, nil, err
 	}
@@ -145,8 +152,11 @@ func (u *Uploader) UploadString(data []byte) (*merkle.Tree, *merkle.Tree, error)
 }
 
 func (u *Uploader) UploadIteratorData(data ccore.IterableData) (*merkle.Tree, error) {
-	uploader := transfer.NewUploader(defaultFlow, nodeClients)
-	err := uploader.Upload(data)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	if err != nil {
+		return nil, err
+	}
+	_, err = uploader.Upload(context.Background(), data)
 	if err != nil {
 		return nil, err
 	}

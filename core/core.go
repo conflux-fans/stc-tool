@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"sync"
 	"time"
@@ -24,12 +25,14 @@ import (
 
 var (
 	// w3client              *web3go.Client
-	nodeClients         []*node.Client
+	zgNodeClients       []*node.ZgsClient
 	kvClientForIterator *kv.Client
-	kvClientsForPut     map[common.Address]*kv.Client
+	kvBatcherForPut     map[common.Address]*kv.Batcher
+	w3Clients           map[common.Address]*web3go.Client
 	zkClient            *zkclient.Client
 	accounts            []common.Address
-	adminKvClientForPut *kv.Client
+	adminBatcher        *kv.Batcher
+	adminW3Client       *web3go.Client
 	defaultFlow         *contract.FlowContract
 	templates           *contracts.Templates
 	defaultAccount      common.Address
@@ -45,7 +48,7 @@ var (
 func Init() {
 	cfg := config.Get()
 	// logger.Get().WithField("config", cfg).Info("Get config")
-	nodeClients = node.MustNewClients(cfg.StorageNodes)
+	zgNodeClients = node.MustNewZgsClients(cfg.StorageNodes)
 	zkClient = zkclient.MustNewClientWithOption(cfg.ZkNode, web3go.ClientOption{
 		Option: providers.Option{
 			Logger:         os.Stdout,
@@ -57,7 +60,7 @@ func Init() {
 	if cfg.Log == config.DEBUG {
 		providerOpt.Logger = os.Stdout
 	}
-	kvClientForIterator = kv.NewClient(node.MustNewClient(cfg.KvNode, providerOpt), defaultFlow)
+	kvClientForIterator = kv.NewClient(node.MustNewKvClient(cfg.KvNode, providerOpt))
 
 	genKvClientsForPut()
 	initTempalteContract()
@@ -65,7 +68,7 @@ func Init() {
 }
 
 func genKvClientsForPut() {
-	kvClientsForPut = make(map[common.Address]*kv.Client)
+	kvBatcherForPut = make(map[common.Address]*kv.Batcher)
 	cfg := config.Get()
 
 	for i, pk := range cfg.PrivateKeys {
@@ -80,12 +83,14 @@ func genKvClientsForPut() {
 			logger.Get().WithError(err).Fatal("Failed to create flow contract")
 			os.Exit(1)
 		}
-		kvClient := kv.NewClient(nodeClients[0], flow)
+		// kvClient := kv.NewClient(zgNodeClients[0])
+		kvBatcher := kv.NewBatcher(math.MaxInt64, zgNodeClients, w3client)
 		account := signers.MustNewPrivateKeySignerByString(pk).Address()
 		accounts = append(accounts, account)
-		kvClientsForPut[account] = kvClient
+		kvBatcherForPut[account] = kvBatcher
 		if i == 0 {
-			adminKvClientForPut = kvClient
+			adminBatcher = kvBatcher
+			adminW3Client = w3client
 			defaultFlow = flow
 			defaultAccount = account
 		}
@@ -93,10 +98,10 @@ func genKvClientsForPut() {
 }
 
 func getKvClientBatcher(account common.Address) (*kv.Batcher, error) {
-	if kvClientsForPut[account] == nil {
+	if kvBatcherForPut[account] == nil {
 		return nil, errors.New("no kv client for account")
 	}
-	return kvClientsForPut[account].Batcher(), nil
+	return kvBatcherForPut[account], nil
 }
 
 func initTempalteContract() {

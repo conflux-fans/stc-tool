@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -11,7 +12,7 @@ import (
 )
 
 func CheckIsStreamWriter(account common.Address) (bool, error) {
-	isWriter, err := kvClientForIterator.IsWriterOfStream(account, STREAM_FILE)
+	isWriter, err := kvClientForIterator.IsWriterOfStream(context.Background(), account, STREAM_FILE)
 	if err != nil {
 		return false, err
 	}
@@ -33,7 +34,7 @@ func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 		go func(_lk []byte) {
 			defer w.Done()
 
-			_isWriter, err := kvClientForIterator.IsWriterOfKey(account, STREAM_FILE, _lk)
+			_isWriter, err := kvClientForIterator.IsWriterOfKey(context.Background(), account, STREAM_FILE, _lk)
 			if err != nil {
 				panic(err)
 			}
@@ -68,12 +69,12 @@ func GrantStreamWriter(accounts ...common.Address) error {
 	}
 
 	logger.Get().WithField("accounts", accounts).Info("Grant stream writer to accounts")
-	batcher := adminKvClientForPut.Batcher()
+	batcher := adminBatcher
 	for _, account := range accounts {
 		batcher.GrantWriteRole(STREAM_FILE, account)
 	}
 
-	err := batcher.Exec()
+	_, err := batcher.Exec(context.Background())
 	if err != nil {
 		return err
 	}
@@ -127,12 +128,13 @@ func TransferWriter(name string, from common.Address, to common.Address) error {
 	}
 
 	keys := meta.AllKeys()
-	batcher := kvClientsForPut[from].Batcher()
+	batcher := kvBatcherForPut[from]
 
 	for _, k := range keys {
 		batcher.GrantSpecialWriteRole(STREAM_FILE, []byte(k), to)
 		batcher.RenounceSpecialWriteRole(STREAM_FILE, []byte(k))
 	}
 
-	return batcher.Exec()
+	_, err = batcher.Exec(context.Background())
+	return err
 }

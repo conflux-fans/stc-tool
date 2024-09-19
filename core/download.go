@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -14,8 +15,12 @@ var (
 )
 
 func DownloadFile(root string, savePath string) {
-	downloader := transfer.NewDownloader(nodeClients...)
-	if err := downloader.Download(root, root, false); err != nil {
+	downloader, err := transfer.NewDownloader(zgNodeClients)
+	if err != nil {
+		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to create downloader")
+	}
+
+	if err := downloader.Download(context.Background(), root, root, false); err != nil {
 		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to download file")
 	}
 	// rename file
@@ -40,7 +45,7 @@ func DownloadExtend(name string, showMetadata, outputToConsole bool) error {
 	defer f.Close()
 
 	for _, k := range meta.LineKeys() {
-		val, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(k))
+		val, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(k))
 		if err != nil {
 			return errors.WithMessage(err, "Failed to get line value")
 		}

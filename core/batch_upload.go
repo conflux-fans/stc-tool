@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -53,7 +54,7 @@ type BatchUploadResult struct {
 func BatchUploadByKv(count int) error {
 	GrantAllAccountStreamWriter()
 
-	limit := len(kvClientsForPut) * ONE_BATCH_COUNT
+	limit := len(kvBatcherForPut) * ONE_BATCH_COUNT
 	if count > limit {
 		return fmt.Errorf("exceed limit, the max limit batch upload count is %d", limit)
 	}
@@ -69,7 +70,7 @@ func BatchUploadByKv(count int) error {
 	}
 	for i := 0; i < count; {
 		account := accounts[i/ONE_BATCH_COUNT]
-		batcher := kvClientsForPut[account].Batcher()
+		batcher := kvBatcherForPut[account]
 		if i == 0 {
 			batcher.Set(STREAM_FILE, []byte(m.LineTotalKey()), []byte(fmt.Sprintf("%d", m.LineTotal)))
 		}
@@ -102,7 +103,7 @@ func BatchUploadByKv(count int) error {
 		w.Add(1)
 		go func(_b *kv.Batcher) {
 			defer w.Done()
-			err := _b.Exec()
+			_, err := _b.Exec(context.Background())
 			if err != nil {
 				errs = append(errs, err)
 			}
@@ -131,7 +132,7 @@ func BatchUploadByKv(count int) error {
 	fmt.Print("\x1b[36mINFO\x1b[0m[0000] \x1b[42m[TOOL]\x1b[0m Start verify ...")
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
-		v, err := kvClientForIterator.GetValue(STREAM_FILE, []byte(m.LineIndexKey(count-1)))
+		v, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.LineIndexKey(count-1)))
 		if err != nil {
 			logger.Get().WithError(err).Info("Failed to check upload state")
 			time.Sleep(time.Millisecond * 100)
@@ -159,7 +160,10 @@ func BatchUploadByKv(count int) error {
 // TODO: count replace by source path?
 func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 
-	uploader := transfer.NewUploader(defaultFlow, nodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	if err != nil {
+		return common.Hash{}, errors.WithMessage(err, "Failed to create uploader")
+	}
 
 	var datas []core.IterableData
 	var report BatchUploadReport
@@ -181,7 +185,7 @@ func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 
 	// save text and root to file
 	report.StartTime = time.Now()
-	hash, _, err := uploader.BatchUpload(datas, false)
+	hash, _, err := uploader.BatchUpload(context.Background(), datas, false)
 	if err != nil {
 		return common.Hash{}, errors.WithMessage(err, "Failed to batch upload")
 	}

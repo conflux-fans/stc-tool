@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -163,7 +164,7 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 	batcher.Set(STREAM_FILE, []byte(meta.ExtendDataOwnerTokenIDKey()), []byte(fmt.Sprintf("%d", meta.OwnerTokenID)))
 	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
 
-	err = batcher.Exec()
+	_, err = batcher.Exec(context.Background())
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set values of content")
 	}
@@ -192,7 +193,7 @@ func (a *Appender) uploadStringLines(account common.Address, name string, meta *
 	}
 
 	logger.Get().WithField("name", name).Info("Set content values")
-	err = batcher.Exec()
+	_, err = batcher.Exec(context.Background())
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set values of content")
 	}
@@ -213,7 +214,7 @@ func (a *Appender) uploadStringLines(account common.Address, name string, meta *
 // 返回:
 //   - error: 如果上传过程中出现错误则返回相应的错误信息
 func (a *Appender) uploadLinesAndSetSpecialWriter(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
-	adminBatcher := adminKvClientForPut.Batcher()
+	// adminBatcher := kv.NewBatcher(math.MaxUint64, zgNodeClients) //adminKvClientForPut.Batcher()
 	batcher, err := getKvClientBatcher(account)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get kv client")
@@ -237,13 +238,13 @@ func (a *Appender) uploadLinesAndSetSpecialWriter(account common.Address, name s
 	}
 
 	logger.Get().WithField("name", name).Info("Set content keys to special keys")
-	err = adminBatcher.Exec()
+	_, err = adminBatcher.Exec(context.Background())
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set speicial key by admin batcher")
 	}
 
 	logger.Get().WithField("name", name).Info("Set content values")
-	err = batcher.Exec()
+	_, err = batcher.Exec(context.Background())
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set values of content")
 	}
