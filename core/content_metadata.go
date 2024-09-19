@@ -89,3 +89,7 @@ func (m *ContentMetadata) AllKeys() []string {
 func (m *ContentMetadata) ToMap() map[string]string {
 	return commonutils.StructToStringMap(m)
 }
+
+func (m *ContentMetadata) SaveFile() string {
+	return m.Name + ".zg"
+}

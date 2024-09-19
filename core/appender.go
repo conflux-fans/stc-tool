@@ -71,7 +71,7 @@ func (a *Appender) appendExtendOrCreate(account common.Address, name string, dat
 
 	switch dataType {
 	case enums.EXTEND_DATA_TEXT:
-		return a.uploadExtendAsValue(account, name, meta, data)
+		return a.uploadExtendAsText(account, name, meta, data)
 	case enums.EXTEND_DATA_POINTER:
 		return a.uploadExtendAsPointer(account, name, meta, data)
 	}
@@ -118,15 +118,15 @@ func (a *Appender) uploadExtendAsPointer(account common.Address, name string, me
 		return err
 	}
 	// 将文件hash作为数据上传
-	err = a.uploadExtendAsValue(account, name, meta, hashData)
+	err = a.uploadExtendAsText(account, name, meta, hashData)
 	if err != nil {
 		return errors.WithMessage(err, "上传文件hash失败")
 	}
 	return nil
 }
 
-func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
-	batcher, err := getKvClientBatcher(account)
+func (a *Appender) uploadExtendAsText(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
+	batcher, err := getKvBatcher(account)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get kv client")
 	}
@@ -144,31 +144,24 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 		if !exist {
 			break
 		}
-		chunk := iterator.Current()
-		key := []byte(meta.LineIndexKey(meta.LineTotal + i))
-		entries[string(key)] = string(chunk)
-		batcher.Set(STREAM_FILE, key, chunk)
-		logger.Get().WithField("key", string(key)).Info("Set line kv")
+		entries[meta.LineIndexKey(meta.LineTotal+i)] = string(iterator.Current())
 		i++
 	}
-	logger.Get().WithField("name", name).Info("Set content values")
+	logger.Get().WithField("line num", i).Info("content lines")
 
-	lineTotalVal := []byte(fmt.Sprintf("%d", meta.LineTotal+i))
-	entries[string(meta.LineTotalKey())] = string(lineTotalVal)
-	batcher.Set(STREAM_FILE, []byte(meta.LineTotalKey()), lineTotalVal)
+	entries[meta.LineTotalKey()] = fmt.Sprintf("%d", meta.LineTotal+i)
+	entries[meta.ExtendDataTypeKey()] = meta.ExtendDataType.String()
+	entries[meta.ExtendDataOwnerTokenIDKey()] = fmt.Sprintf("%d", meta.OwnerTokenID)
 
-	entries[string(meta.ExtendDataTypeKey())] = string(meta.ExtendDataType.String())
-	batcher.Set(STREAM_FILE, []byte(meta.ExtendDataTypeKey()), []byte(meta.ExtendDataType.String()))
-
-	entries[string(meta.ExtendDataOwnerTokenIDKey())] = fmt.Sprintf("%d", meta.OwnerTokenID)
-	batcher.Set(STREAM_FILE, []byte(meta.ExtendDataOwnerTokenIDKey()), []byte(fmt.Sprintf("%d", meta.OwnerTokenID)))
+	for k, v := range entries {
+		batcher.Set(STREAM_FILE, []byte(k), []byte(v))
+	}
 	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
 
 	_, err = batcher.Exec(context.Background())
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set values of content")
 	}
-
 	logger.Get().WithField("name", name).WithField("line", i).Info("Append content completed")
 
 	return nil
@@ -176,7 +169,7 @@ func (a *Appender) uploadExtendAsValue(account common.Address, name string, meta
 
 func (a *Appender) uploadStringLines(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
 
-	batcher, err := getKvClientBatcher(account)
+	batcher, err := getKvBatcher(account)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get kv client")
 	}
@@ -215,7 +208,7 @@ func (a *Appender) uploadStringLines(account common.Address, name string, meta *
 //   - error: 如果上传过程中出现错误则返回相应的错误信息
 func (a *Appender) uploadLinesAndSetSpecialWriter(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
 	// adminBatcher := kv.NewBatcher(math.MaxUint64, zgNodeClients) //adminKvClientForPut.Batcher()
-	batcher, err := getKvClientBatcher(account)
+	batcher, err := getKvBatcher(account)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get kv client")
 	}

@@ -41,12 +41,24 @@ func StructToMap(obj interface{}) map[string]interface{} {
 func StructToStringMap(obj interface{}) map[string]string {
 	result := make(map[string]string)
 	v := reflect.ValueOf(obj)
+
+	// 如果传入的是指针，获取其指向的值
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	// 确保我们处理的是结构体
+	if v.Kind() != reflect.Struct {
+		return result
+	}
+
 	t := v.Type()
 
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 		fieldValue := v.Field(i)
 
+		// 只处理可导出的字段
 		if field.PkgPath == "" {
 			switch fieldValue.Kind() {
 			case reflect.Struct:
@@ -63,6 +75,8 @@ func StructToStringMap(obj interface{}) map[string]string {
 				} else {
 					result[field.Name] = "nil"
 				}
+			case reflect.Slice, reflect.Array:
+				result[field.Name] = fmt.Sprintf("%v", fieldValue.Interface())
 			default:
 				result[field.Name] = fmt.Sprintf("%v", fieldValue.Interface())
 			}

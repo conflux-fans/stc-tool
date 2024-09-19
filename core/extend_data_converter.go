@@ -2,6 +2,7 @@ package core
 
 import (
 	ccore "github.com/0glabs/0g-storage-client/core"
+	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/constants/enums"
 )
 
@@ -19,7 +20,7 @@ func (p *ExtendDataConverter) ByContent(data []byte) (enums.ExtendDataType, ccor
 	if err != nil {
 		return enums.ExtendDataType(-1), nil, err
 	}
-	return enums.EXTEND_DATA_TEXT, _data, nil
+	return getExtendType(_data.Size()), _data, nil
 }
 
 func (p *ExtendDataConverter) ByFile(filePath string) (enums.ExtendDataType, ccore.IterableData, error) {
@@ -27,5 +28,12 @@ func (p *ExtendDataConverter) ByFile(filePath string) (enums.ExtendDataType, cco
 	if err != nil {
 		return enums.ExtendDataType(-1), nil, err
 	}
-	return enums.EXTEND_DATA_POINTER, f, nil
+	return getExtendType(f.Size()), f, nil
+}
+
+func getExtendType(size int64) enums.ExtendDataType {
+	if size <= config.Get().ExtendData.TextMaxSize {
+		return enums.EXTEND_DATA_TEXT
+	}
+	return enums.EXTEND_DATA_POINTER
 }

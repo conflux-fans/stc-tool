@@ -1,3 +1,6 @@
+# FIXME:
+transfer.Uploader 上传现在支持一个 zgnode
+
 •10000条/秒
 
 	•KV BATCH，网页 SHOW NUMBER / 命令行 SHOW NUMBER / SEQUENCE NUMBER

@@ -11,7 +11,9 @@
             "mode": "auto",
             "program": "${fileDirname}",
             // "args": ["upload","--file", "/Users/dayong/myspace/mywork/storage-cli/a.txt", "--name", "test"]
-            "args": ["upload", "content" ,"--name", "data1","--content", "hello", "--account", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]
+            // "args": ["upload", "content" ,"--name", "data1","--content", "hello", "--account", "0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE"]
+            "args": ["upload", "content" ,"--name", "data1","--content", "hello", "--account", "0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE"]
+            // "args": ["zk", "proof", "-v", "'{\"name\": \"Alice\", \"age\": 25, \"birth_date\": \"20000101\", \"edu_level\": 4, \"serial_no\": \"1234567890\"}'", "-t", "20240101"]
         }
     ]
 }

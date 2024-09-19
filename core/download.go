@@ -6,21 +6,37 @@ import (
 	"os"
 
 	"github.com/0glabs/0g-storage-client/transfer"
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/logger"
+	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	ERR_UNEXIST_CONTENT = errors.New("Unexists content name")
+	downloader          Downloader
 )
 
-func DownloadFile(root string, savePath string) {
-	downloader, err := transfer.NewDownloader(zgNodeClients)
-	if err != nil {
-		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to create downloader")
-	}
+type Downloader struct {
+	zgDownloader *transfer.Downloader
+}
 
-	if err := downloader.Download(context.Background(), root, root, false); err != nil {
+func InitDefaultDownloader() {
+	_zgDownloader, err := transfer.NewDownloader(zgNodeClients, zgLogOpt)
+	if err != nil {
+		logrus.WithError(err).Fatal("Failed to create zg downloader")
+	}
+	downloader.zgDownloader = _zgDownloader
+}
+
+func DefaultDownloader() *Downloader {
+	return &downloader
+}
+
+func (d *Downloader) DownloadFile(root string, savePath string) {
+	if err := d.zgDownloader.Download(context.Background(), root, root, false); err != nil {
 		logger.Get().WithField("root", root).WithError(err).Fatal("Failed to download file")
 	}
 	// rename file
@@ -29,7 +45,7 @@ func DownloadFile(root string, savePath string) {
 	}
 }
 
-func DownloadExtend(name string, showMetadata, outputToConsole bool) error {
+func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole bool) error {
 	logger.Get().WithField("name", name).Info("Start download content")
 
 	meta, err := GetContentMetadata(name)
@@ -38,12 +54,48 @@ func DownloadExtend(name string, showMetadata, outputToConsole bool) error {
 	}
 	logger.Get().WithField("metadata", meta).Info("Get content metadata")
 
-	f, err := os.OpenFile(name+".zg", os.O_CREATE|os.O_RDWR, 0755)
+	// 如果是 POINTER，读取第一样为 root，然后根据 root获取文件，写到 f
+	// 如果是 TEXT，读取所有行写到 f
+	if meta.ExtendDataType == enums.EXTEND_DATA_POINTER {
+		if err := d.downloadToFileByPointer(meta); err != nil {
+			return errors.WithMessage(err, "Failed to download file")
+		}
+	} else {
+		if err := d.downloadToFileByText(meta); err != nil {
+			return errors.WithMessage(err, "Failed to download file")
+		}
+	}
+
+	// 如果文件长度大于 1k，则提示文本大于 1k，不输出到控制台
+	if outputToConsole {
+		if err := d.displayOnConsole(meta); err != nil {
+			return errors.WithMessage(err, "Failed to display on console")
+		}
+	}
+
+	return nil
+}
+
+func (d *Downloader) downloadToFileByPointer(meta *ContentMetadata) error {
+	// 读取第一行为文件 root
+	root, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(meta.LineKeys()[0]))
+	if err != nil {
+		return errors.WithMessage(err, "无法获取 root 值")
+	}
+	logger.Get().WithField("root", fmt.Sprintf("%x", root.Data[:32])).WithField("data", fmt.Sprintf("%x", root.Data)).Info("Got root")
+
+	d.DownloadFile(common.BytesToHash(root.Data[:32]).Hex(), meta.SaveFile())
+	logger.Get().Info("已下载 POINTER 类型文件")
+	return nil
+}
+
+func (d *Downloader) downloadToFileByText(meta *ContentMetadata) error {
+	f, err := os.OpenFile(meta.SaveFile(), os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to open file")
 	}
 	defer f.Close()
-
+	// TEXT 类型继续执行后续代码
 	for _, k := range meta.LineKeys() {
 		val, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(k))
 		if err != nil {
@@ -55,17 +107,26 @@ func DownloadExtend(name string, showMetadata, outputToConsole bool) error {
 			return errors.WithMessage(err, "Failed to write file")
 		}
 	}
-	logger.Get().Info(fmt.Sprintf("Download data %s to file %s.zg completed ", name, name))
+	logger.Get().Info(fmt.Sprintf("Download data %s to file %s.zg completed ", meta.Name, meta.Name))
+	return nil
+}
 
-	if outputToConsole {
-		content, err := os.ReadFile(name + ".zg")
-		if err != nil {
-			return errors.WithMessage(err, "Failed to read file")
-		}
-		metaMap := meta.ToMap()
-		metaMap["Content"] = string(content)
-		logger.SuccessfWithParams(metaMap, "Download content completed")
+func (d *Downloader) displayOnConsole(meta *ContentMetadata) error {
+	fileInfo, err := os.Stat(meta.SaveFile())
+	if err != nil {
+		return errors.WithMessage(err, "无法获取文件信息")
 	}
 
+	if fileInfo.Size() > 1024 {
+		logger.Get().Warn("文件大小超过1k，不输出到控制台")
+	} else {
+		content, err := os.ReadFile(meta.SaveFile())
+		if err != nil {
+			return errors.WithMessage(err, "读取文件失败")
+		}
+		metaMap := meta.ToMap()
+		metaMap["content"] = string(content)
+		logger.SuccessfWithParams(metaMap, "下载内容完成")
+	}
 	return nil
 }

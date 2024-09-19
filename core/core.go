@@ -6,8 +6,8 @@ import (
 	"math"
 	"os"
 	"sync"
-	"time"
 
+	zg_common "github.com/0glabs/0g-storage-client/common"
 	"github.com/0glabs/0g-storage-client/common/blockchain"
 	"github.com/0glabs/0g-storage-client/contract"
 	"github.com/0glabs/0g-storage-client/kv"
@@ -21,10 +21,15 @@ import (
 	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
 	"github.com/openweb3/web3go"
 	"github.com/openweb3/web3go/signers"
+	"github.com/sirupsen/logrus"
 )
 
 var (
-	// w3client              *web3go.Client
+	providerOpt providers.Option
+	zgLogOpt    zg_common.LogOption
+)
+
+var (
 	zgNodeClients       []*node.ZgsClient
 	kvClientForIterator *kv.Client
 	kvBatcherForPut     map[common.Address]*kv.Batcher
@@ -45,26 +50,31 @@ var (
 	STREAM_FILE = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
 )
 
-func Init() {
+func initProviderOpt() {
 	cfg := config.Get()
-	// logger.Get().WithField("config", cfg).Info("Get config")
-	zgNodeClients = node.MustNewZgsClients(cfg.StorageNodes)
-	zkClient = zkclient.MustNewClientWithOption(cfg.ZkNode, web3go.ClientOption{
-		Option: providers.Option{
-			Logger:         os.Stdout,
-			RequestTimeout: time.Minute,
-		},
-	})
-
-	providerOpt := providers.Option{}
 	if cfg.Log == config.DEBUG {
 		providerOpt.Logger = os.Stdout
+		zgLogOpt.Logger = logrus.New()
 	}
+}
+
+func Init() {
+	initProviderOpt()
+
+	cfg := config.Get()
+	// logger.Get().WithField("config", cfg).Info("Get config")
+	zgNodeClients = node.MustNewZgsClients(cfg.StorageNodes, providerOpt)
+	zkClient = zkclient.MustNewClientWithOption(cfg.ZkNode, web3go.ClientOption{
+		Option: providerOpt,
+	})
+
 	kvClientForIterator = kv.NewClient(node.MustNewKvClient(cfg.KvNode, providerOpt))
 
 	genKvClientsForPut()
 	initTempalteContract()
 	// GrantAllAccountWriter()
+
+	InitDefaultDownloader()
 }
 
 func genKvClientsForPut() {
@@ -72,10 +82,10 @@ func genKvClientsForPut() {
 	cfg := config.Get()
 
 	for i, pk := range cfg.PrivateKeys {
-		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk)
-		if cfg.Log == config.DEBUG {
-			w3client.SetProvider(providers.NewLoggerProvider(w3client.Provider(), os.Stdout))
-		}
+		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk, providerOpt)
+		// if cfg.Log == config.DEBUG {
+		// 	w3client.SetProvider(providers.NewLoggerProvider(w3client.Provider(), os.Stdout))
+		// }
 
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
 		flow, err := contract.NewFlowContract(flowAddr, w3client)
@@ -84,7 +94,7 @@ func genKvClientsForPut() {
 			os.Exit(1)
 		}
 		// kvClient := kv.NewClient(zgNodeClients[0])
-		kvBatcher := kv.NewBatcher(math.MaxInt64, zgNodeClients, w3client)
+		kvBatcher := kv.NewBatcher(math.MaxUint64, zgNodeClients, w3client, zgLogOpt)
 		account := signers.MustNewPrivateKeySignerByString(pk).Address()
 		accounts = append(accounts, account)
 		kvBatcherForPut[account] = kvBatcher
@@ -97,7 +107,7 @@ func genKvClientsForPut() {
 	}
 }
 
-func getKvClientBatcher(account common.Address) (*kv.Batcher, error) {
+func getKvBatcher(account common.Address) (*kv.Batcher, error) {
 	if kvBatcherForPut[account] == nil {
 		return nil, errors.New("no kv client for account")
 	}

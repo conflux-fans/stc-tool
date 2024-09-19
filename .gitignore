@@ -2,3 +2,5 @@ log
 core/run/*
 run/*
 config.yaml
+tmp/*
+*.zg

@@ -41,6 +41,9 @@ type Config struct {
 	ZkNode       string   `yaml:"zkNode"`
 	PrivateKeys  []string `yaml:"privateKeys"`
 	Log          string   `yaml:"log"`
+	ExtendData   struct {
+		TextMaxSize int64 `yaml:"textMaxSize"`
+	} `yaml:"extendData"`
 }
 
 var (

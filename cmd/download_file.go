@@ -18,7 +18,7 @@ var downloadFileCmd = &cobra.Command{
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		savePath := path.Join(".", root+".zg")
-		core.DownloadFile(root, savePath)
+		core.DefaultDownloader().DownloadFile(root, savePath)
 		logger.SuccessWithResult(savePath, "Download file successfully, please find in below path")
 	},
 }
