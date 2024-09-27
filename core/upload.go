@@ -83,7 +83,7 @@ func (a *Uploader) UploadExtendIfNotExist(account common.Address, name string, d
 	if err == nil {
 		return errors.New("content already exists")
 	} else if err != ERR_UNEXIST_CONTENT {
-		return errors.WithMessage(err, "获取内容元数据失败")
+		return errors.WithMessage(err, "Failed to get content metadata")
 	}
 
 	txHash, tokenID, err := DefaultOwnerOperator().Mint(account)
@@ -125,7 +125,7 @@ func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta 
 	for {
 		exist, err := iterator.Next()
 		if err != nil {
-			return errors.WithMessage(err, "迭代数据时出错")
+			return errors.WithMessage(err, "Error iterating data")
 		}
 		if !exist {
 			break
@@ -154,7 +154,7 @@ func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta 
 }
 
 func (a *Uploader) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
-	// 首先将整个文件上传
+	// First, upload the entire file
 	mt, err := DefaultUploader().UploadIteratorData(data)
 	if err != nil {
 		return err
@@ -164,10 +164,10 @@ func (a *Uploader) uploadExtendAsPointer(account common.Address, name string, me
 	if err != nil {
 		return err
 	}
-	// 将文件hash作为数据上传
+	// Upload the file hash as data
 	err = a.uploadExtendAsText(account, name, meta, hashData)
 	if err != nil {
-		return errors.WithMessage(err, "上传文件hash失败")
+		return errors.WithMessage(err, "Failed to upload file hash")
 	}
 	return nil
 }

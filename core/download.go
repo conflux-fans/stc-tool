@@ -77,15 +77,15 @@ func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole b
 }
 
 func (d *Downloader) downloadToFileByPointer(meta *ContentMetadata) error {
-	// 读取第一行为文件 root
+	// Read the first line as file root
 	root, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(meta.LineKeys()[0]))
 	if err != nil {
-		return errors.WithMessage(err, "无法获取 root 值")
+		return errors.WithMessage(err, "Failed to get root value")
 	}
 	logger.Get().WithField("root", fmt.Sprintf("%x", root.Data[:32])).WithField("data", fmt.Sprintf("%x", root.Data)).Info("Got root")
 
 	d.DownloadFile(common.BytesToHash(root.Data[:32]).Hex(), meta.SaveFile())
-	logger.Get().Info("已下载 POINTER 类型文件")
+	logger.Get().Info("Downloaded POINTER type file")
 	return nil
 }
 
@@ -114,19 +114,19 @@ func (d *Downloader) downloadToFileByText(meta *ContentMetadata) error {
 func (d *Downloader) displayOnConsole(meta *ContentMetadata) error {
 	fileInfo, err := os.Stat(meta.SaveFile())
 	if err != nil {
-		return errors.WithMessage(err, "无法获取文件信息")
+		return errors.WithMessage(err, "Failed to get file information")
 	}
 
 	if fileInfo.Size() > 1024 {
-		logger.Get().Warn("文件大小超过1k，不输出到控制台")
+		logger.Get().Warn("File size exceeds 1k, not displaying on console")
 	} else {
 		content, err := os.ReadFile(meta.SaveFile())
 		if err != nil {
-			return errors.WithMessage(err, "读取文件失败")
+			return errors.WithMessage(err, "Failed to read file")
 		}
 		metaMap := meta.ToMap()
 		metaMap["content"] = string(content)
-		logger.SuccessfWithParams(metaMap, "下载内容完成")
+		logger.SuccessfWithParams(metaMap, "Download content completed")
 	}
 	return nil
 }

@@ -82,24 +82,24 @@ func (a *Appender) AppendExtend(account common.Address, name string, data ccore.
 func (a *Appender) GetMeta(account common.Address, name string) (*ContentMetadata, error) {
 	meta, err := GetContentMetadata(name)
 	if err != nil {
-		return nil, errors.WithMessage(err, "获取内容元数据失败")
+		return nil, errors.WithMessage(err, "Failed to get content metadata")
 	}
 
 	// if err := a.checkWritePermission(name, account); err != nil {
 	// 	return nil, err
 	// }
 
-	// 检查是否 owner
+	// Check if owner
 	isOwner, err := DefaultOwnerOperator().CheckIsContentOwner(account, name)
 	if err != nil {
-		return nil, errors.WithMessage(err, "检查是否 owner 失败")
+		return nil, errors.WithMessage(err, "Failed to check if owner")
 	}
 	if !isOwner {
-		return nil, errors.New("账户不是内容所有者")
+		return nil, errors.New("Account is not the content owner")
 	}
 
 	if meta.ExtendDataType == enums.EXTEND_DATA_POINTER {
-		return nil, errors.New("指针类型内容不支持追加操作")
+		return nil, errors.New("Pointer type content does not support append operation")
 	}
 
 	return meta, nil
@@ -108,10 +108,10 @@ func (a *Appender) GetMeta(account common.Address, name string) (*ContentMetadat
 func (a *Appender) checkWritePermission(name string, account common.Address) error {
 	isWriter, err := CheckIsContentWriter(name, account)
 	if err != nil {
-		return fmt.Errorf("检查写入权限时出错: %w", err)
+		return fmt.Errorf("error checking write permission: %v", err)
 	}
 	if !isWriter {
-		return fmt.Errorf("账户 %v 不是内容的写入者", account)
+		return fmt.Errorf("account %v is not a writer of the content", account)
 	}
 	return nil
 }
@@ -159,7 +159,7 @@ func (a *Appender) uploadExtendAsText(account common.Address, name string, meta 
 }
 
 func (a *Appender) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
-	// 首先将整个文件上传
+	// First, upload the entire file
 	mt, err := DefaultUploader().UploadIteratorData(data)
 	if err != nil {
 		return err
@@ -169,10 +169,10 @@ func (a *Appender) uploadExtendAsPointer(account common.Address, name string, me
 	if err != nil {
 		return err
 	}
-	// 将文件hash作为数据上传
+	// Upload the file hash as data
 	err = a.uploadExtendAsText(account, name, meta, hashData)
 	if err != nil {
-		return errors.WithMessage(err, "上传文件hash失败")
+		return errors.WithMessage(err, "Failed to upload file hash")
 	}
 	return nil
 }

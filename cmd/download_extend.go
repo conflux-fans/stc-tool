@@ -26,7 +26,7 @@ var downloadExtendCmd = &cobra.Command{
 func init() {
 	downloadCmd.AddCommand(downloadExtendCmd)
 	downloadExtendCmd.Flags().StringVarP(&name, "name", "n", "", "data name")
-	downloadExtendCmd.Flags().Bool("console", false, "输出到控制台")
-	downloadExtendCmd.Flags().Bool("metadata", false, "输出 metadata")
+	downloadExtendCmd.Flags().Bool("console", false, "Output to console")
+	downloadExtendCmd.Flags().Bool("metadata", false, "Output metadata")
 	downloadExtendCmd.MarkFlagRequired("name")
 }
