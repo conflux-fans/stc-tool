@@ -107,6 +107,7 @@ Available Commands:
   template    Template opertaions
   upload      Upload file or content
   verify      Verify file
+  zk          generate zk proof and verify
 
 Flags:
   -h, --help   help for storage-cli
