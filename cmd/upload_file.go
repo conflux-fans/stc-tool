@@ -21,10 +21,15 @@ var uploadFileCmd = &cobra.Command{
 			logger.Failf("Failed to create encryption option %v", err)
 			return
 		}
-		if _, err := core.DefaultUploader().UploadFile(filePath, opt); err != nil {
-			logger.Fail(err.Error())
+		tree, err := core.DefaultUploader().UploadFile(filePath, opt)
+		if err != nil {
+			logger.Failf("Failed to upload file %v", err)
 			return
 		}
+		logger.SuccessfWithParams(map[string]string{
+			"File": filePath,
+			"Root": tree.Root().Hex(),
+		}, "Upload file completed")
 	},
 }
 

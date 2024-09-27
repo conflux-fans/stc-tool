@@ -23,26 +23,13 @@ var uploadExtendCmd = &cobra.Command{
 			return
 		}
 
-		var dataType enums.ExtendDataType
-		var data ccore.IterableData
-		var err error
-		if content != "" {
-			dataType, data, err = core.DefaultExtendDataConverter().ByContent([]byte(content))
-			if err != nil {
-				logger.Fail(err.Error())
-				return
-			}
+		dataType, data, err := getExtendData()
+		if err != nil {
+			logger.Failf("get extend data failed, err: %v", err)
+			return
 		}
 
-		if fileOfContent != "" {
-			dataType, data, err = core.DefaultExtendDataConverter().ByFile(fileOfContent)
-			if err != nil {
-				logger.Fail(err.Error())
-				return
-			}
-		}
-
-		if err := core.DefaultUploader().UploadExtend(common.HexToAddress(account), name, dataType, data); err != nil {
+		if err := core.DefaultUploader().UploadExtendIfNotExist(common.HexToAddress(account), name, dataType, data); err != nil {
 			logger.Fail(err.Error())
 			return
 		}
@@ -51,6 +38,28 @@ var uploadExtendCmd = &cobra.Command{
 			"Name": name,
 		}, "Upload content completed")
 	},
+}
+
+func getExtendData() (enums.ExtendDataType, ccore.IterableData, error) {
+	var dataType enums.ExtendDataType
+	var data ccore.IterableData
+	var err error
+	if content != "" {
+		dataType, data, err = core.DefaultExtendDataConverter().ByContent([]byte(content))
+		if err != nil {
+			logger.Fail(err.Error())
+			return enums.ExtendDataType(-1), nil, err
+		}
+	}
+
+	if fileOfContent != "" {
+		dataType, data, err = core.DefaultExtendDataConverter().ByFile(fileOfContent)
+		if err != nil {
+			logger.Fail(err.Error())
+			return enums.ExtendDataType(-1), nil, err
+		}
+	}
+	return dataType, data, err
 }
 
 func init() {

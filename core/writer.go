@@ -12,7 +12,7 @@ import (
 )
 
 func CheckIsStreamWriter(account common.Address) (bool, error) {
-	isWriter, err := kvClientForIterator.IsWriterOfStream(context.Background(), account, STREAM_FILE)
+	isWriter, err := kvClientForIterator.IsWriterOfStream(context.Background(), account, kvStreamId)
 	if err != nil {
 		return false, err
 	}
@@ -34,7 +34,7 @@ func CheckIsContentWriter(name string, account common.Address) (bool, error) {
 		go func(_lk []byte) {
 			defer w.Done()
 
-			_isWriter, err := kvClientForIterator.IsWriterOfKey(context.Background(), account, STREAM_FILE, _lk)
+			_isWriter, err := kvClientForIterator.IsWriterOfKey(context.Background(), account, kvStreamId, _lk)
 			if err != nil {
 				panic(err)
 			}
@@ -71,7 +71,7 @@ func GrantStreamWriter(accounts ...common.Address) error {
 	logger.Get().WithField("accounts", accounts).Info("Grant stream writer to accounts")
 	batcher := adminBatcher
 	for _, account := range accounts {
-		batcher.GrantWriteRole(STREAM_FILE, account)
+		batcher.GrantWriteRole(kvStreamId, account)
 	}
 
 	_, err := batcher.Exec(context.Background())
@@ -131,8 +131,8 @@ func TransferWriter(name string, from common.Address, to common.Address) error {
 	batcher := kvBatcherForPut[from]
 
 	for _, k := range keys {
-		batcher.GrantSpecialWriteRole(STREAM_FILE, []byte(k), to)
-		batcher.RenounceSpecialWriteRole(STREAM_FILE, []byte(k))
+		batcher.GrantSpecialWriteRole(kvStreamId, []byte(k), to)
+		batcher.RenounceSpecialWriteRole(kvStreamId, []byte(k))
 	}
 
 	_, err = batcher.Exec(context.Background())

@@ -15,16 +15,15 @@ type ContentMetadata struct {
 	Name           string
 	LineTotal      int
 	ExtendDataType enums.ExtendDataType
-	OwnerTokenID   uint64
+	OwnerTokenID   string
 }
 
 func GetContentMetadata(name string) (*ContentMetadata, error) {
-
 	m := &ContentMetadata{
 		Name: name,
 	}
 	// query size
-	v, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.LineTotalKey()))
+	v, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(m.LineTotalKey()))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to get file line size")
 	}
@@ -37,7 +36,7 @@ func GetContentMetadata(name string) (*ContentMetadata, error) {
 		return nil, errors.WithMessage(err, "Failed to convert")
 	}
 
-	v, err = kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.ExtendDataTypeKey()))
+	v, err = kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(m.ExtendDataTypeKey()))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to get file extend data type")
 	}
@@ -46,15 +45,11 @@ func GetContentMetadata(name string) (*ContentMetadata, error) {
 		return nil, errors.WithMessage(err, "Failed to parse extend data type")
 	}
 
-	v, err = kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.ExtendDataOwnerTokenIDKey()))
+	v, err = kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(m.ExtendDataOwnerTokenIDKey()))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to get file extend data owner token id")
 	}
-	m.OwnerTokenID, err = strconv.ParseUint(string(v.Data), 10, 64)
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to convert")
-	}
-
+	m.OwnerTokenID = string(v.Data)
 	return m, nil
 }
 

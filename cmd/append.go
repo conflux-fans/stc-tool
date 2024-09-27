@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"github.com/conflux-fans/storage-cli/constants/enums"
+	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
@@ -20,26 +22,25 @@ var appendCmd = &cobra.Command{
 			return
 		}
 
-		if content != "" {
-			// if err := core.DefaultAppender().AppendDataFromContent(common.HexToAddress(account), name, content); err != nil {
-			// 	logger.Fail(err.Error())
-			// }
+		dataType, data, err := getExtendData()
+		if err != nil {
+			return
+		}
+		if dataType == enums.EXTEND_DATA_POINTER {
+			logger.Fail("Not support pointer data type")
 			return
 		}
 
-		if filePath != "" {
-			// if err := core.DefaultAppender().AppendDataFromFile(common.HexToAddress(account), name, filePath); err != nil {
-			// 	logger.Fail(err.Error())
-			// }
+		if err := core.DefaultAppender().AppendExtend(common.HexToAddress(account), name, data); err != nil {
+			logger.Fail(err.Error())
 			return
 		}
+
+		logger.SuccessfWithParams(map[string]string{
+			"Name": name,
+		}, "Append content completed")
 	},
 }
-
-var (
-	content string
-	account string
-)
 
 func init() {
 	rootCmd.AddCommand(appendCmd)

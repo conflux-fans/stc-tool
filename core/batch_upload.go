@@ -72,7 +72,7 @@ func BatchUploadByKv(count int) error {
 		account := accounts[i/ONE_BATCH_COUNT]
 		batcher := kvBatcherForPut[account]
 		if i == 0 {
-			batcher.Set(STREAM_FILE, []byte(m.LineTotalKey()), []byte(fmt.Sprintf("%d", m.LineTotal)))
+			batcher.Set(kvStreamId, []byte(m.LineTotalKey()), []byte(fmt.Sprintf("%d", m.LineTotal)))
 		}
 
 		// check account is writer, panic if not
@@ -87,7 +87,7 @@ func BatchUploadByKv(count int) error {
 		end := lo.Min([]int{count, i + ONE_BATCH_COUNT})
 		for j := i; j < end; j++ {
 			k, v := []byte(m.LineIndexKey(j)), []byte(fmt.Sprintf("%d", j))
-			batcher.Set(STREAM_FILE, k, v)
+			batcher.Set(kvStreamId, k, v)
 			logger.Get().WithField("key", string(k)).WithField("value", string(v)).Debug("set key")
 		}
 		batchers = append(batchers, batcher)
@@ -132,7 +132,7 @@ func BatchUploadByKv(count int) error {
 	fmt.Print("\x1b[36mINFO\x1b[0m[0000] \x1b[42m[TOOL]\x1b[0m Start verify ...")
 	for i := 0; i < 1000; i++ {
 		fmt.Print(".")
-		v, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.LineIndexKey(count-1)))
+		v, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(m.LineIndexKey(count-1)))
 		if err != nil {
 			logger.Get().WithError(err).Info("Failed to check upload state")
 			time.Sleep(time.Millisecond * 100)

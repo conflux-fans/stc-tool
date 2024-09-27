@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/conflux-fans/storage-cli/cmd/file"
+	"github.com/conflux-fans/storage-cli/cmd/owner"
 	"github.com/conflux-fans/storage-cli/cmd/template"
-	"github.com/conflux-fans/storage-cli/cmd/writer"
 	"github.com/conflux-fans/storage-cli/cmd/zk"
 	"github.com/spf13/cobra"
 )
@@ -33,6 +33,6 @@ func Execute() {
 func init() {
 	file.InitCmds(rootCmd)
 	template.InitCmds(rootCmd)
-	writer.InitCmds(rootCmd)
+	owner.InitCmds(rootCmd)
 	zk.InitCmds(rootCmd)
 }

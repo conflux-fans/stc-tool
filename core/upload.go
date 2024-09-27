@@ -8,11 +8,13 @@ import (
 	ccore "github.com/0glabs/0g-storage-client/core"
 	"github.com/0glabs/0g-storage-client/core/merkle"
 	"github.com/0glabs/0g-storage-client/transfer"
+	"github.com/conflux-fans/storage-cli/constants"
 	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,21 +43,21 @@ func DefaultUploader() *Uploader {
 }
 
 // Upload data
-func (u *Uploader) UploadExtend(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
-	logger.Get().WithField("name", name).Info("Ready to upload content")
+// func (u *Uploader) UploadExtend(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
+// 	logger.Get().WithField("name", name).Info("Ready to upload content")
 
-	// revert if exists
-	if err := u.checkExtendNameExists(name); err != nil {
-		return err
-	}
+// 	// revert if exists
+// 	if err := u.checkExtendNameExists(name); err != nil {
+// 		return err
+// 	}
 
-	if err := DefaultAppender().appendExtendOrCreate(account, name, dataType, data, true); err != nil {
-		return err
-	}
+// 	if err := u.Create(account, name, dataType, data, true); err != nil {
+// 		return err
+// 	}
 
-	logger.Get().WithField("name", name).Info("Upload data completed")
-	return nil
-}
+// 	logger.Get().WithField("name", name).Info("Upload data completed")
+// 	return nil
+// }
 
 // func (u *Uploader) UploadDataFromFile(account common.Address, name string, filePath string) error {
 // 	if err := u.checkDataNameExists(name); err != nil {
@@ -70,13 +72,113 @@ func (u *Uploader) UploadExtend(account common.Address, name string, dataType en
 // 	return nil
 // }
 
+func (a *Uploader) UploadExtendIfNotExist(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData) error {
+	if data.Size() > constants.CONTENT_MAX_SIZE {
+		return errors.New("Exceed max size once uploadable")
+	}
+
+	logger.Get().WithField("name", name).Info("Start append content")
+
+	_, err := GetContentMetadata(name)
+	if err == nil {
+		return errors.New("content already exists")
+	} else if err != ERR_UNEXIST_CONTENT {
+		return errors.WithMessage(err, "获取内容元数据失败")
+	}
+
+	txHash, tokenID, err := DefaultOwnerOperator().Mint(account)
+	if err != nil {
+		return errors.WithMessage(err, "Failed to mint")
+	}
+	logger.Get().WithField("txHash", txHash.Hex()).WithField("tokenID", tokenID.String()).Info("Mint content owner NFT completed")
+
+	meta := &ContentMetadata{
+		Name:           name,
+		ExtendDataType: dataType,
+		OwnerTokenID:   tokenID.String(),
+	}
+
+	return a.uploadExtend(account, name, meta, data)
+}
+
+func (a *Uploader) uploadExtend(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
+	switch meta.ExtendDataType {
+	case enums.EXTEND_DATA_TEXT:
+		return a.uploadExtendAsText(account, name, meta, data)
+	case enums.EXTEND_DATA_POINTER:
+		return a.uploadExtendAsPointer(account, name, meta, data)
+	}
+	return fmt.Errorf("unsupported extend data type %v", meta.ExtendDataType)
+}
+
+func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
+	batcher, err := getKvBatcher(account)
+	if err != nil {
+		return errors.WithMessage(err, "Failed to get kv client")
+	}
+
+	iterator := data.Iterate(0, int64(constants.CHUNK_SIZE), false)
+
+	entries := make(map[string]string)
+
+	i := 0
+	for {
+		exist, err := iterator.Next()
+		if err != nil {
+			return errors.WithMessage(err, "迭代数据时出错")
+		}
+		if !exist {
+			break
+		}
+		entries[meta.LineIndexKey(meta.LineTotal+i)] = string(iterator.Current())
+		i++
+	}
+	logger.Get().WithField("line num", i).Info("content lines")
+
+	entries[meta.LineTotalKey()] = fmt.Sprintf("%d", meta.LineTotal+i)
+	entries[meta.ExtendDataTypeKey()] = meta.ExtendDataType.String()
+	entries[meta.ExtendDataOwnerTokenIDKey()] = meta.OwnerTokenID
+
+	for k, v := range entries {
+		batcher.Set(kvStreamId, []byte(k), []byte(v))
+	}
+	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
+
+	_, err = batcher.Exec(context.Background())
+	if err != nil {
+		return errors.WithMessage(err, "Failed to set values of content")
+	}
+	logger.Get().WithField("name", name).WithField("line", i).Info("Append content completed")
+
+	return nil
+}
+
+func (a *Uploader) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
+	// 首先将整个文件上传
+	mt, err := DefaultUploader().UploadIteratorData(data)
+	if err != nil {
+		return err
+	}
+
+	hashData, err := ccore.NewDataInMemory(mt.Root().Bytes())
+	if err != nil {
+		return err
+	}
+	// 将文件hash作为数据上传
+	err = a.uploadExtendAsText(account, name, meta, hashData)
+	if err != nil {
+		return errors.WithMessage(err, "上传文件hash失败")
+	}
+	return nil
+}
+
 func (u *Uploader) checkExtendNameExists(name string) error {
 	// revert if exists
 	m := ContentMetadata{
 		Name: name,
 	}
 
-	v, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(m.LineTotalKey()))
+	v, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(m.LineTotalKey()))
 	if err != nil {
 		return errors.WithMessage(err, "Failed to get file line size")
 	}

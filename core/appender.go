@@ -12,7 +12,6 @@ import (
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 )
 
 var appender Appender
@@ -23,26 +22,6 @@ func DefaultAppender() *Appender {
 	return &appender
 }
 
-func (a *Appender) splitStringToChunks(str string) []string {
-	var chunks []string
-	for i := 0; i < len(str); i += constants.CHUNK_SIZE {
-		end := lo.Min([]int{(i + 1) * constants.CHUNK_SIZE, len(str)})
-		chunks = append(chunks, str[i*constants.CHUNK_SIZE:end])
-	}
-	return chunks
-}
-
-func (a *Appender) splitDataToChunks(data ccore.IterableData) []string {
-	// split content to chunks
-	var chunks []string
-	iterator := data.Iterate(0, int64(constants.CONTENT_MAX_SIZE), false)
-	for {
-		chunk := iterator.Current()
-		chunks = append(chunks, string(chunk))
-	}
-	return chunks
-}
-
 // appendExtendOrCreate 向现有内容追加数据或在指定时创建新内容
 //
 // 参数:
@@ -50,7 +29,42 @@ func (a *Appender) splitDataToChunks(data ccore.IterableData) []string {
 //   - name: 内容名称
 //   - data: 要追加的数据
 //   - createIfNotExist: 如果内容不存在是否创建新内容
-func (a *Appender) appendExtendOrCreate(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData, createIfNotExist bool) error {
+// func (a *Appender) appendExtendOrCreate(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData, createIfNotExist bool) error {
+// 	if data.Size() > constants.CONTENT_MAX_SIZE {
+// 		return errors.New("Exceed max size once uploadable")
+// 	}
+
+// 	logger.Get().WithField("name", name).Info("Start append content")
+
+// 	meta, err := a.GetMeta(account, name)
+// 	if err != nil {
+// 		if errors.Cause(err) == ERR_UNEXIST_CONTENT && createIfNotExist {
+// 			txHash, tokenID, err := DefaultOwnerOperator().Mint(account)
+// 			if err != nil {
+// 				return errors.WithMessage(err, "Failed to mint")
+// 			}
+// 			logger.Get().WithField("txHash", txHash.Hex()).WithField("tokenID", tokenID.String()).Info("Mint content owner NFT completed")
+
+// 			meta = &ContentMetadata{
+// 				Name:           name,
+// 				ExtendDataType: dataType,
+// 				OwnerTokenID:   tokenID.Uint64(),
+// 			}
+// 		} else {
+// 			return err
+// 		}
+// 	}
+
+// 	switch dataType {
+// 	case enums.EXTEND_DATA_TEXT:
+// 		return a.uploadExtendAsText(account, name, meta, data)
+// 	case enums.EXTEND_DATA_POINTER:
+// 		return a.uploadExtendAsPointer(account, name, meta, data)
+// 	}
+// 	return nil
+// }
+
+func (a *Appender) AppendExtend(account common.Address, name string, data ccore.IterableData) error {
 	if data.Size() > constants.CONTENT_MAX_SIZE {
 		return errors.New("Exceed max size once uploadable")
 	}
@@ -59,23 +73,10 @@ func (a *Appender) appendExtendOrCreate(account common.Address, name string, dat
 
 	meta, err := a.GetMeta(account, name)
 	if err != nil {
-		if errors.Cause(err) == ERR_UNEXIST_CONTENT && createIfNotExist {
-			meta = &ContentMetadata{
-				Name:           name,
-				ExtendDataType: dataType,
-			}
-		} else {
-			return err
-		}
+		return err
 	}
 
-	switch dataType {
-	case enums.EXTEND_DATA_TEXT:
-		return a.uploadExtendAsText(account, name, meta, data)
-	case enums.EXTEND_DATA_POINTER:
-		return a.uploadExtendAsPointer(account, name, meta, data)
-	}
-	return nil
+	return DefaultUploader().uploadExtend(account, name, meta, data)
 }
 
 func (a *Appender) GetMeta(account common.Address, name string) (*ContentMetadata, error) {
@@ -84,8 +85,17 @@ func (a *Appender) GetMeta(account common.Address, name string) (*ContentMetadat
 		return nil, errors.WithMessage(err, "获取内容元数据失败")
 	}
 
-	if err := a.checkWritePermission(name, account); err != nil {
-		return nil, err
+	// if err := a.checkWritePermission(name, account); err != nil {
+	// 	return nil, err
+	// }
+
+	// 检查是否 owner
+	isOwner, err := DefaultOwnerOperator().CheckIsContentOwner(account, name)
+	if err != nil {
+		return nil, errors.WithMessage(err, "检查是否 owner 失败")
+	}
+	if !isOwner {
+		return nil, errors.New("账户不是内容所有者")
 	}
 
 	if meta.ExtendDataType == enums.EXTEND_DATA_POINTER {
@@ -102,25 +112,6 @@ func (a *Appender) checkWritePermission(name string, account common.Address) err
 	}
 	if !isWriter {
 		return fmt.Errorf("账户 %v 不是内容的写入者", account)
-	}
-	return nil
-}
-
-func (a *Appender) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
-	// 首先将整个文件上传
-	mt, err := DefaultUploader().UploadIteratorData(data)
-	if err != nil {
-		return err
-	}
-
-	hashData, err := ccore.NewDataInMemory(mt.Root().Bytes())
-	if err != nil {
-		return err
-	}
-	// 将文件hash作为数据上传
-	err = a.uploadExtendAsText(account, name, meta, hashData)
-	if err != nil {
-		return errors.WithMessage(err, "上传文件hash失败")
 	}
 	return nil
 }
@@ -151,10 +142,10 @@ func (a *Appender) uploadExtendAsText(account common.Address, name string, meta 
 
 	entries[meta.LineTotalKey()] = fmt.Sprintf("%d", meta.LineTotal+i)
 	entries[meta.ExtendDataTypeKey()] = meta.ExtendDataType.String()
-	entries[meta.ExtendDataOwnerTokenIDKey()] = fmt.Sprintf("%d", meta.OwnerTokenID)
+	entries[meta.ExtendDataOwnerTokenIDKey()] = meta.OwnerTokenID
 
 	for k, v := range entries {
-		batcher.Set(STREAM_FILE, []byte(k), []byte(v))
+		batcher.Set(kvStreamId, []byte(k), []byte(v))
 	}
 	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
 
@@ -167,6 +158,25 @@ func (a *Appender) uploadExtendAsText(account common.Address, name string, meta 
 	return nil
 }
 
+func (a *Appender) uploadExtendAsPointer(account common.Address, name string, meta *ContentMetadata, data ccore.IterableData) error {
+	// 首先将整个文件上传
+	mt, err := DefaultUploader().UploadIteratorData(data)
+	if err != nil {
+		return err
+	}
+
+	hashData, err := ccore.NewDataInMemory(mt.Root().Bytes())
+	if err != nil {
+		return err
+	}
+	// 将文件hash作为数据上传
+	err = a.uploadExtendAsText(account, name, meta, hashData)
+	if err != nil {
+		return errors.WithMessage(err, "上传文件hash失败")
+	}
+	return nil
+}
+
 func (a *Appender) uploadStringLines(account common.Address, name string, meta *ContentMetadata, chunks []string) error {
 
 	batcher, err := getKvBatcher(account)
@@ -176,12 +186,12 @@ func (a *Appender) uploadStringLines(account common.Address, name string, meta *
 
 	lineCountVal := []byte(fmt.Sprintf("%d", meta.LineTotal+len(chunks)))
 
-	batcher.Set(STREAM_FILE, []byte(meta.LineTotalKey()), lineCountVal)
+	batcher.Set(kvStreamId, []byte(meta.LineTotalKey()), lineCountVal)
 	logger.Get().WithField("line count key", string(meta.LineTotalKey())).Info("Set line count kv")
 
 	for i, chunk := range chunks {
 		key := []byte(meta.LineIndexKey(meta.LineTotal + i))
-		batcher.Set(STREAM_FILE, key, []byte(chunk))
+		batcher.Set(kvStreamId, key, []byte(chunk))
 		logger.Get().WithField("key", string(key)).Info("Set line kv")
 	}
 
@@ -216,16 +226,16 @@ func (a *Appender) uploadLinesAndSetSpecialWriter(account common.Address, name s
 	lineTotalKey := []byte(meta.LineTotalKey())
 	lineTotalVal := []byte(fmt.Sprintf("%d", meta.LineTotal+len(chunks)))
 
-	batcher.Set(STREAM_FILE, lineTotalKey, lineTotalVal)
-	adminBatcher.SetKeyToSpecial(STREAM_FILE, lineTotalKey).GrantSpecialWriteRole(STREAM_FILE, lineTotalKey, account)
+	batcher.Set(kvStreamId, lineTotalKey, lineTotalVal)
+	adminBatcher.SetKeyToSpecial(kvStreamId, lineTotalKey).GrantSpecialWriteRole(kvStreamId, lineTotalKey, account)
 
 	logger.Get().WithField("line count key", string(lineTotalKey)).Info("Set line count kv")
 
 	for i, chunk := range chunks {
 		key := []byte(meta.LineIndexKey(meta.LineTotal + i))
 
-		batcher.Set(STREAM_FILE, key, []byte(chunk))
-		adminBatcher.SetKeyToSpecial(STREAM_FILE, []byte(key)).GrantSpecialWriteRole(STREAM_FILE, []byte(key), account)
+		batcher.Set(kvStreamId, key, []byte(chunk))
+		adminBatcher.SetKeyToSpecial(kvStreamId, []byte(key)).GrantSpecialWriteRole(kvStreamId, []byte(key), account)
 
 		logger.Get().WithField("key", string(key)).Info("Set line kv")
 	}

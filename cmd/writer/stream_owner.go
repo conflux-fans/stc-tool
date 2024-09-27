@@ -40,7 +40,7 @@ var (
 )
 
 func init() {
-	ownerCmd.AddCommand(streamOwnerCmd)
+	writerCmd.AddCommand(streamOwnerCmd)
 	streamOwnerCmd.Flags().StringVar(&account, "account", "", "account to check if is stream owner")
 	streamOwnerCmd.MarkFlagRequired("account")
 }

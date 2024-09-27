@@ -1,17 +1,17 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package writer
+package owner
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// writerCmd represents the writer command
-var writerCmd = &cobra.Command{
-	Use:   "writer",
-	Short: "Writer operations",
-	Long:  `Writer operations`,
+// ownerCmd represents the writer command
+var ownerCmd = &cobra.Command{
+	Use:   "owner",
+	Short: "Owner operations",
+	Long:  `Owner operations`,
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }
@@ -21,5 +21,5 @@ var (
 )
 
 func InitCmds(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(writerCmd)
+	rootCmd.AddCommand(ownerCmd)
 }

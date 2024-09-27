@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package writer
+package owner
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ var contentOwnerCmd = &cobra.Command{
 			return
 		}
 
-		isWriter, err := core.CheckIsContentWriter(name, common.HexToAddress(account))
+		isOwner, err := core.DefaultOwnerOperator().CheckIsContentOwner(common.HexToAddress(account), name)
 		if err != nil {
 			logger.Fail(err.Error())
 			return
@@ -32,13 +32,17 @@ var contentOwnerCmd = &cobra.Command{
 		logger.SuccessfWithParams(map[string]string{
 			"Account":      account,
 			"Content Name": name,
-			"Result":       fmt.Sprintf("%v", isWriter),
+			"Result":       fmt.Sprintf("%v", isOwner),
 		}, "Check if account is owner of content completed")
 	},
 }
 
+var (
+	account string
+)
+
 func init() {
-	writerCmd.AddCommand(contentOwnerCmd)
+	ownerCmd.AddCommand(contentOwnerCmd)
 	contentOwnerCmd.Flags().StringVar(&account, "account", "", "account to check if is content owner")
 	contentOwnerCmd.Flags().StringVar(&name, "name", "", "content name")
 	contentOwnerCmd.MarkFlagRequired("account")

@@ -35,9 +35,11 @@ type Config struct {
 		URL              string `yaml:"url"`
 		FlowContract     string `yaml:"flowContract"`
 		TemplateContract string `yaml:"templateContract"`
+		PmContract       string `yaml:"pmContract"`
 	} `yaml:"blockChain"`
 	StorageNodes []string `yaml:"storageNodes"`
 	KvNode       string   `yaml:"kvNode"`
+	KvStreamId   string   `yaml:"kvStreamId"`
 	ZkNode       string   `yaml:"zkNode"`
 	PrivateKeys  []string `yaml:"privateKeys"`
 	Log          string   `yaml:"log"`

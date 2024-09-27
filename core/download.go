@@ -78,7 +78,7 @@ func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole b
 
 func (d *Downloader) downloadToFileByPointer(meta *ContentMetadata) error {
 	// 读取第一行为文件 root
-	root, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(meta.LineKeys()[0]))
+	root, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(meta.LineKeys()[0]))
 	if err != nil {
 		return errors.WithMessage(err, "无法获取 root 值")
 	}
@@ -97,7 +97,7 @@ func (d *Downloader) downloadToFileByText(meta *ContentMetadata) error {
 	defer f.Close()
 	// TEXT 类型继续执行后续代码
 	for _, k := range meta.LineKeys() {
-		val, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, []byte(k))
+		val, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, []byte(k))
 		if err != nil {
 			return errors.WithMessage(err, "Failed to get line value")
 		}

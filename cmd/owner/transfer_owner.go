@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package writer
+package owner
 
 import (
 	"github.com/conflux-fans/storage-cli/core"
@@ -25,17 +25,16 @@ var transferOwnerCmd = &cobra.Command{
 			return
 		}
 
-		core.GrantAllAccountStreamWriter()
-
-		err := core.TransferWriter(name, common.HexToAddress(currentOwner), common.HexToAddress(newOwner))
+		txHash, err := core.DefaultOwnerOperator().TransferOwner(name, common.HexToAddress(currentOwner), common.HexToAddress(newOwner))
 		if err != nil {
 			logger.Fail(err.Error())
 			return
 		}
 		logger.SuccessfWithParams(map[string]string{
-			"Name": name,
-			"From": currentOwner,
-			"To":   newOwner,
+			"Name":   name,
+			"From":   currentOwner,
+			"To":     newOwner,
+			"TxHash": txHash.Hex(),
 		}, "Successfully transferred content ownership")
 	},
 }
@@ -45,7 +44,7 @@ var (
 )
 
 func init() {
-	writerCmd.AddCommand(transferOwnerCmd)
+	ownerCmd.AddCommand(transferOwnerCmd)
 	transferOwnerCmd.Flags().StringVar(&name, "name", "", "content name to transfer ownership")
 	transferOwnerCmd.Flags().StringVar(&currentOwner, "from", "", "current owner")
 	transferOwnerCmd.Flags().StringVar(&newOwner, "to", "", "target owner")

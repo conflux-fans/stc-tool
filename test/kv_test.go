@@ -83,7 +83,7 @@ func TestZgUploadBytes(t *testing.T) {
 }
 
 func TestKvBatchUploadBytes(t *testing.T) {
-	STREAM_FILE := common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
+	kvStreamId := common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
 
 	w3client := blockchain.MustNewWeb3("http://127.0.0.1:14000", "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e23", providers.Option{
 		Logger: os.Stdout,
@@ -109,7 +109,7 @@ func TestKvBatchUploadBytes(t *testing.T) {
 		}
 		chunk := iterator.Current()
 		key := []byte(fmt.Sprintf("%v:%d", now, i))
-		kvBatcher.Set(STREAM_FILE, key, chunk)
+		kvBatcher.Set(kvStreamId, key, chunk)
 		logger.Get().WithField("key", string(key)).Info("Set line kv")
 		i++
 	}
@@ -118,7 +118,7 @@ func TestKvBatchUploadBytes(t *testing.T) {
 
 	kvClientForGet := kv.NewClient(node.MustNewKvClient("http://127.0.0.1:16000")) //
 
-	iter := kvClientForGet.NewIterator(STREAM_FILE)
+	iter := kvClientForGet.NewIterator(kvStreamId)
 	fmt.Println("begin to end:")
 	iter.SeekToFirst(context.Background())
 	for iter.Valid() {
@@ -127,7 +127,7 @@ func TestKvBatchUploadBytes(t *testing.T) {
 		iter.Next(context.Background())
 	}
 
-	value, err := kvClientForGet.GetValue(context.Background(), STREAM_FILE, []byte(fmt.Sprintf("%v:%d", now, 0)))
+	value, err := kvClientForGet.GetValue(context.Background(), kvStreamId, []byte(fmt.Sprintf("%v:%d", now, 0)))
 	assert.NoError(t, err)
 	assert.Equal(t, "hello world", value.Data)
 }

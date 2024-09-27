@@ -22,24 +22,24 @@ func TestUploadStream(t *testing.T) {
 
 	logger.Get().WithField("key", string(key)).Info("Start put")
 
-	batcher.Set(STREAM_FILE, key, []byte("hello world")).
-		SetKeyToSpecial(STREAM_FILE, key).
-		GrantSpecialWriteRole(STREAM_FILE, key, defaultAccount)
+	batcher.Set(kvStreamId, key, []byte("hello world")).
+		SetKeyToSpecial(kvStreamId, key).
+		GrantSpecialWriteRole(kvStreamId, key, defaultAccount)
 
 	_, err := batcher.Exec(context.Background())
 	assert.NoError(t, err)
 
 	// query
 	time.Sleep(10 * time.Second)
-	val, err := kvClientForIterator.GetValue(context.Background(), STREAM_FILE, key)
+	val, err := kvClientForIterator.GetValue(context.Background(), kvStreamId, key)
 	assert.NoError(t, err)
 	assert.True(t, val.Size > 0)
 
-	isSpecialKey, err := kvClientForIterator.IsSpecialKey(context.Background(), STREAM_FILE, key)
+	isSpecialKey, err := kvClientForIterator.IsSpecialKey(context.Background(), kvStreamId, key)
 	assert.NoError(t, err)
 	assert.True(t, isSpecialKey)
 
-	isWriter, err := kvClientForIterator.IsWriterOfKey(context.Background(), defaultAccount, STREAM_FILE, key)
+	isWriter, err := kvClientForIterator.IsWriterOfKey(context.Background(), defaultAccount, kvStreamId, key)
 	assert.NoError(t, err)
 	assert.True(t, isWriter)
 }

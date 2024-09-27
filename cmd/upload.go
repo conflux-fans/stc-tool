@@ -10,6 +10,8 @@ import (
 var (
 	name          string
 	fileOfContent string
+	content       string
+	account       string
 )
 
 // uploadCmd represents the upload command

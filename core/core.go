@@ -44,11 +44,12 @@ var (
 	signerFn            bind.SignerFn
 	// signerManager         *signers.SignerManager
 	grantWriterOnce sync.Once
+	kvStreamId      common.Hash
 )
 
-var (
-	STREAM_FILE = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
-)
+// var (
+// 	kvStreamId = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
+// )
 
 func initProviderOpt() {
 	cfg := config.Get()
@@ -69,16 +70,21 @@ func Init() {
 	})
 
 	kvClientForIterator = kv.NewClient(node.MustNewKvClient(cfg.KvNode, providerOpt))
+	kvStreamId = common.HexToHash(cfg.KvStreamId)
+	if kvStreamId == (common.Hash{}) {
+		panic("kvStreamID is empty")
+	}
 
-	genKvClientsForPut()
+	initKvBatchersAndW3Clients()
 	initTempalteContract()
 	// GrantAllAccountWriter()
 
 	InitDefaultDownloader()
 }
 
-func genKvClientsForPut() {
+func initKvBatchersAndW3Clients() {
 	kvBatcherForPut = make(map[common.Address]*kv.Batcher)
+	w3Clients = make(map[common.Address]*web3go.Client)
 	cfg := config.Get()
 
 	for i, pk := range cfg.PrivateKeys {
@@ -104,6 +110,7 @@ func genKvClientsForPut() {
 			defaultFlow = flow
 			defaultAccount = account
 		}
+		w3Clients[account] = w3client
 	}
 }
 
