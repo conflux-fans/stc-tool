@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
@@ -17,7 +18,12 @@ var verifyCmd = &cobra.Command{
 	Short: "Verify file",
 	Long:  `Verify file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		opt, err := core.NewEncryptOption(cipher, password)
+		cipherMethod, err := enums.ParseCipherMethod(cipher)
+		if err != nil {
+			logger.Failf("Failed to parse cipher method %v", err)
+			return
+		}
+		opt, err := core.NewEncryptOption(cipherMethod, password)
 		if err != nil {
 			logger.Failf("Failed to create options: %s", err.Error())
 			return

@@ -14,7 +14,7 @@ func TestEncryptBytes(t *testing.T) {
 	input := []byte("1")
 	output := bytes.NewBuffer(make([]byte, 0))
 
-	encryptor := new(AesEncryptor)
+	encryptor := new(AesCbcEncryptor)
 	err := encryptor.Encrypt(bytes.NewBuffer(input), output, []byte("1234567812345678"))
 	assert.NilError(t, err)
 
@@ -31,7 +31,7 @@ func TestDecryptBytes(t *testing.T) {
 	inputBuf := bytes.NewBuffer(input)
 	outputBuf := bytes.NewBuffer(make([]byte, 0))
 
-	encryptor := new(AesEncryptor)
+	encryptor := new(AesCbcEncryptor)
 	err = encryptor.Decrypt(inputBuf, outputBuf, []byte("1234567812345678"))
 	assert.NilError(t, err)
 

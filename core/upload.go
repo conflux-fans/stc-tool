@@ -23,7 +23,7 @@ type UploadOption struct {
 	// Tag           string
 }
 
-func NewUploadOption(method string, password string) (*UploadOption, error) {
+func NewUploadOption(method enums.CipherMethod, password string) (*UploadOption, error) {
 	encryptOpt, err := NewEncryptOption(method, password)
 	if err != nil {
 		return nil, err
@@ -225,32 +225,27 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 }
 
 // upload data and return segments merkle tree and chunks merle tree
-func (u *Uploader) UploadString(data []byte) (*merkle.Tree, *merkle.Tree, error) {
+func (u *Uploader) UploadBytes(data []byte) (common.Hash, common.Hash, error) {
 	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
 	if err != nil {
-		return nil, nil, err
+		return common.Hash{}, common.Hash{}, err
 	}
 	dataInMemory, err := ccore.NewDataInMemory(data)
 	if err != nil {
-		return nil, nil, err
+		return common.Hash{}, common.Hash{}, err
 	}
 
-	_, err = uploader.Upload(context.Background(), dataInMemory)
+	submissionTxHash, err := uploader.Upload(context.Background(), dataInMemory)
 	if err != nil && err.Error() != "Data already exists on ZeroGStorage network" {
-		return nil, nil, err
+		return common.Hash{}, common.Hash{}, err
 	}
 
 	segmentsTree, err := ccore.MerkleTree(dataInMemory)
 	if err != nil {
-		return nil, nil, err
+		return common.Hash{}, common.Hash{}, err
 	}
 
-	chunksTree, err := u.getChunksTree(data)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return segmentsTree, chunksTree, nil
+	return submissionTxHash, segmentsTree.Root(), nil
 }
 
 func (u *Uploader) UploadIteratorData(data ccore.IterableData) (*merkle.Tree, error) {

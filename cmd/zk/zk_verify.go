@@ -17,7 +17,7 @@ var zkVerifyCmd = &cobra.Command{
 	Short: "zk verify",
 	Long:  `zk verify`,
 	Run: func(cmd *cobra.Command, args []string) {
-		result, err := core.ZkVerify(proof, birthDateThreshold, root)
+		result, err := core.NewZk().ZkVerify(proof, birthDateThreshold, root)
 		if err != nil {
 			logger.Failf("Failed verify: %v", err.Error())
 			return
@@ -28,13 +28,12 @@ var zkVerifyCmd = &cobra.Command{
 }
 
 var (
-	proof, leafHash, root string
+	proof, root string
 )
 
 func init() {
 	zkCmd.AddCommand(zkVerifyCmd)
 	zkVerifyCmd.Flags().StringVarP(&proof, "proof", "", "", "proof")
 	zkVerifyCmd.Flags().StringVarP(&birthDateThreshold, "birth_threshold", "", "", "birth date threshold")
-	zkVerifyCmd.Flags().StringVarP(&leafHash, "leaf_hash", "", "", "leaf hash")
 	zkVerifyCmd.Flags().StringVarP(&root, "root", "", "", "root hash")
 }

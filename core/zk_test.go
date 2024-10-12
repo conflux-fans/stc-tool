@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -19,8 +18,9 @@ func TestZkProof(t *testing.T) {
 	Init()
 
 	vc := `{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}`
-	_, err := ZkProof(vc, "20240101")
+	proveOutput, err := NewZk().ZkProof(vc, "verysecretkey123", "uniqueiv12345678", "19990101")
 	assert.NoError(t, err)
+	fmt.Printf("prove output: %v\n", proveOutput)
 }
 
 func TestGetChunksTree(t *testing.T) {
@@ -45,19 +45,11 @@ func TestUploadData(t *testing.T) {
 	assert.NoError(t, err)
 
 	data := _vc.Hash()
-	segTree, trunksTree, err := DefaultUploader().UploadString(data[:])
+	submissionTx, dataRoot, err := DefaultUploader().UploadBytes(data[:])
 	assert.NoError(t, err)
 
-	fmt.Printf("seg tree root: %v\n", segTree.Root())
-	fmt.Printf("seg proof at 0: %v\n", segTree.ProofAt(0))
-	fmt.Printf("trunks tree root: %v\n", trunksTree.Root())
-	fmt.Printf("trunks proof at 0: %v\n", trunksTree.ProofAt(0))
-
-	// FIXME: get flow root
-	// storageSystemRoot, err := defaultFlow.Root(nil)
-	storageSystemRoot := common.Hash{}
-	assert.NoError(t, err)
-	fmt.Printf("storage system root: %x\n", storageSystemRoot)
+	fmt.Printf("submission tx: %v\n", submissionTx)
+	fmt.Printf("data root: %v\n", dataRoot)
 }
 
 func TestZkVerify(t *testing.T) {
@@ -65,14 +57,10 @@ func TestZkVerify(t *testing.T) {
 	config.Init()
 	Init()
 
-	proof := "dcd19771587f25cb7d706020efb93cae9b8898116932074fc389311b035a5b967d564463c426aaa34960f5b50859f298a7e62d9fac74c5cc680ae7365597d01a79673058eb3227b58706d7d6c92d41e6146fdb45442ee2ddc622315d380cdca449b54240ae7fa68e037f58092031f23da1e99aae84df13a400ea961bf73f798f"
+	proof := "179147f5ce659de5bb82c69649c2a296e9a3157a4d5a22696558af9d11e878875b3b11090e89240637b7c3e9a04bdb1663fbf2fb768ee08cde1f8b252214f5042217ab56966124501e54154e5822bb67720dbc82bcc2e8213bfa49336ec563086194563dfb03572b52cf75948f0e97ea1973a3d63330fd9b569db262c1c3bda1"
+	flowRoot := common.HexToHash("0x096092f289fe8d67ff2ad798845fd059a82207025c0e6cd8b4fc344f30d53aa9")
 
-	// FIXME: get flow root
-	// storageSystemRoot, err := defaultFlow.Root(nil)
-	// assert.NoError(t, err)
-	storageSystemRoot := common.Hash{}
-
-	isSucess, err := ZkVerify(proof, "20240101", hex.EncodeToString(storageSystemRoot[:]))
+	isSucess, err := NewZk().ZkVerify(proof, "19990101", flowRoot.Hex())
 	assert.NoError(t, err)
 	fmt.Println(isSucess)
 }

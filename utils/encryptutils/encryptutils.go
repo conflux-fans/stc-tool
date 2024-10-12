@@ -1,11 +1,12 @@
 package encryptutils
 
 import (
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/pkg/errors"
 )
 
-func EncryptFile(filePath string, method string, password string) (outputPath string, err error) {
+func EncryptFile(filePath string, method enums.CipherMethod, password string) (outputPath string, err error) {
 	encryptor, err := encrypt.GetEncryptor(method)
 	if err != nil {
 		return "", errors.WithMessage(err, "Failed to get encryptor")
@@ -18,7 +19,7 @@ func EncryptFile(filePath string, method string, password string) (outputPath st
 	return outputPath, nil
 }
 
-func EncryptBytes(soruce []byte, method string, password string) ([]byte, error) {
+func EncryptBytes(soruce []byte, method enums.CipherMethod, password string) ([]byte, error) {
 	encryptor, err := encrypt.GetEncryptor(method)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to get encryptor")

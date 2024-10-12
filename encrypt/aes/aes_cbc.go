@@ -8,18 +8,18 @@ import (
 	"github.com/conflux-fans/storage-cli/logger"
 )
 
-type AesEncryptor struct {
+type AesCbcEncryptor struct {
 }
 
-var iv = []byte("abcdef1234567890")
+var IV = []byte("abcdef1234567890")
 
-func (a *AesEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) error {
+func (a *AesCbcEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) error {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return err
 	}
 
-	output.Write(iv)
+	output.Write(IV)
 
 	for {
 		buf := make([]byte, 4096)
@@ -33,7 +33,7 @@ func (a *AesEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) er
 		// fmt.Println("read", n)
 
 		paded := pad(buf[:n])
-		cipher.NewCBCEncrypter(block, iv).CryptBlocks(paded, paded)
+		cipher.NewCBCEncrypter(block, IV).CryptBlocks(paded, paded)
 		n, err = output.Write(paded)
 		if err != nil {
 			return err
@@ -45,7 +45,7 @@ func (a *AesEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) er
 	return nil
 }
 
-func (a *AesEncryptor) Decrypt(input io.Reader, output io.Writer, key []byte) error {
+func (a *AesCbcEncryptor) Decrypt(input io.Reader, output io.Writer, key []byte) error {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return err

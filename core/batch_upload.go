@@ -23,15 +23,15 @@ const (
 )
 
 type EncryptOption struct {
-	Method   string
+	Method   enums.CipherMethod
 	Password string
 }
 
-func NewEncryptOption(method string, password string) (*EncryptOption, error) {
-	if method == "" && password == "" {
+func NewEncryptOption(method enums.CipherMethod, password string) (*EncryptOption, error) {
+	if method == enums.CIPHER_METHOD_EMPTY && password == "" {
 		return nil, nil
 	}
-	if method == "" {
+	if method == enums.CIPHER_METHOD_EMPTY {
 		return nil, errors.New("Missing cipher method specified")
 	}
 	if password == "" {
@@ -202,7 +202,7 @@ func randomText(encryptOpt *EncryptOption) ([]byte, error) {
 	rnd := rand.Intn(10000)
 	content := []byte(fmt.Sprintf("%v - %d - hello world", time.Now().Format(time.RFC3339Nano), rnd))
 
-	if encryptOpt == nil || encryptOpt.Method == "" {
+	if encryptOpt == nil || encryptOpt.Method == enums.CIPHER_METHOD_EMPTY {
 		return content, nil
 	}
 

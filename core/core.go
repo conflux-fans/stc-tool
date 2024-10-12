@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"sync"
+	"time"
 
 	zg_common "github.com/0glabs/0g-storage-client/common"
 	"github.com/0glabs/0g-storage-client/common/blockchain"
@@ -47,23 +48,20 @@ var (
 	kvStreamId      common.Hash
 )
 
-// var (
-// 	kvStreamId = common.HexToHash("000000000000000000000000000000000000000000000000000000000000f2bd")
-// )
-
 func initProviderOpt() {
 	cfg := config.Get()
 	if cfg.Log == config.DEBUG {
 		providerOpt.Logger = os.Stdout
-		zgLogOpt.Logger = logrus.New()
 	}
+	zgLogOpt.Logger = logrus.New()
+	zgLogOpt.LogLevel = logrus.DebugLevel
+	providerOpt.RequestTimeout = time.Minute
 }
 
 func Init() {
 	initProviderOpt()
 
 	cfg := config.Get()
-	// logger.Get().WithField("config", cfg).Info("Get config")
 	zgNodeClients = node.MustNewZgsClients(cfg.StorageNodes, providerOpt)
 	zkClient = zkclient.MustNewClientWithOption(cfg.ZkNode, web3go.ClientOption{
 		Option: providerOpt,
@@ -77,8 +75,6 @@ func Init() {
 
 	initKvBatchersAndW3Clients()
 	initTempalteContract()
-	// GrantAllAccountWriter()
-
 	InitDefaultDownloader()
 }
 
@@ -89,9 +85,6 @@ func initKvBatchersAndW3Clients() {
 
 	for i, pk := range cfg.PrivateKeys {
 		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk, providerOpt)
-		// if cfg.Log == config.DEBUG {
-		// 	w3client.SetProvider(providers.NewLoggerProvider(w3client.Provider(), os.Stdout))
-		// }
 
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
 		flow, err := contract.NewFlowContract(flowAddr, w3client)
@@ -99,7 +92,7 @@ func initKvBatchersAndW3Clients() {
 			logger.Get().WithError(err).Fatal("Failed to create flow contract")
 			os.Exit(1)
 		}
-		// kvClient := kv.NewClient(zgNodeClients[0])
+
 		kvBatcher := kv.NewBatcher(math.MaxUint64, zgNodeClients, w3client, zgLogOpt)
 		account := signers.MustNewPrivateKeySignerByString(pk).Address()
 		accounts = append(accounts, account)
@@ -142,5 +135,4 @@ func GrantAllAccountStreamWriter() {
 			panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))
 		}
 	})
-	// logger.Get().Info("Granted all")
 }

@@ -9,7 +9,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openweb3/go-rpc-provider v0.3.3
+	github.com/openweb3/go-rpc-provider v0.3.4
 	github.com/openweb3/web3go v0.2.9
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
@@ -127,3 +127,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
+
+replace github.com/0glabs/0g-storage-client v0.6.0 => github.com/wangdayong228/0g-storage-client v0.0.0-20241009091134-d6f491d4875b

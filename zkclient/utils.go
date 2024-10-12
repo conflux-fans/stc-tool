@@ -52,8 +52,30 @@ func PadToSector(input []byte) []byte {
 
 func BoolsToUint64(values []bool) uint64 {
 	var result uint64
-	for i, v := range values {
-		result += uint64(int(BoolToUnit(v)) >> i)
+	for _, v := range values {
+		// result += uint64(int(BoolToUnit(v)) >> i)
+		result = result<<1 | uint64(BoolToUnit(v))
 	}
 	return result
+}
+
+func InvertBools(values []bool) []bool {
+	result := make([]bool, len(values))
+	for i, v := range values {
+		result[i] = !v
+	}
+	return result
+}
+
+func ReverseBools(values []bool) []bool {
+	for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
+		values[i], values[j] = values[j], values[i]
+	}
+	return values
+}
+
+func stringToByte16(s []byte) [16]byte {
+	var byteArray [16]byte
+	copy(byteArray[:], s)
+	return byteArray
 }

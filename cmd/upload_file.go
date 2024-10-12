@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
@@ -15,7 +16,13 @@ var uploadFileCmd = &cobra.Command{
 	Short: "Upload file",
 	Long:  `Upload file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		opt, err := core.NewUploadOption(cipher, password)
+		cipherMethod, err := enums.ParseCipherMethod(cipher)
+		if err != nil {
+			logger.Failf("Failed to parse cipher method %v", err)
+			return
+		}
+
+		opt, err := core.NewUploadOption(cipherMethod, password)
 
 		if err != nil {
 			logger.Failf("Failed to create encryption option %v", err)

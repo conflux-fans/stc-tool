@@ -15,16 +15,15 @@ var zkProofCmd = &cobra.Command{
 	Short: "generate zk proof",
 	Long:  `generate zk proof`,
 	Run: func(cmd *cobra.Command, args []string) {
-		proof, err := core.ZkProof(vc, birthDateThreshold)
+		proof, err := core.NewZk().ZkProof(vc, key, iv, birthDateThreshold)
 		if err != nil {
 			logger.Failf("Failed to generate zk proof: %v", err)
 			return
 		}
 
 		logger.SuccessfWithParams(map[string]string{
-			"VC Proof":       proof.Proof,
-			"Encrypt VcRoot": proof.EncryptVcRoot.Hex(),
-			"Flow Root":      proof.FlowRoot.Hex(),
+			"VC Proof":  proof.Proof,
+			"Flow Root": proof.FlowRoot.Hex(),
 		}, "Successfully generated zk proof")
 	},
 }
@@ -32,16 +31,16 @@ var zkProofCmd = &cobra.Command{
 var (
 	vc                 string
 	birthDateThreshold string
-	// pathElements       string
-	// pathIndices        string
+	key                string
+	iv                 string
 )
 
 func init() {
 	zkCmd.AddCommand(zkProofCmd)
 	zkProofCmd.Flags().StringVarP(&vc, "vc", "v", "", "vc string in json format")
 	zkProofCmd.Flags().StringVarP(&birthDateThreshold, "threshold", "t", "", "birth date threshold, format is yearmonthdate, such as 20240101")
-	// zkProofCmd.Flags().StringVarP(&pathElements, "path-elements", "e", "", "path elements")
-	// zkProofCmd.Flags().StringVarP(&pathIndices, "path-indicies", "i", "", "path indices")
+	zkProofCmd.Flags().StringVarP(&key, "key", "k", "", "key")
+	zkProofCmd.Flags().StringVarP(&iv, "iv", "i", "", "iv")
 	zkProofCmd.MarkFlagRequired("vc")
 	zkProofCmd.MarkFlagRequired("threshold")
 }

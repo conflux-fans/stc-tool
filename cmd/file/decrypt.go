@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package file
 
 import (
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/encrypt"
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
@@ -15,7 +16,13 @@ var decryptCmd = &cobra.Command{
 	Short: "Decrypt file",
 	Long:  `Decrypt file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		encryptor, err := encrypt.GetEncryptor(cipher)
+		cipherMethod, err := enums.ParseCipherMethod(cipher)
+		if err != nil {
+			logger.Failf("Failed to parse cipher method %v", err)
+			return
+		}
+
+		encryptor, err := encrypt.GetEncryptor(cipherMethod)
 		if err != nil {
 			logger.Failf("Failed to get encryptor %v", err)
 			return
@@ -27,7 +34,7 @@ var decryptCmd = &cobra.Command{
 
 		outputFile, err := encrypt.DecryptFile(encryptor, sourceFilePath, outputDirPath, []byte(password))
 		if err != nil {
-			logger.Failf("Failed to encrypt file %v", err)
+			logger.Failf("Failed to decrypt file %v", err)
 			return
 		}
 

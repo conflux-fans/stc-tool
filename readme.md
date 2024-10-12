@@ -1,116 +1,167 @@
-[toc]
+# Storage CLI 工具文档
 
-# 环境搭建
+## 简介
 
-## 部署合约并设置到所有环境中
+Storage CLI 是一个用于文件和内容上传、下载、验证、批量操作、所有者管理和模板管理的命令行工具。它支持多种操作，包括文件上传、内容追加、零知识证明生成和验证等。
+
+## 安装
+
+请确保您已安装 Go 语言环境
 
 ```sh
-git clone https://github.com/wangdayong228/0g-storage-contracts.git
-cd zerog-storage-contracts
-git checkout add-template
-make renew
+go install github.com/wangdayong228/0g-storage-contracts/storage-cli
 ```
-renew 命令做了以下工作
-### 1. 部署 zg 相关合约
 
-部署 flow 和 ProMine 合约
+## 配置
 
-### 2. 配置 zg-node
-
-配置文件
-```conf
-log_config_file = "log_config"
-network_libp2p_port = 11000
-network_discovery_port = 11000
-rpc_listen_address = "127.0.0.1:11100"
-log_contract_address = "0xF5587366B9bDA86854f765A4B6184bDd5dBdFa8E"
-mine_contract_address = "0x4AF117e7B516969488EDee50a8f7afFb48C62bCb"
-blockchain_rpc_endpoint = "https://evmtestnet.confluxrpc.com/6XWH2kDUX4wcKVN1VThMpjhhwerkTMZR8GYjk3S8Ti6GhM8qw7TJXDuT4sJWsM8MNmz2oxLsWAbjDUELaeAG4QA9Y"
-network_libp2p_nodes = []
-log_sync_start_block_number = 164900000
-```
-- log_contract_address 配置为步骤 1 部署的 flow 合约
-- mine_contract_address 配置为不走 1 部署的 ProMine 合约
-- log_sync_start_block_number 配置为不大于 flow 合约部署区块高度即可
-
-<!-- 版本 commithash: 306c43c9dca6645da56c37f3337b08f39eb30cfa -->
-**版本 1.0.0-testnet**
-### 3. 配置 zg-kv
-
-配置文件
-```conf
-stream_ids = ["000000000000000000000000000000000000000000000000000000000000f2bd", "000000000000000000000000000000000000000000000000000000000000f009", "0000000000000000000000000000000000000000000000000000000000016879", "0000000000000000000000000000000000000000000000000000000000002e3d"]
-
-
-db_dir = "db"
-kv_db_dir = "kv.DB"
-
-rpc_enabled = true
-rpc_listen_address = "127.0.0.1:6789"
-zgs_node_urls = "http://127.0.0.1:11100"
-
-log_config_file = "log_config"
-
-blockchain_rpc_endpoint = "https://evmtestnet.confluxrpc.com/6XWH2kDUX4wcKVN1VThMpjhhwerkTMZR8GYjk3S8Ti6GhM8qw7TJXDuT4sJWsM8MNmz2oxLsWAbjDUELaeAG4QA9Y"
-log_contract_address = "0xF5587366B9bDA86854f765A4B6184bDd5dBdFa8E"
-log_sync_start_block_number = 164900000
-
-```
-- log_contract_address 配置为步骤 1 部署的 flow 合约
-- log_sync_start_block_number 配置为不大于 flow 合约部署区块高度即可
-- stream_ids 每个 stream 可以看成是一个数据库，写文件只能使用配置好的 stream，否则不生效（也不报错）
-
-<!-- 版本 commithash: bacf761d0f26af64b6375850ba2e9987ada93dc7 -->
-**版本 1.0.0-testnet**
-
-### 4. 配置本工具 storage-tool
+在使用工具之前，请确保配置文件已正确设置。以下是一个示例配置：
 
 ```yaml
 
 blockChain:
-  url: "https://etest-rpc.nftrainbow.cn/JwtQFtZXar"
-  # url: "http://127.0.0.1:8545"
-  flowContract: "0xEA6718Cab1eA7aaa61D2a28f0297D6F2Ca194647"
-  templateContract: "0x34Ab680c8De93aA0742EF5843520E86239B954EF"
+  url: http://127.0.0.1:14000
+  flowContract: 0x33f2CFc729Bd870fA54b5032660e06B4CF2a7F94 
+  templateContract: 0x34Ab680c8De93aA0742EF5843520E86239B954EF
+  pmContract: 0x588D57Fb016CEE89513B9B7ee78AeB8b56BAc85D
 storageNodes:
-  - "http://127.0.0.1:11100"
-kvNode: "http://127.0.0.1:6789"
+  - http://127.0.0.1:15000
+  - http://127.0.0.1:15001
+  - http://127.0.0.1:15002
+  - http://127.0.0.1:15003
+kvNode: http://127.0.0.1:16000
+kvStreamId: 000000000000000000000000000000000000000000000000000000000000f009
+zkNode: http://127.0.0.1:3030
 privateKeys:
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e23" #0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e24" #0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e25" #0xe61646FD48adF644404f373D984B14C877957F7c
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e26" #0xE7b3CafBf258804B867Df17e0AE5238030658a03
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e27" #0x8Faf8127849e4157dD086C923576a4029cA4E2B5
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e28" #0x0513B660EaBb10Ee88b8AC69188d3994f184a3D9
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e29" #0x60E54B5daD7331a85c3408A887588430B19b26D6
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e30" #0xB1b635163C5f58327b2FeD3a83131B6B209082C8
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e31" #0x581773C26661fA73f45516a72a138341F75a4cDD
-  - "7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e32" #0xC933adff23Ce870B290C3D59b872855568eBE505
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e23
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e24
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e25
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e26
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e27
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e28
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e29
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e30
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e31
+  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e32
 log : info # info,debug
+extendData:
+  textMaxSize: 1024 # 大于该长度的数据将以 pointer 扩展数据类型存储
 ```
 
-# 工具命令
+## 使用方法
+
+### 基本命令
+
+- **上传文件**
+
+  上传文件到存储节点：
+
+  ```sh
+  storage-cli upload file --file ~/tmp/random_files/file_1.txt
+  ```
+
+- **上传内容**
+
+  上传内容到存储节点：
+
+  ```sh
+  storage-cli upload content --name content1 --file ./go.sum --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
+  ```
+
+- **追加内容**
+
+  向指定内容追加内容：
+
+  ```sh
+  storage-cli append --name content3 --data " world" --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
+  ```
+
+- **下载内容**
+
+  下载指定内容：
+
+  ```sh
+  storage-cli download content --name content3
+  ```
+
+- **所有者转移**
+
+  转移内容的所有权：
+
+  ```sh
+  storage-cli owner transfer --name content2 --from 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --to 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
+  ```
+- **所有权查询**
+
+  查询账户是否拥有内容所有权：
+
+  ```sh
+  storage-cli owner content --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --name content2 
+  ```
+
+### 零知识证明
+
+- **生成证明**
+
+  生成零知识证明：
+
+  ```sh
+  storage-cli zk proof -v '{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}' -t 20000101 -k verysecretkey123 -i uniqueiv12345678
+  ```
+
+- **验证证明**
+
+  验证零知识证明：
+
+  ```sh
+  storage-cli zk verify --proof <proof> --root <root_hash> --birth_threshold 20000101
+  ```
+
+## 高级功能
+
+### 批量上传
+
+批量上传 N 条随机数据：
 
 ```sh
-Storage cli for upload, append, verify, batchupload, owner manager and template manager
-
-Usage:
-  storage-cli [command]
-
-Available Commands:
-  append      Append content to specified file
-  batch       Batch operations
-  download    Download file or content
-  file        File operations
-  help        Help about any command
-  owner       Owner operations
-  template    Template opertaions
-  upload      Upload file or content
-  verify      Verify file
-  zk          generate zk proof and verify
-
-Flags:
-  -h, --help   help for storage-cli
-
-Use "storage-cli [command] --help" for more information about a command.
+storage-cli run . batch upload -c 100000
 ```
+
+### 模板管理
+
+- **创建模板**
+
+  创建新的存证模板：
+
+  ```sh
+  storage-cli template create --name test4 --keys name,age
+  ```
+
+- **下载模板**
+
+  下载存证模板：
+
+  ```sh
+  storage-cli template download --name test4
+  ```
+
+## 常见问题
+
+1. **如何配置多个存储节点？**
+
+   在配置文件中，`storageNodes` 字段可以接受一个节点列表。
+
+2. **如何处理上传失败的情况？**
+
+   请检查网络连接和配置文件中的节点地址是否正确。
+
+3. **如何确保数据的安全性？**
+
+   使用加密方法上传文件，并在配置中设置合适的加密参数。
+
+## 版本信息
+
+当前版本：1.0.0-testnet
+
+## 贡献
+
+欢迎提交问题和贡献代码！请访问我们的 [GitHub 仓库](https://github.com/wangdayong228/0g-storage-contracts) 了解更多信息。

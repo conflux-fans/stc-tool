@@ -1,103 +1,124 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
+	"time"
 
+	"github.com/0glabs/0g-storage-client/node"
 	"github.com/conflux-fans/storage-cli/logger"
-	"github.com/conflux-fans/storage-cli/utils/encryptutils"
 	"github.com/conflux-fans/storage-cli/zkclient"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
-func ZkProof(vc string, birthdateThreshold string) (*zkclient.ProveOutput, error) {
+type Zk struct {
+	client *zkclient.Client
+}
+
+func NewZk() *Zk {
+	return &Zk{
+		client: zkClient,
+	}
+}
+
+func (z *Zk) ZkProof(vc, key, iv, birthdateThreshold string) (*zkclient.ProveOutput, error) {
 	var _vc zkclient.VC
 	if err := json.Unmarshal([]byte(vc), &_vc); err != nil {
 		return nil, errors.WithMessage(err, "failed to parse vc")
 	}
 
-	// upload encrypted vc
-	encryptedVc, err := encryptutils.EncryptBytes(_vc.EncodeAndPadToSector(), "aes", "1234567812345678")
-	if err != nil {
-		return nil, errors.WithMessage(err, "failed to encrypt vc")
-	}
+	logrus.WithField("flow length", z.mustGetFlowLength()).Info("ready to upload vc data")
 
-	segTree, _, err := DefaultUploader().UploadString(zkclient.PadToSector(encryptedVc))
+	// key, iv := "verysecretkey123", "uniqueiv12345678"
+	vcUploadData := _vc.MustGetUploadText(key, iv)
+	submissionTx, dataRoot, err := DefaultUploader().UploadBytes(vcUploadData)
 	if err != nil {
 		return nil, err
 	}
-	logger.Get().Info("encrypted vc uploaded successfully")
+	logger.Get().WithField("flow length", z.mustGetFlowLength()).WithField("submission tx", submissionTx).WithField("data root", dataRoot).Info("vc hash uploaded successfully")
 
-	// upload vc hash
-	data := _vc.Hash()
-	_, chunksTree, err := DefaultUploader().UploadString(zkclient.PadToSector(data[:]))
-	if err != nil {
-		return nil, err
-	}
-	logger.Get().Info("vc hash uploaded successfully")
-
-	// get vc hash merkel proof against flow
-	// segmentWithProof, err := nodeClients[0].ZeroGStorage().DownloadSegmentWithProof(segmentTree.Root(), 0)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// lemma := segmentWithProof.Proof.Lemma
-	// PathElements := lemma[:len(lemma)-1]
-
-	// pathIndex := zkclient.BoolsToUint64(segmentWithProof.Proof.Path)
-	// logger.Get().WithField("path elements", lemma).WithField("path index", pathIndex).WithField("root", segmentTree).Info("Get merkel proof")
-
-	// chunksTree, err := getChunksTree(data)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// TODO: gen proof
-	lemma := chunksTree.ProofAt(0).Lemma
-	PathElements := lemma[:len(lemma)-1]
-
-	pathIndex := zkclient.BoolsToUint64(chunksTree.ProofAt(0).Path)
-
-	vcProof, err := zkClient.GetProof(&zkclient.ProveInput{
-		Data:               _vc,
-		BirthdateThreshold: birthdateThreshold,
-		MerkleProof:        PathElements,
-		PathIndex:          pathIndex,
-	})
+	flowProof, err := z.getSectorProof(submissionTx)
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: get flow root
-	// flowRoot, err := defaultFlow.Root(nil)
-	flowRoot := common.Hash{}
+	if flowProof.Lemma[0] != dataRoot {
+		logrus.WithField("flow proof data root", flowProof.Lemma[0]).WithField("data root", dataRoot).Error("flow proof data root not match")
+	}
+
+	vcProof, err := z.getVcProof(key, iv, _vc, flowProof, birthdateThreshold)
 	if err != nil {
 		return nil, err
 	}
 
 	return &zkclient.ProveOutput{
-		Proof:         vcProof,
-		EncryptVcRoot: segTree.Root(),
-		FlowRoot:      flowRoot,
+		Proof:            vcProof,
+		VcUploadTextRoot: dataRoot,
+		FlowRoot:         flowProof.Lemma[len(flowProof.Lemma)-1],
 	}, nil
 }
 
-func ZkVerify(vcProof string, birthdateThreshold string, root string) (bool, error) {
+// get proof
+// 1. get sector position by submission tx log
+// 2. get sector proof by storage-client
+func (z *Zk) getSectorProof(submissionTxHash common.Hash) (*node.FlowProof, error) {
+	receipt, err := adminW3Client.Eth.TransactionReceipt(submissionTxHash)
+	if err != nil {
+		return nil, err
+	}
+
+	submit, err := defaultFlow.ParseSubmit(*receipt.Logs[0].ToEthLog())
+	if err != nil {
+		return nil, err
+	}
+
+	time.Sleep(time.Second * 5)
+
+	return zgNodeClients[0].GetSectorProof(context.Background(), submit.StartPos.Uint64(), nil)
+}
+
+func (z *Zk) getVcProof(key, iv string, vc zkclient.VC, flowProof *node.FlowProof, birthdateThreshold string) (string, error) {
+	pathElementms := flowProof.Lemma[1 : len(flowProof.Lemma)-1]
+	pathIndex := z.genVcInputPath(flowProof.Path)
+	// pathIndex := zkclient.BoolsToUint64(zkclient.InvertBools(flowProof.Path[1 : len(flowProof.Path)-1]))
+
+	birthdate, err := time.Parse("20060102", birthdateThreshold)
+	if err != nil {
+		return "", errors.WithMessage(err, "failed to parse birthdate threshold")
+	}
+	logger.Get().WithField("merkel proof", pathElementms).WithField("path index", pathIndex).Info("ready to gen vc proof")
+
+	return zkClient.GetProof(zkclient.NewProveInput(key, iv, vc, pathElementms, pathIndex, []zkclient.ExtensionSignal{{Date: &birthdate}}))
+}
+
+func (z *Zk) genVcInputPath(flowProofPath []bool) uint64 {
+	p := zkclient.InvertBools(flowProofPath)
+	p = zkclient.ReverseBools(p)
+	return zkclient.BoolsToUint64(p)
+}
+
+func (z *Zk) mustGetFlowLength() uint64 {
+	tree, err := defaultFlow.Tree(nil)
+	if err != nil {
+		panic(err)
+	}
+	return tree.CurrentLength.Uint64()
+}
+
+func (z *Zk) ZkVerify(vcProof string, birthdateThreshold string, root string) (bool, error) {
 	logger.Get().WithField("proof", vcProof).
 		WithField("birthdate_threshold", birthdateThreshold).
-		// WithField("leaf_hash", leafHash).
 		WithField("root", root).
 		Info("start zk verify")
 
-	// var _pubInputs []string
-	// if err := json.Unmarshal([]byte(pubInputs), &_pubInputs); err != nil {
-	// 	return false, errors.WithMessage(err, "failed to unmarshal public inputs")
-	// }
+	birthdate, err := time.Parse("20060102", birthdateThreshold)
+	if err != nil {
+		return false, errors.WithMessage(err, "failed to parse birthdate threshold")
+	}
 	return zkClient.Verify(vcProof, zkclient.VerifyInput{
-		BirthdateThreshold: birthdateThreshold,
-		Root:               common.HexToHash(root),
-		// LeafHash:           common.HexToHash(leafHash),
-
+		Extensions: []zkclient.ExtensionSignal{{Date: &birthdate}},
+		Root:       common.HexToHash(root),
 	})
 }

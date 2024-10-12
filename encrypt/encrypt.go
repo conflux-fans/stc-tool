@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/encrypt/aes"
 	"github.com/conflux-fans/storage-cli/encrypt/empty"
 	"github.com/pkg/errors"
@@ -17,18 +18,21 @@ type Encryptor interface {
 }
 
 var (
-	aseEncryptor   aes.AesEncryptor
-	emptyEncryptor empty.EmptyEncryptor
+	aseCbcEncryptor aes.AesCbcEncryptor
+	aseCtrEncryptor aes.AesCtrEncryptor
+	emptyEncryptor  empty.EmptyEncryptor
 )
 
-func GetEncryptor(method string) (Encryptor, error) {
+func GetEncryptor(method enums.CipherMethod) (Encryptor, error) {
 	switch method {
-	case "":
+	case enums.CIPHER_METHOD_EMPTY:
 		return &emptyEncryptor, nil
-	case "aes":
-		return &aseEncryptor, nil
+	case enums.CIPHER_METHOD_AES_CBC:
+		return &aseCbcEncryptor, nil
+	case enums.CIPHER_METHOD_AES_CTR:
+		return &aseCtrEncryptor, nil
 	}
-	return nil, errors.New("unsupport")
+	return nil, errors.New("unsupport cipher method")
 }
 
 func EncryptBytes(e Encryptor, input, key []byte) ([]byte, error) {
