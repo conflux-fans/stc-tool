@@ -22,48 +22,6 @@ func DefaultAppender() *Appender {
 	return &appender
 }
 
-// appendExtendOrCreate 向现有内容追加数据或在指定时创建新内容
-//
-// 参数:
-//   - account: 操作账户地址
-//   - name: 内容名称
-//   - data: 要追加的数据
-//   - createIfNotExist: 如果内容不存在是否创建新内容
-// func (a *Appender) appendExtendOrCreate(account common.Address, name string, dataType enums.ExtendDataType, data ccore.IterableData, createIfNotExist bool) error {
-// 	if data.Size() > constants.CONTENT_MAX_SIZE {
-// 		return errors.New("Exceed max size once uploadable")
-// 	}
-
-// 	logger.Get().WithField("name", name).Info("Start append content")
-
-// 	meta, err := a.GetMeta(account, name)
-// 	if err != nil {
-// 		if errors.Cause(err) == ERR_UNEXIST_CONTENT && createIfNotExist {
-// 			txHash, tokenID, err := DefaultOwnerOperator().Mint(account)
-// 			if err != nil {
-// 				return errors.WithMessage(err, "Failed to mint")
-// 			}
-// 			logger.Get().WithField("txHash", txHash.Hex()).WithField("tokenID", tokenID.String()).Info("Mint content owner NFT completed")
-
-// 			meta = &ContentMetadata{
-// 				Name:           name,
-// 				ExtendDataType: dataType,
-// 				OwnerTokenID:   tokenID.Uint64(),
-// 			}
-// 		} else {
-// 			return err
-// 		}
-// 	}
-
-// 	switch dataType {
-// 	case enums.EXTEND_DATA_TEXT:
-// 		return a.uploadExtendAsText(account, name, meta, data)
-// 	case enums.EXTEND_DATA_POINTER:
-// 		return a.uploadExtendAsPointer(account, name, meta, data)
-// 	}
-// 	return nil
-// }
-
 func (a *Appender) AppendExtend(account common.Address, name string, data ccore.IterableData) error {
 	if data.Size() > constants.CONTENT_MAX_SIZE {
 		return errors.New("Exceed max size once uploadable")
@@ -155,39 +113,6 @@ func (a *Appender) uploadLinesAndSetSpecialWriter(account common.Address, name s
 
 	return nil
 }
-
-// func (a *Appender) AppendDataFromFile(account common.Address, name string, filePath string) error {
-// 	return a.appendDataFromFileOrCreate(account, name, filePath, false)
-// }
-
-// // appendDataFromFileOrCreate 将文件内容追加到指定名称的目标中
-// // 参数:
-// //   - account: 账户地址
-// //   - name: 目标名称
-// //   - filePath: 要追加的文件路径
-// //   - force: 如果为true,则在目标不存在时创建新的目标并追加内容
-// func (a *Appender) appendDataFromFileOrCreate(account common.Address, name string, filePath string, force bool) error {
-// 	f, err := a.openFile(filePath)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// split by VALUE_MAX_SIZE
-// 	for {
-// 		buffer := make([]byte, constants.CONTENT_MAX_SIZE)
-// 		n, err := f.Read(buffer)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if n == 0 {
-// 			return nil
-// 		}
-
-// 		if err = a.appendDataOrCreate(account, name, string(buffer[:n]), force); err != nil {
-// 			return err
-// 		}
-// 	}
-// }
 
 func (a *Appender) openFile(name string) (*os.File, error) {
 	file, err := os.Open(name)
