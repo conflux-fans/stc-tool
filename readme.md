@@ -56,7 +56,7 @@ extendData:
   上传文件到存储节点：
 
   ```sh
-  storage-cli upload file --file ~/tmp/random_files/file_1.txt
+  storage-cli upload file --file ./file_1.txt
   ```
 
 - **上传内容**
@@ -72,7 +72,7 @@ extendData:
   向指定内容追加内容：
 
   ```sh
-  storage-cli append --name content3 --data " world" --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
+  storage-cli append --name content1 --data " world" --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
   ```
 
 - **下载内容**
@@ -80,7 +80,7 @@ extendData:
   下载指定内容：
 
   ```sh
-  storage-cli download content --name content3
+  storage-cli download content --name content1
   ```
 
 - **所有者转移**
@@ -88,14 +88,14 @@ extendData:
   转移内容的所有权：
 
   ```sh
-  storage-cli owner transfer --name content2 --from 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --to 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
+  storage-cli owner transfer --name content1 --from 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --to 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b
   ```
 - **所有权查询**
 
   查询账户是否拥有内容所有权：
 
   ```sh
-  storage-cli owner content --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --name content2 
+  storage-cli owner content --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE --name content1 
   ```
 
 ### 零知识证明
