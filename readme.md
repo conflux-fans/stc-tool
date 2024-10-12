@@ -46,6 +46,14 @@ log : info # info,debug
 extendData:
   textMaxSize: 1024 # 大于该长度的数据将以 pointer 扩展数据类型存储
 ```
+## 准备工作
+
+运行命令前需要确保账户中有足够的 CFX 余额，否则无法正常运行。
+
+该工具提供了初始化账户余额的命令，可以用来为指定账户充值。
+```sh
+cd ./scripts/init && go run .
+```
 
 ## 使用方法
 
@@ -150,18 +158,15 @@ storage-cli run . batch upload -c 100000
 
    在配置文件中，`storageNodes` 字段可以接受一个节点列表。
 
-2. **如何处理上传失败的情况？**
+2. **配置中的节点信息怎么填？**
 
-   请检查网络连接和配置文件中的节点地址是否正确。
+   需要分别搭建 `storage-node`,`kv-node`,`blockchain` 节点服务。
 
 3. **如何确保数据的安全性？**
 
-   使用加密方法上传文件，并在配置中设置合适的加密参数。
+   upload 命令可以使用加密方法上传文件，并在配置中设置合适的加密参数。
 
-## 版本信息
-
-当前版本：1.0.0-testnet
 
 ## 贡献
 
-欢迎提交问题和贡献代码！请访问我们的 [GitHub 仓库](https://github.com/wangdayong228/0g-storage-contracts) 了解更多信息。
+欢迎提交问题和贡献代码！请访问我们的 [GitHub 仓库](https://github.com/conflux-fans/storage-cli) 了解更多信息。
