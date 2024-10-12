@@ -138,11 +138,11 @@ func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta 
 	entries[meta.LineTotalKey()] = fmt.Sprintf("%d", meta.LineTotal+i)
 	entries[meta.ExtendDataTypeKey()] = meta.ExtendDataType.String()
 	entries[meta.ExtendDataOwnerTokenIDKey()] = meta.OwnerTokenID
-
 	for k, v := range entries {
 		batcher.Set(kvStreamId, []byte(k), []byte(v))
 	}
-	logger.Get().WithField("entries", entries).Info("Set line metadata kvs")
+
+	logger.Get().WithField("line total", entries[meta.LineTotalKey()]).WithField("extend type", entries[meta.ExtendDataTypeKey()]).WithField("owner token id", entries[meta.ExtendDataOwnerTokenIDKey()]).Info("Set line metadata kvs")
 
 	_, err = batcher.Exec(context.Background())
 	if err != nil {
