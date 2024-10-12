@@ -165,8 +165,3 @@ storage-cli run . batch upload -c 100000
 3. **如何确保数据的安全性？**
 
    upload 命令可以使用加密方法上传文件，并在配置中设置合适的加密参数。
-
-
-## 贡献
-
-欢迎提交问题和贡献代码！请访问我们的 [GitHub 仓库](https://github.com/conflux-fans/storage-cli) 了解更多信息。
