@@ -37,7 +37,7 @@ func (z *Zk) ZkProof(vc, key, iv, birthdateThreshold string) (*zkclient.ProveOut
 	if err != nil {
 		return nil, err
 	}
-	logger.Get().WithField("flow length", z.mustGetFlowLength()).WithField("submission tx", submissionTx).WithField("data root", dataRoot).Info("vc hash uploaded successfully")
+	logger.Get().WithField("flow length", z.mustGetFlowLength()).WithField("submission tx", submissionTx).WithField("data root", dataRoot).Info("VC uploaded successfully")
 
 	flowProof, err := z.getSectorProof(submissionTx)
 	if err != nil {
@@ -88,7 +88,7 @@ func (z *Zk) getVcProof(key, iv string, vc zkclient.VC, flowProof *node.FlowProo
 	if err != nil {
 		return "", errors.WithMessage(err, "failed to parse birthdate threshold")
 	}
-	logger.Get().WithField("merkel proof", pathElementms).WithField("path index", pathIndex).Info("ready to gen vc proof")
+	logger.Get().WithField("merkel proof", pathElementms).WithField("path index", pathIndex).Info("Ready to gen vc proof")
 
 	return zkClient.GetProof(zkclient.NewProveInput(key, iv, vc, pathElementms, pathIndex, []zkclient.ExtensionSignal{{Date: &birthdate}}))
 }
@@ -111,7 +111,7 @@ func (z *Zk) ZkVerify(vcProof string, birthdateThreshold string, root string) (b
 	logger.Get().WithField("proof", vcProof).
 		WithField("birthdate_threshold", birthdateThreshold).
 		WithField("root", root).
-		Info("start zk verify")
+		Info("Start zk verify")
 
 	birthdate, err := time.Parse("20060102", birthdateThreshold)
 	if err != nil {

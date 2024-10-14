@@ -77,7 +77,7 @@ func (a *Uploader) UploadExtendIfNotExist(account common.Address, name string, d
 		return errors.New("Exceed max size once uploadable")
 	}
 
-	logger.Get().WithField("name", name).Info("Start append content")
+	logger.Get().WithField("name", name).Info("Start upload content")
 
 	_, err := GetContentMetadata(name)
 	if err == nil {
@@ -133,7 +133,7 @@ func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta 
 		entries[meta.LineIndexKey(meta.LineTotal+i)] = string(iterator.Current())
 		i++
 	}
-	logger.Get().WithField("line num", i).Info("content lines")
+	logger.Get().WithField("line num", i).Info("Content lines")
 
 	entries[meta.LineTotalKey()] = fmt.Sprintf("%d", meta.LineTotal+i)
 	entries[meta.ExtendDataTypeKey()] = meta.ExtendDataType.String()
@@ -148,7 +148,7 @@ func (a *Uploader) uploadExtendAsText(account common.Address, name string, meta 
 	if err != nil {
 		return errors.WithMessage(err, "Failed to set values of content")
 	}
-	logger.Get().WithField("name", name).WithField("line", i).Info("Append content completed")
+	logger.Get().WithField("name", name).WithField("line", i).Info("Upload content completed")
 
 	return nil
 }

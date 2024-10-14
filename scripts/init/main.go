@@ -17,11 +17,11 @@ import (
 
 func main() {
 	initConfig()
+	checkContractsExist()
 	distributeEth()
 }
 
 func initConfig() {
-	config.SetConfigFile("../../config.yaml")
 	config.Init()
 }
 
@@ -50,5 +50,24 @@ func distributeEth() {
 			panic(fmt.Sprintf("发送交易失败: %s", err))
 		}
 		fmt.Printf("交易已发送: %s\n", txHash)
+	}
+}
+
+func checkContractsExist() {
+	cfg := config.Get()
+	client := web3go.MustNewClient(cfg.BlockChain.URL)
+	contracts := []common.Address{
+		common.HexToAddress(cfg.BlockChain.FlowContract),
+		// common.HexToAddress(cfg.BlockChain.TemplateContract),
+		common.HexToAddress(cfg.BlockChain.PmContract),
+	}
+	for _, contract := range contracts {
+		code, err := client.Eth.CodeAt(contract, nil)
+		if err != nil {
+			panic(fmt.Sprintf("获取 %v 合约代码失败: %s", contract, err))
+		}
+		if len(code) == 0 {
+			panic(fmt.Sprintf("合约 %v 不存在", contract))
+		}
 	}
 }

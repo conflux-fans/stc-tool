@@ -69,10 +69,16 @@ cd ./scripts/init && go run .
 
 - **上传内容**
 
-  上传内容到存储节点：
+  上传内容为 pointer数据类型 到存储节点：
 
   ```sh
   storage-cli upload content --name content1 --file ./go.sum --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
+  ```
+
+  上传内容为 text数据类型 到存储节点：
+
+  ```sh
+  storage-cli upload content --name content1 --content "hello" --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
   ```
 
 - **追加内容**
@@ -89,6 +95,11 @@ cd ./scripts/init && go run .
 
   ```sh
   storage-cli download content --name content1
+  ```
+
+  下载内容并输出到终端：
+  ```sh
+  storage-cli download content --name content2 --console
   ```
 
 - **所有者转移**
@@ -131,7 +142,7 @@ cd ./scripts/init && go run .
 批量上传 N 条随机数据：
 
 ```sh
-storage-cli run . batch upload -c 100000
+storage-cli batch upload -c 100000
 ```
 
 ### 模板管理
