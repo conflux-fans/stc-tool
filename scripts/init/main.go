@@ -17,8 +17,8 @@ import (
 
 func main() {
 	initConfig()
-	checkContractsExist()
 	distributeEth()
+	checkContractsExist()
 }
 
 func initConfig() {
