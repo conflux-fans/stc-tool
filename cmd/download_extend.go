@@ -21,7 +21,6 @@ var downloadExtendCmd = &cobra.Command{
 			logger.Failf("Failed to download content %s: %v\n", name, err)
 			return
 		}
-		logger.SuccessWithResult(name, "Download content successfully")
 	},
 }
 

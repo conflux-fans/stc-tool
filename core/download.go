@@ -71,9 +71,12 @@ func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole b
 		if err := d.displayOnConsole(meta); err != nil {
 			return errors.WithMessage(err, "Failed to display on console")
 		}
+	} else {
+		logger.SuccessfWithParams(map[string]string{
+			"Name":     name,
+			"SaveFile": meta.SaveFile(),
+		}, "Download content successfully")
 	}
-
-	logger.Get().Info(fmt.Sprintf("Download data %s to file %s completed ", meta.Name, meta.SaveFile()))
 
 	return nil
 }
@@ -121,13 +124,16 @@ func (d *Downloader) displayOnConsole(meta *ContentMetadata) error {
 
 	if fileInfo.Size() > 1024 {
 		logger.Get().Warn("File size exceeds 1k, not displaying on console")
+		metaMap := meta.ToMap()
+		metaMap["Content"] = "please find content in file " + meta.SaveFile()
+		logger.SuccessfWithParams(metaMap, "Download content completed")
 	} else {
 		content, err := os.ReadFile(meta.SaveFile())
 		if err != nil {
 			return errors.WithMessage(err, "Failed to read file")
 		}
 		metaMap := meta.ToMap()
-		metaMap["content"] = string(content)
+		metaMap["Content"] = string(content)
 		logger.SuccessfWithParams(metaMap, "Download content completed")
 	}
 	return nil
