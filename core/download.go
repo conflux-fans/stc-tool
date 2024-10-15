@@ -73,6 +73,8 @@ func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole b
 		}
 	}
 
+	logger.Get().Info(fmt.Sprintf("Download data %s to file %s completed ", meta.Name, meta.SaveFile()))
+
 	return nil
 }
 
@@ -107,7 +109,7 @@ func (d *Downloader) downloadToFileByText(meta *ContentMetadata) error {
 			return errors.WithMessage(err, "Failed to write file")
 		}
 	}
-	logger.Get().Info(fmt.Sprintf("Download data %s to file %s.zg completed ", meta.Name, meta.Name))
+	logger.Get().Info(fmt.Sprintf("Download data %s to file %s completed ", meta.Name, meta.SaveFile()))
 	return nil
 }
 
