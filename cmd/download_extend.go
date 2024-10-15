@@ -19,6 +19,7 @@ var downloadExtendCmd = &cobra.Command{
 		isShowMetadata, _ := cmd.Flags().GetBool("metadata")
 		if err := core.DefaultDownloader().DownloadExtend(name, isShowMetadata, isOutputToconsole); err != nil {
 			logger.Failf("Failed to download content %s: %v\n", name, err)
+			return
 		}
 		logger.SuccessWithResult(name, "Download content successfully")
 	},
