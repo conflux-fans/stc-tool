@@ -66,7 +66,7 @@ func init() {
 	uploadCmd.AddCommand(uploadExtendCmd)
 	uploadExtendCmd.Flags().StringVar(&fileOfContent, "file", "", "file path of content to upload")
 	uploadExtendCmd.Flags().StringVar(&content, "content", "", "content be uploaded")
-	uploadExtendCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
-	uploadExtendCmd.Flags().StringVar(&account, "account", "", "name, for appending content")
-	uploadExtendCmd.MarkFlagsOneRequired("content", "file")
+	uploadExtendCmd.Flags().StringVar(&name, "name", "", "content name")
+	uploadExtendCmd.Flags().StringVar(&account, "account", "", "account address of content owner")
+	uploadExtendCmd.MarkFlagsOneRequired("content", "file", "name", "account")
 }

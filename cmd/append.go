@@ -14,8 +14,8 @@ import (
 // appendCmd represents the append command
 var appendCmd = &cobra.Command{
 	Use:   "append",
-	Short: "Append content to specified file",
-	Long:  `Append content to specified file`,
+	Short: "Append data",
+	Long:  `Append data to specified uploaded content by name`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !common.IsHexAddress(account) {
 			logger.Failf("account %s is not valid address", account)
@@ -44,7 +44,7 @@ var appendCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(appendCmd)
-	appendCmd.Flags().StringVar(&filePath, "file", "", "file path of content to upload")
+	appendCmd.Flags().StringVar(&filePath, "file", "", "path of the file containing content to append")
 	appendCmd.Flags().StringVar(&content, "data", "", "append content")
 	appendCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
 	appendCmd.Flags().StringVar(&account, "account", "", "name, for appending content")

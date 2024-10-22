@@ -16,7 +16,7 @@ import (
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Verify file",
-	Long:  `Verify file`,
+	Long:  `Verify if file match with providing file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cipherMethod, err := enums.ParseCipherMethod(cipher)
 		if err != nil {
