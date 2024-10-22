@@ -305,3 +305,34 @@ storage-cli zk proof \
    - VC Proof : c9c3da6512e9f20ef8dd07df85fd6831d6a8dc82f58f88a4d2f3163941345b9a5ab2e38a717ae078b1bb2c576878f3ed8f24161f4693ef2b0891ae9fb97d1103608d86f2697fc3336966effee5516460067463761cc5004ca2a113fbc0183099ca74cb260b27e0bc97bd15e9e1a8339b1e56d73d640d504dc65b94d55d087c28
    - Flow Root: 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
 ```
+
+## 10. 零知识证明验证
+
+验证零知识证明以确保数据的真实性和完整性。验证通过时结果为 `true`，否则为 `false`。
+
+### 命令语法
+
+```shell
+storage-cli zk verify --proof <PROOF> --root <ROOT_HASH> --birth_threshold <BIRTH_DATE_THRESHOLD>
+```
+
+### 选项说明
+
+| 选项 | 必填 | 说明 |
+|------|------|------|
+| `--proof <PROOF>` | 是 | 零知识证明字符串 |
+| `--root <ROOT_HASH>` | 是 | 去中心化文件系统的根哈希值 |
+| `--birth_threshold <BIRTH_DATE_THRESHOLD>` | 是 | 要验证的出生日期阈值，格式为年/月/日（如：20240101）|
+
+### 示例
+
+**示例 14**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
+
+```shell
+storage-cli zk verify \
+   --proof c9c3da6512e9f20ef8dd07df85fd6831d6a8dc82f58f88a4d2f3163941345b9a5ab2e38a717ae078b1bb2c576878f3ed8f24161f4693ef2b0891ae9fb97d1103608d86f2697fc3336966effee5516460067463761cc5004ca2a113fbc0183099ca74cb260b27e0bc97bd15e9e1a8339b1e56d73d640d504dc65b94d55d087c28 \
+   --root 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4 \
+   --birth_threshold 20000101
+```
+
+> **注意**：示例中使用的证明和根哈希值来自[生成零知识证明](#9-生成零知识证明)的输出结果。
