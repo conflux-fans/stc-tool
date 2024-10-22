@@ -226,9 +226,9 @@ storage-cli zk verify --proof <proof> --root <root_hash> --birth_threshold <birt
 
 ### 参数说明
 
-- `--proof <proof>` 是需要验证的零知识证明。
-- `--root <root_hash>` 是数据的根哈希。
-- `--birth_threshold <birth_date_threshold>` 是出生日期的阈值。
+- `--proof <proof>` 零知识证明。
+- `--root <root_hash>` 去中心化文件系统根哈希。
+- `--birth_threshold <birth_date_threshold>` 要验证的出生日期。
 
 ### 示例
 示例 14： 用零知识证明的方式验证 Alice 的生日是否为 20000101
