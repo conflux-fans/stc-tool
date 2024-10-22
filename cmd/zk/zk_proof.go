@@ -33,14 +33,17 @@ var (
 	birthDateThreshold string
 	key                string
 	iv                 string
+	sourceFile         string
 )
 
 func init() {
 	zkCmd.AddCommand(zkProofCmd)
-	zkProofCmd.Flags().StringVarP(&vc, "vc", "v", "", "vc string in json format")
-	zkProofCmd.Flags().StringVarP(&birthDateThreshold, "threshold", "t", "", "birth date threshold, format is yearmonthdate, such as 20240101")
-	zkProofCmd.Flags().StringVarP(&key, "key", "k", "", "key")
+	// zkProofCmd.Flags().StringVarP(&vc, "vc", "v", "", "vc string in json format")
+	// zkProofCmd.Flags().StringVarP(&birthDateThreshold, "threshold", "t", "", "birth date threshold, format is yearmonthdate, such as 20240101")
+	// zkProofCmd.Flags().StringVarP(&key, "key", "k", "", "key")
+	// zkProofCmd.Flags().StringVarP(&iv, "iv", "i", "", "iv")
 	zkProofCmd.Flags().StringVarP(&iv, "iv", "i", "", "iv")
+	zkProofCmd.Flags().StringVarP(&sourceFile, "key", "k", "", "key")
 	zkProofCmd.MarkFlagRequired("vc")
 	zkProofCmd.MarkFlagRequired("threshold")
 }
