@@ -127,7 +127,7 @@ storage-cli upload content --account <ACCOUNT_ADDRESS> --name <CONTENT_NAME> (--
 ```shell
 storage-cli upload content \
    --content "Hello, World!" \
-   --account 0x1234567890abcdef \
+   --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
    --name "Greeting"
 ```
 
@@ -136,7 +136,7 @@ storage-cli upload content \
 ```shell
 storage-cli upload content \
    --file content.txt \
-   --account 0x1234567890abcdef \
+   --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
    --name "FileContent"
 ```
 
@@ -231,11 +231,11 @@ storage-cli owner content --account <ACCOUNT_ADDRESS> --name <CONTENT_NAME>
 
 ### 示例
 
-**示例 11**：检查账户 `0x1234567890abcdef` 是否拥有名称为 Greeting 的内容：
+**示例 11**：检查账户 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 是否拥有名称为 Greeting 的内容：
 
 ```shell
 storage-cli owner content \
-   --account 0x1234567890abcdef \
+   --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
    --name "Greeting"
 ```
 
@@ -259,12 +259,12 @@ storage-cli owner transfer --from <CURRENT_OWNER> --to <TARGET_OWNER> --name <CO
 
 ### 示例
 
-**示例 12**：将名称为 Greeting 的内容的所有权从 `0x1234567890abcdef` 转移给 `0xfedcba0987654321`：
+**示例 12**：将名称为 Greeting 的内容的所有权从 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 转移给 `0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b`：
 
 ```shell
 storage-cli owner transfer \
-   --from 0x1234567890abcdef \
-   --to 0xfedcba0987654321 \
+   --from 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
+   --to 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b \
    --name "Greeting"
 ```
 
