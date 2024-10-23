@@ -132,7 +132,7 @@ func (z *Zk) getSectorProof(submissionTxHash common.Hash) (*node.FlowProof, erro
 func convertFlowProofToForZk(flowProof *node.FlowProof) *FlowProofForZk {
 	fp := &FlowProofForZk{}
 	fp.Lemma = flowProof.Lemma[1 : len(flowProof.Lemma)-1]
-	fp.Path = genVcInputPath(flowProof.Path[1 : len(flowProof.Path)-1])
+	fp.Path = genVcInputPath(flowProof.Path)
 	fp.VcDataRoot = flowProof.Lemma[0]
 	fp.FlowRoot = flowProof.Lemma[len(flowProof.Lemma)-1]
 	return fp
