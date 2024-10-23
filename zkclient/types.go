@@ -182,9 +182,9 @@ func (e *ExtensionSignal) UnmarshalJSON(data []byte) error {
 }
 
 type ProveOutput struct {
-	Proof            string
-	VcUploadTextRoot common.Hash
-	FlowRoot         common.Hash
+	Proof      string
+	VcDataRoot common.Hash
+	FlowRoot   common.Hash
 }
 
 type VerifyInput struct {

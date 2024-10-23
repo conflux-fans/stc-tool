@@ -55,7 +55,7 @@ func initProviderOpt() {
 	}
 	zgLogOpt.Logger = logrus.New()
 	zgLogOpt.LogLevel = logrus.DebugLevel
-	providerOpt.RequestTimeout = time.Minute
+	providerOpt.RequestTimeout = time.Minute * 3
 }
 
 func Init() {

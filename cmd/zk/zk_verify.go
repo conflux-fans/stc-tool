@@ -28,7 +28,7 @@ var zkVerifyCmd = &cobra.Command{
 }
 
 var (
-	proof, root string
+	proof, root, birthDateThreshold string
 )
 
 func init() {
