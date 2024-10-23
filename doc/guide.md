@@ -140,7 +140,7 @@ storage-cli upload content \
    --name "FileContent"
 ```
 
-## 下载文件
+## 5. 下载文件
 
 从去中心化存储系统下载文件。可以使用文件共享代码或根哈希值进行下载。
 
@@ -154,24 +154,24 @@ storage-cli download file (--code <FILE_SHARE_CODE> | --root <ROOT_HASH>)
 
 | 选项 | 必填 | 说明 |
 |------|------|------|
-| `--code <FILE_SHARE_CODE>` | 与 `--root` 二选一 | 件共享代码，用于下载文件 |
+| `--code <FILE_SHARE_CODE>` | 与 `--root` 二选一 | 文件共享代码，用于下载文件 |
 | `--root <ROOT_HASH>` | 与 `--code` 二选一 |  已上传的中心化文件的根哈希值|
 
 ### 示例
 
-**示例 15**：使用文件共享代码下载文件：
+**示例 7**：使用文件共享代码下载文件：
 
 ```shell
 storage-cli download file --code abc123def456
 ```
 
-**示例 16**：使用根哈希值下载文件：
+**示例 8**：使用根哈希值下载文件：
 
 ```shell
 storage-cli download file --root 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
 ```
 
-## 13. 下载内容
+## 6. 下载内容
 
 从去中心化存储系统下载内容。可以选择将内容输出到控制台或输出元数据。
 
@@ -191,19 +191,19 @@ storage-cli download content [flags]
 
 ### 示例
 
-**示例 18**：下载名称为 "ExampleData" 的内容并输出到控制台：
+**示例 9**：下载名称为 "ExampleData" 的内容并输出到控制台：
 
 ```shell
 storage-cli download content --name "ExampleData" --console
 ```
 
-**示例 19**：下载名称为 "ExampleData" 的内容并输出元数据：
+**示例 10**：下载名称为 "ExampleData" 的内容并输出元数据：
 
 ```shell
-storage-cli download content --name "ExampleData" --metadata --console
+storage-cli download content --name "ExampleData" --metadata
 ```
 
-## 5. 验证文件
+## 7. 验证文件
 
 验证文件是否与提供的文件匹配。当文件是加密上传时，该命令也需要指定相同的加密方法和密码。
 
@@ -223,13 +223,13 @@ storage-cli verify --file <FILE_PATH> [--cipher <CIPHER_METHOD> --password <PASS
 
 ### 示例
 
-**示例 7**：验证非加密上传的文件：
+**示例 11**：验证非加密上传的文件：
 
 ```shell
 storage-cli verify --file example.txt
 ```
 
-**示例 8**：验证加密上传的文件：
+**示例 12**：验证加密上传的文件：
 
 ```shell
 storage-cli verify \
@@ -238,7 +238,7 @@ storage-cli verify \
    --password mypassword123456
 ```
 
-## 6. 追加内容
+## 8. 追加内容
 
 将数据追加到已上传的对应名称的内容后。
 
@@ -259,7 +259,7 @@ storage-cli append --name <CONTENT_NAME> (--data <APPEND_DATA> | --file <FILE_PA
 
 ### 示例
 
-**示例 9**：将文本内容 "Hello again!" 追加到名称为 Greeting 的内容后：
+**示例 13**：将文本内容 "Hello again!" 追加到名称为 Greeting 的内容后：
 
 ```shell
 storage-cli append \
@@ -267,7 +267,7 @@ storage-cli append \
    --data "Hello again!"
 ```
 
-**示例 10**：将文件 `additional_content.txt` 中的内容追加到名称为 FileContent 的内容后：
+**示例 14**：将文件 `additional_content.txt` 中的内容追加到名称为 FileContent 的内容后：
 
 ```shell
 storage-cli append \
@@ -275,7 +275,7 @@ storage-cli append \
    --file additional_content.txt
 ```
 
-## 7. 所有权查询
+## 9. 所有权查询
 
 查询指定用户是否拥有某个内容的所有权。该命令用于查询[内容上传](#4-内容上传)时指定的用户账户地址。
 
@@ -294,7 +294,7 @@ storage-cli owner content --account <ACCOUNT_ADDRESS> --name <CONTENT_NAME>
 
 ### 示例
 
-**示例 11**：检查账户 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 是否拥有名称为 Greeting 的内容：
+**示例 15**：检查账户 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 是否拥有名称为 Greeting 的内容：
 
 ```shell
 storage-cli owner content \
@@ -302,7 +302,7 @@ storage-cli owner content \
    --name "Greeting"
 ```
 
-## 8. 所有权转移
+## 10. 所有权转移
 
 将内容的所有权从一个账户转移到另一个账户。
 
@@ -322,7 +322,7 @@ storage-cli owner transfer --from <CURRENT_OWNER> --to <TARGET_OWNER> --name <CO
 
 ### 示例
 
-**示例 12**：将名称为 Greeting 的内容的所有权从 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 转移给 `0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b`：
+**示例 16**：将名称为 Greeting 的内容的所有权从 `0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE` 转移给 `0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b`：
 
 ```shell
 storage-cli owner transfer \
@@ -331,7 +331,7 @@ storage-cli owner transfer \
    --name "Greeting"
 ```
 
-## 所有权转移历史查询
+## 11. 所有权转移历史查询
 
 查询指定内容的所有权转移历史记录。可以通过内容名称进行查询。
 
@@ -355,8 +355,7 @@ storage-cli owner history --name <CONTENT_NAME>
 storage-cli owner history --name "Greeting"
 ```
 
-
-## 9. 生成零知识证明
+## 12. 生成零知识证明
 
 生成零知识证明以验证特定条件下的数据。输出结果包括 Merkle 证明和去中心化文件系统的 `root hash`，可用于零知识证明验证。
 
@@ -377,7 +376,7 @@ storage-cli zk proof --vc <VC_STRING> --threshold <BIRTH_DATE_THRESHOLD> --key <
 
 ### 示例
 
-**示例 13**：为 Alice 生成零知识证明：
+**示例 18**：为 Alice 生成零知识证明：
 
 ```shell
 storage-cli zk proof \
@@ -394,7 +393,7 @@ storage-cli zk proof \
    - Flow Root: 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
 ```
 
-## 10. 零知识证明验证
+## 13. 零知识证明验证
 
 验证零知识证明以确保数据的真实性和完整性。验证通过时结果为 `true`，否则为 `false`。
 
@@ -414,7 +413,7 @@ storage-cli zk verify --proof <PROOF> --root <ROOT_HASH> --birth_threshold <BIRT
 
 ### 示例
 
-**示例 14**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
+**示例 19**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
 
 ```shell
 storage-cli zk verify \
@@ -423,4 +422,4 @@ storage-cli zk verify \
    --birth_threshold 20000101
 ```
 
-> **注意**：示例中使用的证明和根哈希值来自[生成零知识证明](#9-生成零知识证明)的输出结果。
+> **注意**：示例中使用的证明和根哈希值来自[生成零知识证明](#12-生成零知识证明)的输出结果。
