@@ -24,7 +24,7 @@ func TestZkUpload(t *testing.T) {
 
 	ZkUploadInput := ZkUploadInput{
 		Vc:                 &_vc,
-		BirthdateThreshold: "20240101",
+		BirthdateThreshold: "19990101",
 	}
 	key, iv := "verysecretkey123", "uniqueiv12345678"
 	// zk := NewZk()
@@ -73,13 +73,13 @@ func TestZkUpload(t *testing.T) {
 	})
 
 	t.Run("zk verify", func(_t *testing.T) {
-		proof := "179147f5ce659de5bb82c69649c2a296e9a3157a4d5a22696558af9d11e878875b3b11090e89240637b7c3e9a04bdb1663fbf2fb768ee08cde1f8b252214f5042217ab56966124501e54154e5822bb67720dbc82bcc2e8213bfa49336ec563086194563dfb03572b52cf75948f0e97ea1973a3d63330fd9b569db262c1c3bda1"
-		flowRoot := common.HexToHash("0x096092f289fe8d67ff2ad798845fd059a82207025c0e6cd8b4fc344f30d53aa9")
+		proof := "d9ca38128b8e13b80ea6370705c7d66fedd483a9a8b565da4762ce079cd8572dc55f0f73389ad64708c91e326ff5f9fd7a3081ae3c1f4b535e9e7bda18398220808be6c1cb7b57154e8937d1c7785532907b99dacb1131818592af7fef65029f6d8130636c460b7efa461c8cbba67043127e768f7e5aaed69f6ead6de3afeb96"
+		flowRoot := common.HexToHash("0x3efcbfbda4ea3ddd932e9c4959f54bbe5fc929359540a3405df28ccff746cec7")
 
-		// proof := "1a4a0c404549afba9f88a6406ae22ddfdfe87a71f875f3eefea0ee300445d4875d18882ca872bc676a2c1e316bba836b3c04f8a5a73516c27c5c6706839a692c9b2e1d13334382aa068a98f99c5ff546c66e99c4db93246ad751c128e8960509f9693d9302636fc425e21eae84ff535a0988787dd9446fe6896daefc8a51dc17"
+		// proof := "d9ca38128b8e13b80ea6370705c7d66fedd483a9a8b565da4762ce079cd8572dc55f0f73389ad64708c91e326ff5f9fd7a3081ae3c1f4b535e9e7bda18398220808be6c1cb7b57154e8937d1c7785532907b99dacb1131818592af7fef65029f6d8130636c460b7efa461c8cbba67043127e768f7e5aaed69f6ead6de3afeb96"
 		// flowRoot := common.HexToHash("0x3efcbfbda4ea3ddd932e9c4959f54bbe5fc929359540a3405df28ccff746cec7")
 
-		isSucess, err := NewZk().ZkVerify(proof, "20000101", flowRoot.Hex())
+		isSucess, err := NewZk().ZkVerify(proof, "19990101", flowRoot.Hex())
 		assert.NoError(t, err)
 		assert.True(t, isSucess)
 		fmt.Println(isSucess)
