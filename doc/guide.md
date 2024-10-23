@@ -355,14 +355,14 @@ storage-cli owner history --name <CONTENT_NAME>
 storage-cli owner history --name "Greeting"
 ```
 
-## 12. 生成零知识证明
+## 12. VC加密上传
 
-生成零知识证明以验证特定条件下的数据。输出结果包括 Merkle 证明和去中心化文件系统的 `root hash`，可用于零知识证明验证。
+将VC数据加密上传到去中心化存储系统。将会输出改文件相关的用于生成零知识证明相关数据。
 
 ### 命令语法
 
 ```shell
-storage-cli zk proof --vc <VC_STRING> --threshold <BIRTH_DATE_THRESHOLD> --key <KEY> --iv <IV>
+storage-cli zk upload --vc <VC_STRING>
 ```
 
 ### 选项说明
@@ -370,19 +370,49 @@ storage-cli zk proof --vc <VC_STRING> --threshold <BIRTH_DATE_THRESHOLD> --key <
 | 选项 | 必填 | 说明 |
 |------|------|------|
 | `--vc <VC_STRING>` | 是 | 验证凭证字符串，需以 JSON 格式提供 |
-| `--threshold <BIRTH_DATE_THRESHOLD>` | 是 | 出生日期阈值，格式为年/月/日（如：20240101）|
-| `--key <KEY>` | 是 | 用于加密的密钥 |
-| `--iv <IV>` | 是 | 初始化向量 |
 
 ### 示例
 
-**示例 18**：为 Alice 生成零知识证明：
+**示例 18**：上传VC数据到去中心化存储系统：
 
 ```shell
-storage-cli zk proof \
-   --vc '{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}' \
-   --threshold 20240101 \
-   --key verysecretkey123
+storage-cli zk upload \
+   --vc '{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}'
+```
+
+## 13. 生成零知识证明
+
+生成零知识证明以验证特定条件下的数据。输出结果包括 Merkle 证明和去中心化文件系统的 `root hash`，可用于零知识证明验证。
+
+### 命令语法
+
+```shell
+storage-cli zk proof --input <INPUT_FILE_PATH>
+```
+
+### 选项说明
+
+| 选项 | 必填 | 说明 |
+|------|------|------|
+| `--input <INPUT_FILE_PATH>` | 是 | 包含输入值（VC、密钥、初始化向量、出生日期阈值）的文件路径 |
+
+### 示例
+
+**示例 19**：为 Alice 生成零知识证明：
+
+```shell
+storage-cli zk proof --input input_values.json
+```
+
+在 `input_values.json` 文件中，需包含以下内容：
+
+```json
+{
+  "vc": "{\"name\": \"Alice\", \"age\": 25, \"birth_date\": \"20000101\", \"edu_level\": 4, \"serial_no\": \"1234567890\"}",
+  "key": "verysecretkey123",
+  "iv": "initialvector123",
+  "birthdate_threshold": "20000101"
+}
 ```
 
 ### 输出示例
@@ -393,7 +423,7 @@ storage-cli zk proof \
    - Flow Root: 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
 ```
 
-## 13. 零知识证明验证
+## 14. 零知识证明验证
 
 验证零知识证明以确保数据的真实性和完整性。验证通过时结果为 `true`，否则为 `false`。
 
@@ -413,7 +443,7 @@ storage-cli zk verify --proof <PROOF> --root <ROOT_HASH> --birth_threshold <BIRT
 
 ### 示例
 
-**示例 19**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
+**示例 20**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
 
 ```shell
 storage-cli zk verify \
@@ -422,4 +452,4 @@ storage-cli zk verify \
    --birth_threshold 20000101
 ```
 
-> **注意**：示例中使用的证明和根哈希值来自[生成零知识证明](#12-生成零知识证明)的输出结果。
+> **注意**：示例中使用的证明和根哈希值来自[生成零知识证明](#13-生成零知识证明)的输出结果。
