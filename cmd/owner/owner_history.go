@@ -11,7 +11,7 @@ import (
 
 // ownerHistoryCmd represents the ownerHistory command
 var ownerHistoryCmd = &cobra.Command{
-	Use:   "ownerHistory",
+	Use:   "history",
 	Short: "query content owner history",
 	Long:  `query content owner history`,
 	Run: func(cmd *cobra.Command, args []string) {

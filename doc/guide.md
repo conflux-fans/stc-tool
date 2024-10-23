@@ -140,6 +140,69 @@ storage-cli upload content \
    --name "FileContent"
 ```
 
+## 下载文件
+
+从去中心化存储系统下载文件。可以使用文件共享代码或根哈希值进行下载。
+
+### 命令语法
+
+```shell
+storage-cli download file (--code <FILE_SHARE_CODE> | --root <ROOT_HASH>)
+```
+
+### 选项说明
+
+| 选项 | 必填 | 说明 |
+|------|------|------|
+| `--code <FILE_SHARE_CODE>` | 与 `--root` 二选一 | 件共享代码，用于下载文件 |
+| `--root <ROOT_HASH>` | 与 `--code` 二选一 |  已上传的中心化文件的根哈希值|
+
+### 示例
+
+**示例 15**：使用文件共享代码下载文件：
+
+```shell
+storage-cli download file --code abc123def456
+```
+
+**示例 16**：使用根哈希值下载文件：
+
+```shell
+storage-cli download file --root 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
+```
+
+## 13. 下载内容
+
+从去中心化存储系统下载内容。可以选择将内容输出到控制台或输出元数据。
+
+### 命令语法
+
+```shell
+storage-cli download content [flags]
+```
+
+### 选项说明
+
+| 选项 | 必填 | 说明 |
+|------|------|------|
+| `--console` | 否 | 将内容输出到控制台 |
+| `--metadata` | 否 | 输出元数据 |
+| `-n, --name <string>` | 是 | 要下载的内容名称 |
+
+### 示例
+
+**示例 18**：下载名称为 "ExampleData" 的内容并输出到控制台：
+
+```shell
+storage-cli download content --name "ExampleData" --console
+```
+
+**示例 19**：下载名称为 "ExampleData" 的内容并输出元数据：
+
+```shell
+storage-cli download content --name "ExampleData" --metadata --console
+```
+
 ## 5. 验证文件
 
 验证文件是否与提供的文件匹配。当文件是加密上传时，该命令也需要指定相同的加密方法和密码。
@@ -267,6 +330,31 @@ storage-cli owner transfer \
    --to 0xd68D7A9639FaaDed2a6002562178502fA3b3Af9b \
    --name "Greeting"
 ```
+
+## 所有权转移历史查询
+
+查询指定内容的所有权转移历史记录。可以通过内容名称进行查询。
+
+### 命令语法
+
+```shell
+storage-cli owner history --name <CONTENT_NAME>
+```
+
+### 选项说明
+
+| 选项 | 必填 | 说明 |
+|------|------|------|
+| `--name <CONTENT_NAME>` | 是 | 需要查询所有权历史的内容名称 |
+
+### 示例
+
+**示例 17**：查询名称为 "Greeting" 的内容的所有权转移历史：
+
+```shell
+storage-cli owner history --name "Greeting"
+```
+
 
 ## 9. 生成零知识证明
 
