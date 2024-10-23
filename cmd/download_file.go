@@ -24,13 +24,15 @@ var downloadFileCmd = &cobra.Command{
 }
 
 var (
-	root string
+	root      string
+	shareCode string
 )
 
 func init() {
 	downloadCmd.AddCommand(downloadFileCmd)
 	downloadFileCmd.Flags().StringVarP(&root, "root", "r", "", "file merkle root")
-	downloadFileCmd.MarkFlagRequired("root")
+	downloadFileCmd.Flags().StringVarP(&shareCode, "code", "c", "", "file share code")
+	downloadFileCmd.MarkFlagsOneRequired("root", "code")
 
 	// Here you will define your flags and configuration settings.
 
