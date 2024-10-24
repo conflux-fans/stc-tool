@@ -16,8 +16,8 @@ import (
 // zkProofCmd represents the zkProof command
 var zkProofCmd = &cobra.Command{
 	Use:   "proof",
-	Short: "generate zk proof",
-	Long:  `generate zk proof`,
+	Short: "Generate zk proof",
+	Long:  `Generate zk proof`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Get().Info("ready to generate zk proof")
 		zkUploadOutput, err := readZkUploadOutput(inputFile)

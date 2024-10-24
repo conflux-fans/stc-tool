@@ -16,8 +16,8 @@ import (
 // zkUploadCmd represents the zkUpload command
 var zkUploadCmd = &cobra.Command{
 	Use:   "upload",
-	Short: "upload vc",
-	Long: `upload VC data to the storage system. The output will be automatically saved to a file for the zk proof command, containing the following fields:
+	Short: "Upload vc",
+	Long: `Upload VC data to the storage system. The output will be automatically saved to a file for the zk proof command, containing the following fields:
 - key: The key used for encryption
 - iv: The initialization vector
 - submission_tx_hash: The hash of the submission transaction
