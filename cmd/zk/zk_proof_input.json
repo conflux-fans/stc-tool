@@ -1,6 +1,0 @@
-{
-		"Vc": {"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"},
-		"Key": "verysecretkey123",
-		"IV": "uniqueiv12345678",
-		"Birthdate_threshold": "2024-01-01"
-	}
