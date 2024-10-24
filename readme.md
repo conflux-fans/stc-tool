@@ -14,38 +14,10 @@ go install github.com/wangdayong228/0g-storage-contracts/storage-cli
 
 ## 配置
 
-在使用工具之前，请确保配置文件已正确设置。以下是一个示例配置：
+在使用工具之前，请确保配置文件已正确设置。配置文件名称为`config.yaml`且应与工作目录同级。
 
-```yaml
+编写`config.yaml`可参考`config.yaml.example`文件。
 
-blockChain:
-  url: http://127.0.0.1:14000
-  flowContract: 0x33f2CFc729Bd870fA54b5032660e06B4CF2a7F94 
-  templateContract: 0x34Ab680c8De93aA0742EF5843520E86239B954EF
-  pmContract: 0x588D57Fb016CEE89513B9B7ee78AeB8b56BAc85D
-storageNodes:
-  - http://127.0.0.1:15000
-  - http://127.0.0.1:15001
-  - http://127.0.0.1:15002
-  - http://127.0.0.1:15003
-kvNode: http://127.0.0.1:16000
-kvStreamId: 000000000000000000000000000000000000000000000000000000000000f009
-zkNode: http://127.0.0.1:3030
-privateKeys:
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e23
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e24
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e25
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e26
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e27
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e28
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e29
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e30
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e31
-  - 7c5da44cf462b81e0b61a582f8c9b23ca78fc23e7104138f4e4329a9b2076e32
-log : info # info,debug
-extendData:
-  textMaxSize: 1024 # 大于该长度的数据将以 pointer 扩展数据类型存储
-```
 ## 准备工作
 
 运行命令前需要确保账户中有足够的 CFX 余额，否则无法正常运行。
