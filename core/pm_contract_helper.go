@@ -183,6 +183,4 @@ func (o *PmContractHelper) FilterTransfer(opts *bind.FilterOpts, from []common.A
 	}
 
 	return result, nil
-
-	// return o.pmContractForRead.FilterTransfer(opts, from, to, tokenIds)
 }

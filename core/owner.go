@@ -95,6 +95,12 @@ func getFilterOpt() (*bind.FilterOpts, error) {
 	}
 	start := uint64(config.Get().BlockChain.StartBlockNum)
 	end := uint64(latestBlock.Int64())
+
+	logger.Get().WithField("start block", start).WithField("end block", end).Info("get filter options")
+	if start > end {
+		return nil, errors.New("start block is greater than end block")
+	}
+
 	opts := &bind.FilterOpts{
 		Start: start,
 		End:   &end,
