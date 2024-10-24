@@ -200,7 +200,7 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 		}()
 	}
 
-	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients, zgLogOpt)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +226,7 @@ func (u *Uploader) UploadFile(filepath string, opt *UploadOption) (*merkle.Tree,
 
 // upload data and return segments merkle tree and chunks merle tree
 func (u *Uploader) UploadBytes(data []byte) (common.Hash, common.Hash, error) {
-	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients, zgLogOpt)
 	if err != nil {
 		return common.Hash{}, common.Hash{}, err
 	}
@@ -249,7 +249,7 @@ func (u *Uploader) UploadBytes(data []byte) (common.Hash, common.Hash, error) {
 }
 
 func (u *Uploader) UploadIteratorData(data ccore.IterableData) (*merkle.Tree, error) {
-	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients, zgLogOpt)
 	if err != nil {
 		return nil, err
 	}

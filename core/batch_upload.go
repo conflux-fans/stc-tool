@@ -160,7 +160,7 @@ func BatchUploadByKv(count int) error {
 // TODO: count replace by source path?
 func BatchUpload(count int, encryptOpt *EncryptOption) (common.Hash, error) {
 
-	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients)
+	uploader, err := transfer.NewUploader(context.Background(), adminW3Client, zgNodeClients, zgLogOpt)
 	if err != nil {
 		return common.Hash{}, errors.WithMessage(err, "Failed to create uploader")
 	}

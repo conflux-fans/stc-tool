@@ -14,8 +14,8 @@ import (
 // zkVerifyCmd represents the zkVerify command
 var zkVerifyCmd = &cobra.Command{
 	Use:   "verify",
-	Short: "zk verify",
-	Long:  `zk verify`,
+	Short: "ZK verify",
+	Long:  `ZK verify`,
 	Run: func(cmd *cobra.Command, args []string) {
 		result, err := core.NewZk().ZkVerify(proof, birthDateThreshold, root)
 		if err != nil {
@@ -28,7 +28,7 @@ var zkVerifyCmd = &cobra.Command{
 }
 
 var (
-	proof, root string
+	proof, root, birthDateThreshold string
 )
 
 func init() {

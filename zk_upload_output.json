@@ -1,0 +1,13 @@
+{
+  "vc": {
+    "name": "Alice",
+    "age": 25,
+    "birth_date": "20000101",
+    "edu_level": 4,
+    "serial_no": "1234567890"
+  },
+  "vc_data_root": "0xe86ac72c953d9e6bc292fa4d362e2c1110cb6f46edb7e909953d5559dee30a8c",
+  "submission_tx_hash": "0x55b4f43a03794c75b6d7ba1a500f73cee2b6a491e8bfecfe36a6db201cef8872",
+  "key": "9cz3Ib9s9OrMW2a9",
+  "iv": "tUaP0epkPwtuGRuj"
+}

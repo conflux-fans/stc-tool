@@ -3,6 +3,10 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
+	"path"
+	"runtime"
+	"strings"
 
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/mitchellh/mapstructure"
@@ -36,21 +40,23 @@ type Config struct {
 		FlowContract     string `yaml:"flowContract"`
 		TemplateContract string `yaml:"templateContract"`
 		PmContract       string `yaml:"pmContract"`
+		StartBlockNum    int64  `yaml:"startBlockNum"`
 	} `yaml:"blockChain"`
-	StorageNodes []string `yaml:"storageNodes"`
-	KvNode       string   `yaml:"kvNode"`
-	KvStreamId   string   `yaml:"kvStreamId"`
-	ZkNode       string   `yaml:"zkNode"`
-	PrivateKeys  []string `yaml:"privateKeys"`
-	Log          string   `yaml:"log"`
-	ExtendData   struct {
+	StorageNodes   []string `yaml:"storageNodes"`
+	KvNode         string   `yaml:"kvNode"`
+	KvStreamId     string   `yaml:"kvStreamId"`
+	ZkNode         string   `yaml:"zkNode"`
+	PrivateKeyFile string   `yaml:"privateKeyFile"`
+	Log            string   `yaml:"log"`
+	ExtendData     struct {
 		TextMaxSize int64 `yaml:"textMaxSize"`
 	} `yaml:"extendData"`
 }
 
 var (
-	_config    Config
-	configPath string = "./config.yaml"
+	_config      Config
+	_privateKeys []string
+	configPath   string = "./config.yaml"
 )
 
 const (
@@ -63,9 +69,43 @@ func SetConfigFile(path string) {
 }
 
 func Init() {
+	viper.SetDefault("privateKeyFile", getDefaultPrivateKeyPath())
 	_config = *initByFile[Config](configPath)
+	_privateKeys = loadPrivateKeys()
 }
 
 func Get() *Config {
 	return &_config
+}
+
+func GetPrivateKeys() []string {
+	return _privateKeys
+}
+
+func loadPrivateKeys() []string {
+	privateKeyFile := _config.PrivateKeyFile
+	content, err := os.ReadFile(privateKeyFile)
+	if err != nil {
+		panic(err)
+	}
+	return strings.Split(string(content), "\n")
+}
+
+func getDefaultPrivateKeyPath() string {
+	switch _os := runtime.GOOS; _os {
+	case "windows":
+		userProfile, ok := os.LookupEnv("USERPROFILE")
+		if !ok {
+			panic("USERPROFILE environment variable not set")
+		}
+		return path.Join(userProfile, ".storage-cli", "private_keys")
+	case "linux", "darwin":
+		home, ok := os.LookupEnv("HOME")
+		if !ok {
+			panic("HOME environment variable not set")
+		}
+		return path.Join(home, ".storage-cli", "private_keys")
+	default:
+		panic("Unknown system os")
+	}
 }

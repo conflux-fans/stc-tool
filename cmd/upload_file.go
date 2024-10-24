@@ -34,8 +34,9 @@ var uploadFileCmd = &cobra.Command{
 			return
 		}
 		logger.SuccessfWithParams(map[string]string{
-			"File": filePath,
-			"Root": tree.Root().Hex(),
+			"File":       filePath,
+			"Root":       tree.Root().Hex(),
+			"Share Code": core.NewShareCodeHelper().GetShareCode(tree.Root()),
 		}, "Upload file completed")
 	},
 }

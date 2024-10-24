@@ -1,3 +1,4 @@
-# TODO:
-1. 上传文件后 mint nft 并设置
-2. 转移权限就是转移 nft
+1. zk 参数放到一个文件，key iv 随机生成
+2. 上传文件后 share code，为 root hash base64 编码
+3. privatekeys 放到一个单独文件
+4. 权限转移历史记录查询

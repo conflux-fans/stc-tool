@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/0glabs/0g-storage-client/core"
 	ccore "github.com/0glabs/0g-storage-client/core"
 	"github.com/conflux-fans/storage-cli/constants"
 	"github.com/conflux-fans/storage-cli/constants/enums"
@@ -126,11 +125,11 @@ func (a *Appender) openFile(name string) (*os.File, error) {
 	}
 
 	if info.IsDir() {
-		return nil, core.ErrFileRequired
+		return nil, ccore.ErrFileRequired
 	}
 
 	if info.Size() == 0 {
-		return nil, core.ErrFileEmpty
+		return nil, ccore.ErrFileEmpty
 	}
 
 	if info.Size() > constants.CONTENT_MAX_SIZE {

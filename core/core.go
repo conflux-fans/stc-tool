@@ -55,7 +55,7 @@ func initProviderOpt() {
 	}
 	zgLogOpt.Logger = logrus.New()
 	zgLogOpt.LogLevel = logrus.DebugLevel
-	providerOpt.RequestTimeout = time.Minute
+	providerOpt.RequestTimeout = time.Minute * 3
 }
 
 func Init() {
@@ -83,7 +83,7 @@ func initKvBatchersAndW3Clients() {
 	w3Clients = make(map[common.Address]*web3go.Client)
 	cfg := config.Get()
 
-	for i, pk := range cfg.PrivateKeys {
+	for i, pk := range config.GetPrivateKeys() {
 		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk, providerOpt)
 
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
@@ -116,7 +116,7 @@ func getKvBatcher(account common.Address) (*kv.Batcher, error) {
 
 func initTempalteContract() {
 	cfg := config.Get()
-	w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, cfg.PrivateKeys[0])
+	w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, config.GetPrivateKeys()[0])
 	templateAddr := common.HexToAddress(cfg.BlockChain.TemplateContract)
 	backend, _signerFn := w3client.ToClientForContract()
 	signerFn = _signerFn
@@ -135,4 +135,8 @@ func GrantAllAccountStreamWriter() {
 			panic(fmt.Sprintf("Failed to grant account %v strem writer", accounts))
 		}
 	})
+}
+
+func GetAccounts() []common.Address {
+	return accounts
 }

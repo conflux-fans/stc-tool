@@ -4,3 +4,4 @@ run/*
 config.yaml
 tmp/*
 *.zg
+zk_proof_input.json

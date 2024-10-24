@@ -17,6 +17,14 @@ var downloadFileCmd = &cobra.Command{
 	Short: "Download file",
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if shareCode != "" {
+			_root, err := core.NewShareCodeHelper().GetRootFromShareCode(shareCode)
+			if err != nil {
+				logger.Failf("Failed to get root from share code %v", err)
+				return
+			}
+			root = _root.Hex()
+		}
 		savePath := path.Join(".", root+".zg")
 		core.DefaultDownloader().DownloadFile(root, savePath)
 		logger.SuccessWithResult(savePath, "Download file successfully, please find in below path")
@@ -24,13 +32,15 @@ var downloadFileCmd = &cobra.Command{
 }
 
 var (
-	root string
+	root      string
+	shareCode string
 )
 
 func init() {
 	downloadCmd.AddCommand(downloadFileCmd)
 	downloadFileCmd.Flags().StringVarP(&root, "root", "r", "", "file merkle root")
-	downloadFileCmd.MarkFlagRequired("root")
+	downloadFileCmd.Flags().StringVarP(&shareCode, "code", "c", "", "file share code")
+	downloadFileCmd.MarkFlagsOneRequired("root", "code")
 
 	// Here you will define your flags and configuration settings.
 

@@ -3,10 +3,12 @@ package core
 import (
 	"fmt"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/conflux-fans/storage-cli/config"
 	"github.com/conflux-fans/storage-cli/contracts"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/utils/web3goutils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -41,10 +43,10 @@ func NewOwnerOperator(contract common.Address) *PmContractHelper {
 	return val
 }
 
-func (o *PmContractHelper) getPmContract(from common.Address) (*contracts.PermissionManager, bind.SignerFn, error) {
-	client, ok := w3Clients[from]
+func (o *PmContractHelper) getPmContract(signerAddr common.Address) (*contracts.PermissionManager, bind.SignerFn, error) {
+	client, ok := w3Clients[signerAddr]
 	if !ok {
-		return nil, nil, fmt.Errorf("w3client of account %s not found", from.Hex())
+		return nil, nil, fmt.Errorf("w3client of account %s not found", signerAddr.Hex())
 	}
 
 	clientForContract, signerFn := client.ToClientForContract()
@@ -117,4 +119,68 @@ func (o *PmContractHelper) OwnerOf(tokenId *big.Int) (common.Address, error) {
 		return common.Address{}, err
 	}
 	return owner, nil
+}
+
+func (o *PmContractHelper) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address, tokenIds []*big.Int) ([]*contracts.PermissionManagerTransfer, error) {
+	batch := 1000
+	var result []*contracts.PermissionManagerTransfer
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var errChan = make(chan error, 1)
+
+	batchCount := (*opts.End - opts.Start + uint64(batch) - 1) / uint64(batch)
+	logger.Get().WithField("start block", opts.Start).WithField("end block", *opts.End).WithField("batchCount", batchCount).Info("ready to get logs concurrently")
+
+	batchResults := make([][]*contracts.PermissionManagerTransfer, batchCount)
+
+	for i := uint64(0); i < batchCount; i++ {
+		wg.Add(1)
+		go func(i uint64) {
+			defer wg.Done()
+			start := opts.Start + i*uint64(batch)
+			end := start + uint64(batch) - 1
+			if end > *opts.End {
+				end = *opts.End
+			}
+
+			batchOpts := &bind.FilterOpts{
+				Start: start,
+				End:   &end,
+			}
+
+			batchIter, err := o.pmContractForRead.FilterTransfer(batchOpts, from, to, tokenIds)
+			if err != nil {
+				select {
+				case errChan <- err:
+				default:
+				}
+				return
+			}
+			defer batchIter.Close()
+
+			var batchLogs []*contracts.PermissionManagerTransfer
+			for batchIter.Next() {
+				batchLogs = append(batchLogs, batchIter.Event)
+			}
+
+			mu.Lock()
+			batchResults[i] = batchLogs
+			mu.Unlock()
+		}(i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	if err := <-errChan; err != nil {
+		panic(err)
+	}
+
+	for _, batchLogs := range batchResults {
+		result = append(result, batchLogs...)
+	}
+
+	return result, nil
 }
