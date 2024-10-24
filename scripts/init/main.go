@@ -28,7 +28,7 @@ func initConfig() {
 func distributeEth() {
 	cfg := config.Get()
 
-	privateKeys := append(cfg.PrivateKeys, "9a6d3ba2b0c7514b16a006ee605055d71b9edfad183aeb2d9790e9d4ccced471")
+	privateKeys := append(config.GetPrivateKeys(), "9a6d3ba2b0c7514b16a006ee605055d71b9edfad183aeb2d9790e9d4ccced471")
 	client := web3go.MustNewClientWithOption(cfg.BlockChain.URL, web3go.ClientOption{
 		SignerManager: signers.MustNewSignerManagerByPrivateKeyStrings(privateKeys),
 		Option: providers.Option{
