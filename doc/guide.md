@@ -511,7 +511,7 @@ storage-cli zk proof --input <INPUT_FILE_PATH> --threshold <BIRTH_DATE_THRESHOLD
 
 ### 示例
 
-**示例 19**：为 Alice 生成零知识证明：
+**示例 5.2**：为 Alice 生成零知识证明：
 
 ```shell
 storage-cli zk proof \
@@ -549,7 +549,7 @@ storage-cli zk verify --proof <PROOF> --root <ROOT_HASH> --birth_threshold <BIRT
 
 ### 示例
 
-**示例 20**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
+**示例 5.3**：用零知识证明的方式验证 Alice 的生日是否为 20000101：
 
 ```shell
 storage-cli zk verify \
@@ -643,7 +643,7 @@ template CustomCheck() {
    使用官方安装脚本进行安装:
 
    ```bash
-   curl --proto '=https' --tlsv1.2 -sSf <https://sh.rustup.rs> | sh
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
    配置当前 shell 环境以启用 Rust:
@@ -657,7 +657,7 @@ template CustomCheck() {
    安装 Node.js (要求版本 >= v18):
 
    ```bash
-   curl -fsSL <https://deb.nodesource.com/setup_18.x> | sudo -E bash -
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
    sudo apt-get install -y nodejs
    ```
 
