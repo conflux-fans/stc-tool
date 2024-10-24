@@ -4,8 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package owner
 
 import (
-	"fmt"
-
+	"github.com/conflux-fans/storage-cli/core"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,12 @@ var ownerHistoryCmd = &cobra.Command{
 	Short: "query content owner history",
 	Long:  `query content owner history`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ownerHistory called")
+		history, err := core.DefaultOwnerOperator().GetOwnerHistory(name)
+		if err != nil {
+			logger.Fail(err.Error())
+			return
+		}
+		logger.SuccessfWithList(history, "Owner history")
 	},
 }
 

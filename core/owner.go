@@ -3,7 +3,10 @@ package core
 import (
 	"math/big"
 
+	"github.com/conflux-fans/storage-cli/config"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/conflux-fans/storage-cli/pkg/utils/bigutils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 )
@@ -16,40 +19,6 @@ type OwnerOperator struct {
 func DefaultOwnerOperator() *OwnerOperator {
 	return &ownerOperator
 }
-
-// func TransferOwner(name string, from common.Address, to common.Address) error {
-// 	// get all keys
-// 	logger.Get().WithField("name", name).WithField("from", from).WithField("to", to).Info("Start transfer content owner")
-
-// 	meta, err := GetContentMetadata(name)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	keys := append(meta.LineKeys, meta.LineSizeKey)
-
-// 	logger.Get().WithField("length", len(keys)).Info("Get content related keys")
-
-// 	// check is all writer, if not
-// 	for _, k := range keys {
-// 		isWriter, err := kvClientForIterator.IsWriterOfKey(defaultAccount, kvStreamId, []byte(k))
-// 		if err != nil {
-// 			return errors.WithMessage(err, "Failed to check if owner")
-// 		}
-// 		if !isWriter {
-// 			return fmt.Errorf("not the writer of key %s", k)
-// 		}
-// 	}
-
-// 	batcher := kvClientsForPut[from].Batcher()
-
-// 	for _, k := range keys {
-// 		batcher.GrantSpecialWriteRole(kvStreamId, []byte(k), to)
-// 		batcher.RenounceSpecialWriteRole(kvStreamId, []byte(k))
-// 	}
-
-// 	return batcher.Exec()
-// }
 
 func (o *OwnerOperator) Mint(to common.Address) (common.Hash, *big.Int, error) {
 	receipt, tokenID, err := DefaultPmContractHelper().Mint(to)
@@ -89,4 +58,46 @@ func (o *OwnerOperator) CheckIsContentOwner(account common.Address, name string)
 	}
 
 	return owner == account, nil
+}
+
+func (o *OwnerOperator) GetOwnerHistory(name string) ([]common.Address, error) {
+	meta, err := GetContentMetadata(name)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get content metadata")
+	}
+	logger.Get().WithField("token_id", meta.OwnerTokenID).Info("get content owner token id")
+
+	opts, err := getFilterOpt()
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get filter options")
+	}
+
+	logs, err := DefaultPmContractHelper().FilterTransfer(opts, nil, nil, []*big.Int{bigutils.MustParseBigInt(meta.OwnerTokenID)})
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get owner history")
+	}
+
+	var result []common.Address
+	for i, log := range logs {
+		if i > 0 && logs[i-1].To != log.From {
+			return nil, errors.New("Owner history is not continuous")
+		}
+		result = append(result, log.From)
+	}
+
+	return result, nil
+}
+
+func getFilterOpt() (*bind.FilterOpts, error) {
+	latestBlock, err := adminW3Client.Eth.BlockNumber()
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to get latest block number")
+	}
+	start := uint64(config.Get().BlockChain.StartBlockNum)
+	end := uint64(latestBlock.Int64())
+	opts := &bind.FilterOpts{
+		Start: start,
+		End:   &end,
+	}
+	return opts, nil
 }

@@ -40,6 +40,7 @@ type Config struct {
 		FlowContract     string `yaml:"flowContract"`
 		TemplateContract string `yaml:"templateContract"`
 		PmContract       string `yaml:"pmContract"`
+		StartBlockNum    int64  `yaml:"startBlockNum"`
 	} `yaml:"blockChain"`
 	StorageNodes   []string `yaml:"storageNodes"`
 	KvNode         string   `yaml:"kvNode"`
