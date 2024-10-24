@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestReadZkProofInput(t *testing.T) {
+func TestReadZkUploadOutput(t *testing.T) {
 	// 创建临时的 zk_proof_input.json 文件
 	tempContent := `{
 		"Vc": {"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"},
