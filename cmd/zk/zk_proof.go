@@ -44,11 +44,11 @@ var (
 func init() {
 	zkCmd.AddCommand(zkProofCmd)
 	// zkProofCmd.Flags().StringVarP(&vc, "vc", "v", "", "vc string in json format")
-	// zkProofCmd.Flags().StringVarP(&birthDateThreshold, "threshold", "t", "", "birth date threshold, format is yearmonthdate, such as 20240101")
+	zkProofCmd.Flags().StringVarP(&birthDateThreshold, "threshold", "t", "", "birth date threshold, format is yearmonthdate, such as 20000101")
 	// zkProofCmd.Flags().StringVarP(&key, "key", "k", "", "key")
 	// zkProofCmd.Flags().StringVarP(&iv, "iv", "i", "", "iv")
 	// zkProofCmd.Flags().StringVarP(&iv, "iv", "i", "", "iv")
-	zkProofCmd.Flags().StringVarP(&inputFile, "input", "i", "", "input file path which contain input values vc, key, iv, birthdate threshold")
+	zkProofCmd.Flags().StringVarP(&inputFile, "input", "i", "", "input file path which contain input values key, iv, submission_tx_hash. the file is auto generated when run upload command")
 	// zkProofCmd.MarkFlagRequired("vc")
 	// zkProofCmd.MarkFlagRequired("threshold")
 	zkProofCmd.MarkFlagRequired("input")

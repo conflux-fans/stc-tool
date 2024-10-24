@@ -18,7 +18,12 @@ import (
 var zkUploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "upload vc",
-	Long:  `upload vc data to storage system`,
+	Long: `upload VC data to the storage system. The output will be automatically saved to a file for the zk proof command, containing the following fields:
+- key: The key used for encryption
+- iv: The initialization vector
+- submission_tx_hash: The hash of the submission transaction
+- vc_data_root: The root hash of the VC encrypted data
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var _vc zkclient.VC
 		err := json.Unmarshal([]byte(vc), &_vc)

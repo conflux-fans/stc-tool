@@ -357,12 +357,16 @@ storage-cli owner history --name "Greeting"
 
 ## 12. VC加密上传
 
-将VC数据加密上传到去中心化存储系统。将会输出改文件相关的用于生成零知识证明相关数据。
+将VC数据加密上传到去中心化存储系统。上传后，相关信息将自动保存到文件中，以便用于生成零知识证明。文件中包含以下字段：
+- `key`: 用于加密的密钥
+- `iv`: 初始化向量
+- `submission_tx_hash`: 提交交易的哈希
+- `vc_data_root`: VC加密数据的根哈希
 
 ### 命令语法
 
 ```shell
-storage-cli zk upload --vc <VC_STRING>
+storage-cli zk upload --vc <VC_JSON_STRING>
 ```
 
 ### 选项说明
@@ -380,6 +384,14 @@ storage-cli zk upload \
    --vc '{"name": "Alice", "age": 25, "birth_date": "20000101", "edu_level": 4, "serial_no": "1234567890"}'
 ```
 
+### 输出示例
+
+上传后，输出文件将包含以下信息：
+- `key`: verysecretkey123
+- `iv`: initialvector123
+- `submission_tx_hash`: "0x276b14f314e7d3583c6718c75f8fc2e1d89b0f13446bf1ee5a02ab8457325343"
+- `vc_data_root`: 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
+
 ## 13. 生成零知识证明
 
 生成零知识证明以验证特定条件下的数据。输出结果包括 Merkle 证明和去中心化文件系统的 `root hash`，可用于零知识证明验证。
@@ -387,21 +399,24 @@ storage-cli zk upload \
 ### 命令语法
 
 ```shell
-storage-cli zk proof --input <INPUT_FILE_PATH>
+storage-cli zk proof --input <INPUT_FILE_PATH> --threshold <BIRTH_DATE_THRESHOLD>
 ```
 
 ### 选项说明
 
 | 选项 | 必填 | 说明 |
 |------|------|------|
-| `--input <INPUT_FILE_PATH>` | 是 | 包含输入值（VC、密钥、初始化向量、出生日期阈值）的文件路径 |
+| `--input <INPUT_FILE_PATH>` | 是 | 包含输入值（VC、密钥、初始化向量、提交交易哈希）的文件路径，该文件在运行上传命令时自动生成 |
+| `--threshold <BIRTH_DATE_THRESHOLD>` | 是 | 出生日期阈值，格式为年/月/日（如：20000101）|
 
 ### 示例
 
 **示例 19**：为 Alice 生成零知识证明：
 
 ```shell
-storage-cli zk proof --input input_values.json
+storage-cli zk proof \
+   --input input_values.json \
+   --threshold 20000101
 ```
 
 在 `input_values.json` 文件中，需包含以下内容：
@@ -411,7 +426,7 @@ storage-cli zk proof --input input_values.json
   "vc": "{\"name\": \"Alice\", \"age\": 25, \"birth_date\": \"20000101\", \"edu_level\": 4, \"serial_no\": \"1234567890\"}",
   "key": "verysecretkey123",
   "iv": "initialvector123",
-  "birthdate_threshold": "20000101"
+  "submission_tx_hash": "0x276b14f314e7d3583c6718c75f8fc2e1d89b0f13446bf1ee5a02ab8457325343"
 }
 ```
 

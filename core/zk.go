@@ -23,15 +23,15 @@ func NewZk() *Zk {
 }
 
 type ZkUploadInput struct {
-	Vc                 *zkclient.VC
-	BirthdateThreshold string
+	Vc                 *zkclient.VC `json:"vc"`
+	BirthdateThreshold string       `json:"birthdate_threshold"`
 }
 
 type ZkUploadOutput struct {
 	FlowProofForZk
-	SubmissionTxHash common.Hash
-	Key              string
-	IV               string
+	SubmissionTxHash common.Hash `json:"submission_tx_hash"`
+	Key              string      `json:"key"`
+	IV               string      `json:"iv"`
 }
 
 // UploadVc upload vc data to storage and get flow proof, the returned flowProof is removed data root and flow root.
@@ -65,17 +65,17 @@ func (z *Zk) UploadVc(input *ZkUploadInput, key, iv string) (*ZkUploadOutput, er
 }
 
 type FlowProofForZk struct {
-	VcDataRoot common.Hash
-	FlowRoot   common.Hash
-	Lemma      []common.Hash
-	Path       uint64
+	VcDataRoot common.Hash   `json:"vc_data_root"`
+	FlowRoot   common.Hash   `json:"flow_root"`
+	Lemma      []common.Hash `json:"lemma"`
+	Path       uint64        `json:"path"`
 }
 
 type ZkProofInput struct {
 	ZkUploadInput
 	FlowProofForZk
-	Key string
-	IV  string
+	Key string `json:"key"`
+	IV  string `json:"iv"`
 }
 
 func (z *Zk) ZkProof(input *ZkProofInput) (*zkclient.ProveOutput, error) {
