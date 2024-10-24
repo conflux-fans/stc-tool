@@ -19,12 +19,22 @@ var zkProofCmd = &cobra.Command{
 	Short: "generate zk proof",
 	Long:  `generate zk proof`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readZkProofInput(inputFile)
+		logger.Get().Info("ready to generate zk proof")
+		zkUploadOutput, err := readZkUploadOutput(inputFile)
 		if err != nil {
 			logger.Failf("Failed to read input file: %v", err)
 			return
 		}
-		proof, err := core.NewZk().ZkProof(input)
+		logger.Get().Info("read input file")
+
+		zkProofInput, err := core.NewZk().GetZkProofInput(zkUploadOutput.Vc, birthDateThreshold, zkUploadOutput)
+		if err != nil {
+			logger.Failf("Failed to get zk proof input: %v", err)
+			return
+		}
+		logger.Get().Info("generated zk proof input")
+
+		proof, err := core.NewZk().ZkProof(zkProofInput)
 		if err != nil {
 			logger.Failf("Failed to generate zk proof: %v", err)
 			return
@@ -52,11 +62,12 @@ func init() {
 	// zkProofCmd.MarkFlagRequired("vc")
 	// zkProofCmd.MarkFlagRequired("threshold")
 	zkProofCmd.MarkFlagRequired("input")
+	zkProofCmd.MarkFlagRequired("threshold")
 }
 
-func readZkProofInput(inputFile string) (*core.ZkProofInput, error) {
+func readZkUploadOutput(inputFile string) (*core.ZkUploadOutput, error) {
 	// read input file and unmarshal json to core.ZkProofInput
-	input := core.ZkProofInput{}
+	input := core.ZkUploadOutput{}
 	content, err := os.ReadFile(inputFile)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to read input file")

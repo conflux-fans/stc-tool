@@ -19,7 +19,7 @@ func TestReadZkProofInput(t *testing.T) {
 	}
 	defer os.Remove("./zk_proof_input.json") // 测试结束后删除临时文件
 
-	input, err := readZkProofInput("./zk_proof_input.json")
+	input, err := readZkUploadOutput("./zk_proof_input.json")
 	if err != nil {
 		t.Fatalf("Failed to get zk proof input: %v", err)
 	}

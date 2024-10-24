@@ -41,47 +41,35 @@ func TestZk(t *testing.T) {
 	var _vc zkclient.VC
 	err := json.Unmarshal([]byte(vc), &_vc)
 	assert.NoError(t, err)
-
-	ZkUploadInput := ZkUploadInput{
-		Vc:                 &_vc,
-		BirthdateThreshold: "20000101",
-	}
 	key, iv := "verysecretkey123", "uniqueiv12345678"
 
 	t.Run("integration", func(_t *testing.T) {
 		// upload
-		zkUploadOutput, err := NewZk().UploadVc(&ZkUploadInput, key, iv)
+		zkUploadOutput, _, err := NewZk().UploadVc(&_vc, key, iv)
 		assert.NoError(_t, err)
 		fmt.Printf("zk upload output: %v\n", zkUploadOutput)
 		assert.Equal(_t, zkUploadOutput.VcDataRoot.Hex(), "0xcca4353c87fe7c16438b81f6931e04112daa4c6c880e0df49a8950f27b4bcc23")
 
+		// get zk proof input
+		zkProofInput, err := NewZk().GetZkProofInput(&_vc, "20000101", zkUploadOutput)
+		assert.NoError(_t, err)
+		fmt.Printf("zk proof input: %v\n", zkProofInput)
+
 		// proof
-		flowProofForZk := FlowProofForZk{
-			VcDataRoot: zkUploadOutput.VcDataRoot,
-			FlowRoot:   zkUploadOutput.FlowRoot,
-			Lemma:      zkUploadOutput.Lemma,
-			Path:       zkUploadOutput.Path,
-		}
-		proveInput := &ZkProofInput{
-			ZkUploadInput:  ZkUploadInput,
-			FlowProofForZk: flowProofForZk,
-			Key:            key,
-			IV:             iv,
-		}
-		proveOutput, err := NewZk().ZkProof(proveInput)
+		proveOutput, err := NewZk().ZkProof(zkProofInput)
 		assert.NoError(_t, err)
 		fmt.Printf("prove output: %v\n", proveOutput)
 
 		// verify
 		// Note: 无法直接测试正确性，因为在生成 proof 时有随机数参与，所以会导致每次结果不一样；只能通过 verify 测试
-		isSucess, err := NewZk().ZkVerify(proveOutput.Proof, "20000101", flowProofForZk.FlowRoot.Hex())
+		isSucess, err := NewZk().ZkVerify(proveOutput.Proof, "20000101", zkProofInput.FlowRoot.Hex())
 		assert.NoError(t, err)
 		assert.True(t, isSucess)
 		fmt.Println(isSucess)
 	})
 
 	t.Run("upload vc", func(_t *testing.T) {
-		zkUploadOutput, err := NewZk().UploadVc(&ZkUploadInput, key, iv)
+		zkUploadOutput, _, err := NewZk().UploadVc(&_vc, key, iv)
 		assert.NoError(_t, err)
 		fmt.Printf("zk upload output: %v\n", zkUploadOutput)
 	})
@@ -113,10 +101,11 @@ func TestZk(t *testing.T) {
 		}
 
 		proveInput := &ZkProofInput{
-			ZkUploadInput:  ZkUploadInput,
-			FlowProofForZk: flowProofForZk,
-			Key:            key,
-			IV:             iv,
+			FlowProofForZk:     &flowProofForZk,
+			Vc:                 &_vc,
+			BirthdateThreshold: "20000101",
+			Key:                key,
+			IV:                 iv,
 		}
 		proveOutput, err := NewZk().ZkProof(proveInput)
 		assert.NoError(_t, err)

@@ -5,7 +5,6 @@ package zk
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/conflux-fans/storage-cli/core"
 	"github.com/conflux-fans/storage-cli/logger"
@@ -33,24 +32,18 @@ var zkUploadCmd = &cobra.Command{
 		}
 
 		key, iv := randutils.String(16), randutils.String(16)
-		uploadOut, err := core.NewZk().UploadVc(&core.ZkUploadInput{
-			Vc:                 &_vc,
-			BirthdateThreshold: birthDateThreshold,
-		}, key, iv)
+		uploadOut, resultPath, err := core.NewZk().UploadVc(&_vc, key, iv)
 		if err != nil {
 			logger.Failf("Failed to upload vc: %v", err)
 			return
 		}
 
 		logger.SuccessfWithParams(map[string]string{
-			"Key":          key,
-			"IV":           iv,
-			"SubmissionTx": uploadOut.SubmissionTxHash.Hex(),
-			"VcDataRoot":   uploadOut.VcDataRoot.Hex(),
-			"FlowRoot":     uploadOut.FlowRoot.Hex(),
-			"Lemma":        fmt.Sprintf("%v", uploadOut.Lemma),
-			"Path":         fmt.Sprintf("%v", uploadOut.Path),
-		}, "Successfully uploaded vc")
+			"key":                key,
+			"iv":                 iv,
+			"vc_data_root":       uploadOut.VcDataRoot.Hex(),
+			"submission_tx_hash": uploadOut.SubmissionTxHash.Hex(),
+		}, "Successfully uploaded VC. The result is saved to file %v, which can be used as input for the zk proof command.", resultPath)
 	},
 }
 
