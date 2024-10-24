@@ -17,6 +17,14 @@ var downloadFileCmd = &cobra.Command{
 	Short: "Download file",
 	Long:  `Download file`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if shareCode != "" {
+			_root, err := core.NewShareCodeHelper().GetRootFromShareCode(shareCode)
+			if err != nil {
+				logger.Failf("Failed to get root from share code %v", err)
+				return
+			}
+			root = _root.Hex()
+		}
 		savePath := path.Join(".", root+".zg")
 		core.DefaultDownloader().DownloadFile(root, savePath)
 		logger.SuccessWithResult(savePath, "Download file successfully, please find in below path")
