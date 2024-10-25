@@ -28,4 +28,4 @@ cd ./scripts/init && go run .
 ```
 
 ## 用户手册
-请见[用户手册](./docs/user-manual.md)
+请见[用户手册](./doc/guide.md)
