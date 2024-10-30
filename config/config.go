@@ -10,6 +10,7 @@ import (
 
 	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -71,7 +72,16 @@ func SetConfigFile(path string) {
 func Init() {
 	viper.SetDefault("privateKeyFile", getDefaultPrivateKeyPath())
 	_config = *initByFile[Config](configPath)
+	setLogger()
 	_privateKeys = loadPrivateKeys()
+}
+
+func setLogger() {
+	logLevel, err := logrus.ParseLevel(Get().Log)
+	if err != nil {
+		panic(err)
+	}
+	logger.Get().SetLevel(logLevel)
 }
 
 func Get() *Config {
@@ -84,11 +94,16 @@ func GetPrivateKeys() []string {
 
 func loadPrivateKeys() []string {
 	privateKeyFile := _config.PrivateKeyFile
+	logger.Get().WithField("file", privateKeyFile).Debug("Load private keys from file")
 	content, err := os.ReadFile(privateKeyFile)
 	if err != nil {
 		panic(err)
 	}
-	return strings.Split(string(content), "\n")
+	str := strings.TrimSpace(string(content))
+	if str == "" {
+		panic("private key file is empty")
+	}
+	return strings.Split(str, "\n")
 }
 
 func getDefaultPrivateKeyPath() string {

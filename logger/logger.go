@@ -6,6 +6,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var _logger *logrus.Logger
+
+func init() {
+	// 创建一个新的 Logger 实例
+	_logger = logrus.New()
+	// 创建一个自定义的 Hook，并添加到 Logger 中
+	_logger.AddHook(&prefixHook{Prefix: "\x1b[42m[TOOL]\x1b[0m"})
+}
+
 func Fail(desc string) {
 	fmt.Println("\n❌ \x1b[31mFAIL\x1b[0m: " + desc + "\n")
 }
@@ -64,15 +73,7 @@ func resultByParams(params map[string]string) string {
 	return result
 }
 func Get() *logrus.Logger {
-	// 创建一个新的 Logger 实例
-	logger := logrus.New()
-
-	// 设置日志级别为 Info 或更高级别的日志将被记录
-	logger.SetLevel(logrus.InfoLevel)
-
-	// 创建一个自定义的 Hook，并添加到 Logger 中
-	logger.AddHook(&prefixHook{Prefix: "\x1b[42m[TOOL]\x1b[0m"})
-	return logger
+	return _logger
 }
 
 // prefixHook 自定义的 Hook，用于在日志条目前添加前缀

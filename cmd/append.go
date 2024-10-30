@@ -22,8 +22,9 @@ var appendCmd = &cobra.Command{
 			return
 		}
 
-		dataType, data, err := getExtendData()
+		dataType, data, err := getExtendData(content, fileOfContent)
 		if err != nil {
+			logger.Failf("get extend data error: %s", err.Error())
 			return
 		}
 		if dataType == enums.EXTEND_DATA_POINTER {
@@ -44,7 +45,7 @@ var appendCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(appendCmd)
-	appendCmd.Flags().StringVar(&filePath, "file", "", "path of the file containing content to append")
+	appendCmd.Flags().StringVar(&fileOfContent, "file", "", "path of the file containing content to append")
 	appendCmd.Flags().StringVar(&content, "data", "", "append content")
 	appendCmd.Flags().StringVar(&name, "name", "", "name, for appending content")
 	appendCmd.Flags().StringVar(&account, "account", "", "name, for appending content")

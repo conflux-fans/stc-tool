@@ -45,7 +45,7 @@ func (d *Downloader) DownloadFile(root string, savePath string) {
 	}
 }
 
-func (d *Downloader) DownloadExtend(name string, showMetadata, outputToConsole bool) error {
+func (d *Downloader) DownloadExtend(name string, outputToConsole bool) error {
 	logger.Get().WithField("name", name).Info("Start download content")
 
 	meta, err := GetContentMetadata(name)

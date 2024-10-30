@@ -38,7 +38,7 @@ var decryptCmd = &cobra.Command{
 			return
 		}
 
-		logger.SuccessWithResult(outputFile, "Decrypted file to below path")
+		logger.SuccessfWithParams(map[string]string{"Decrypted file": outputFile}, "Decrypted file to below path")
 	},
 }
 

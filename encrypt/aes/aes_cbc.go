@@ -14,6 +14,7 @@ type AesCbcEncryptor struct {
 var IV = []byte("abcdef1234567890")
 
 func (a *AesCbcEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) error {
+	logger.Get().Info("encrypt by method aes-cbc")
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return err

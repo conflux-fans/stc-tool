@@ -2,6 +2,7 @@ package encrypt
 
 import (
 	"bytes"
+	"path"
 
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/encrypt/aes"
 	"github.com/conflux-fans/storage-cli/encrypt/empty"
+	"github.com/conflux-fans/storage-cli/logger"
 	"github.com/pkg/errors"
 )
 
@@ -19,7 +21,7 @@ type Encryptor interface {
 
 var (
 	aseCbcEncryptor aes.AesCbcEncryptor
-	aseCtrEncryptor aes.AesCtrEncryptor
+	aseCtrEncryptor aes.AesCtrEncryptor = *aes.NewAesCtrEncryptor(string(aes.IV))
 	emptyEncryptor  empty.EmptyEncryptor
 )
 
@@ -66,13 +68,15 @@ func EncryptFile(e Encryptor, source, outputDirPath string, key []byte) (string,
 	}
 	defer sf.Close()
 
-	outputhPath := outputDirPath + mustGetFileName(sf) + ".encrypt"
+	outputhPath := path.Join(outputDirPath, mustGetFileName(sf)+".encrypt")
 
 	of, err := os.OpenFile(outputhPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return "", errors.WithMessage(err, "Failed to create output file")
 	}
 	defer of.Close()
+
+	logger.Get().WithField("source", source).WithField("output", outputhPath).Info("encrypt file")
 
 	return outputhPath, e.Encrypt(sf, of, key)
 }
@@ -90,7 +94,7 @@ func DecryptFile(e Encryptor, source, outputDirPath string, key []byte) (string,
 	defer sf.Close()
 	// fmt.Printf("sf name %s\n", mustGetFileName(sf))
 
-	outputhPath := outputDirPath + mustGetFileName(sf) + ".decrypt"
+	outputhPath := path.Join(outputDirPath, mustGetFileName(sf)+".decrypt")
 
 	of, err := os.OpenFile(outputhPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {

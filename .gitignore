@@ -5,3 +5,6 @@ config.yaml
 tmp/*
 *.zg
 zk_proof_input.json
+encrypted/*
+example.txt
+additional_content.txt
