@@ -199,13 +199,13 @@ storage-cli download file (--code <FILE_SHARE_CODE> | --root <ROOT_HASH>)
 **示例 2.3**：使用文件共享代码下载文件：
 
 ```shell
-storage-cli download file --code abc123def456
+storage-cli download file --code 3+lZBr+juJKgn31pSprkyUyrUv0CR4BR+/Mxkb/CHkg=
 ```
 
 **示例 2.4**：使用根哈希值下载文件：
 
 ```shell
-storage-cli download file --root 0x032303d969d3f271abfba865e159aa67e45ed406621c301e99c0643498eba7e4
+storage-cli download file --root 0xdfe95906bfa3b892a09f7d694a9ae4c94cab52fd02478051fbf33191bfc21e48
 ```
 
 ## 2.3 文件验证
@@ -278,16 +278,16 @@ storage-cli upload content --account <ACCOUNT_ADDRESS> --name <CONTENT_NAME> (--
 
 ```shell
 storage-cli upload content \
-   --content "Hello, World!" \
+   --content 'Hello, World!' \
    --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
    --name "Greeting"
 ```
 
-**示例 3.2**：将文件 `content.txt` 的内容上传到去中心化存储系统：
+**示例 3.2**：将文件 `example.txt` 的内容上传到去中心化存储系统：
 
 ```shell
 storage-cli upload content \
-   --file content.txt \
+   --file example.txt \
    --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE \
    --name "FileContent"
 ```
@@ -307,21 +307,20 @@ storage-cli download content [flags]
 | 选项                  | 必填 | 说明                                          |
 | --------------------- | ---- | --------------------------------------------- |
 | `--console`           | 否   | 将内容直接输出到控制台显示                    |
-| `--metadata`          | 否   | 输出内容的元数据信息                          |
 | `-n, --name <string>` | 是   | 要下载的内容名称，必须是上传时指定的内容名称  |
 
 ### 示例
 
-**示例 3.3**：下载名称为 "ExampleData" 的内容并输出到控制台：
+**示例 3.3**：下载名称为 "Greeting" 的内容到文件，并输出到控制台：
 
 ```shell
-storage-cli download content --name "ExampleData" --console
+storage-cli download content --name "Greeting" --console
 ```
 
-**示例 3.4**：下载名称为 "ExampleData" 的内容并输出元数据：
+**示例 3.4**：下载名称为 "Greeting" 的内容到文件：
 
 ```shell
-storage-cli download content --name "ExampleData" --metadata
+storage-cli download content --name "Greeting"
 ```
 
 ## 3.3 数据追加
@@ -350,15 +349,17 @@ storage-cli append --name <CONTENT_NAME> (--data <APPEND_DATA> | --file <FILE_PA
 ```shell
 storage-cli append \
    --name "Greeting" \
-   --data "Hello again!"
+   --data 'Hello again!' \
+   --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
 ```
 
-**示例 3.6**：将文件 `additional_content.txt` 中的内容追加到名称为 FileContent 的内容后：
+**示例 3.6**：将文件 `additional_content.txt` 中的内容追加到名称为 Greeting 的内容后：
 
 ```shell
 storage-cli append \
-   --name "FileContent" \
-   --file additional_content.txt
+   --name "Greeting" \
+   --file additional_content.txt \
+   --account 0x26154DF6A79a6C241b46545D672A3Ba6AE8813bE
 ```
 
 # 四、数据所有权管理

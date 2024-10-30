@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
+
 	ccore "github.com/0glabs/0g-storage-client/core"
 	"github.com/conflux-fans/storage-cli/constants/enums"
 	"github.com/conflux-fans/storage-cli/core"
@@ -23,7 +25,7 @@ var uploadExtendCmd = &cobra.Command{
 			return
 		}
 
-		dataType, data, err := getExtendData()
+		dataType, data, err := getExtendData(content, fileOfContent)
 		if err != nil {
 			logger.Failf("get extend data failed, err: %v", err)
 			return
@@ -40,26 +42,28 @@ var uploadExtendCmd = &cobra.Command{
 	},
 }
 
-func getExtendData() (enums.ExtendDataType, ccore.IterableData, error) {
+func getExtendData(content string, filePathOfContent string) (enums.ExtendDataType, ccore.IterableData, error) {
 	var dataType enums.ExtendDataType
 	var data ccore.IterableData
 	var err error
 	if content != "" {
 		dataType, data, err = core.DefaultExtendDataConverter().ByContent([]byte(content))
 		if err != nil {
-			logger.Fail(err.Error())
+			// logger.Fail(err.Error())
 			return enums.ExtendDataType(-1), nil, err
 		}
+		return dataType, data, nil
 	}
 
-	if fileOfContent != "" {
+	if filePathOfContent != "" {
 		dataType, data, err = core.DefaultExtendDataConverter().ByFile(fileOfContent)
 		if err != nil {
-			logger.Fail(err.Error())
+			// logger.Fail(err.Error())
 			return enums.ExtendDataType(-1), nil, err
 		}
+		return dataType, data, nil
 	}
-	return dataType, data, err
+	return dataType, data, errors.New("no data source provided")
 }
 
 func init() {

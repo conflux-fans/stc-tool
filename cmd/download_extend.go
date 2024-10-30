@@ -16,8 +16,8 @@ var downloadExtendCmd = &cobra.Command{
 	Long:  `Download content`,
 	Run: func(cmd *cobra.Command, args []string) {
 		isOutputToconsole, _ := cmd.Flags().GetBool("console")
-		isShowMetadata, _ := cmd.Flags().GetBool("metadata")
-		if err := core.DefaultDownloader().DownloadExtend(name, isShowMetadata, isOutputToconsole); err != nil {
+		// isShowMetadata, _ := cmd.Flags().GetBool("metadata")
+		if err := core.DefaultDownloader().DownloadExtend(name, isOutputToconsole); err != nil {
 			logger.Failf("Failed to download content %s: %v\n", name, err)
 			return
 		}
@@ -28,6 +28,6 @@ func init() {
 	downloadCmd.AddCommand(downloadExtendCmd)
 	downloadExtendCmd.Flags().StringVarP(&name, "name", "n", "", "data name")
 	downloadExtendCmd.Flags().Bool("console", false, "Output to console")
-	downloadExtendCmd.Flags().Bool("metadata", false, "Output metadata")
+	// downloadExtendCmd.Flags().Bool("metadata", false, "Output metadata")
 	downloadExtendCmd.MarkFlagRequired("name")
 }
