@@ -516,11 +516,11 @@ storage-cli zk proof --input <INPUT_FILE_PATH> --threshold <BIRTH_DATE_THRESHOLD
 
 ```shell
 storage-cli zk proof \
-   --input input_values.json \
+   --input zk_upload_output.json \
    --threshold 20000101
 ```
 
-其中 `input_values.json` 文件为[上传步骤](#51-vc加密上传)时的输出文件。
+其中 `zk_upload_output.json` 文件为[上传步骤](#51-vc加密上传)时的输出文件。
 
 ### 输出示例
 
