@@ -108,7 +108,7 @@ storage-cli file decrypt --source <ENCRYPTED_FILE> --output <OUTPUT_DIR> --ciphe
 
 ### 示例
 
-**示例 1.2**：将 `encrypted/example.enc` 文件通过 AES 解密后输出到 `./decrypted` 目录：
+**示例 1.2**：将 `encrypted/example.txt.encrypt` 文件通过 AES 解密后输出到 `./decrypted` 目录：
 
 ```shell
 storage-cli file decrypt \
