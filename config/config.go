@@ -81,7 +81,6 @@ func setLogger() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("log level:", logLevel)
 	logger.Get().SetLevel(logLevel)
 }
 
