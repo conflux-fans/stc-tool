@@ -84,6 +84,7 @@ func initKvBatchersAndW3Clients() {
 	cfg := config.Get()
 
 	for i, pk := range config.GetPrivateKeys() {
+		logger.Get().WithField("pk", pk).Debug("init w3 client")
 		w3client := blockchain.MustNewWeb3(cfg.BlockChain.URL, pk, providerOpt)
 
 		flowAddr := common.HexToAddress(cfg.BlockChain.FlowContract)
