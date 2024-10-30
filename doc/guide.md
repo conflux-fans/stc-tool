@@ -77,7 +77,7 @@ storage-cli file encrypt --source <SOURCE_FILE> --output <OUTPUT_DIR> --cipher <
 storage-cli file encrypt \
    --source example.txt \
    --output ./encrypted \
-   --cipher AES_CTR \
+   --cipher AES_CBC \
    --password mypassword123456
 ```
 

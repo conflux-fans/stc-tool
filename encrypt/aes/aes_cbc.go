@@ -3,6 +3,7 @@ package aes
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"fmt"
 	"io"
 
 	"github.com/conflux-fans/storage-cli/logger"
@@ -14,6 +15,7 @@ type AesCbcEncryptor struct {
 var IV = []byte("abcdef1234567890")
 
 func (a *AesCbcEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte) error {
+	logger.Get().Info("encrypt by method aes-cbc")
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return err
@@ -30,7 +32,7 @@ func (a *AesCbcEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte)
 			return err
 		}
 
-		// fmt.Println("read", n)
+		fmt.Println("read", n)
 
 		paded := pad(buf[:n])
 		cipher.NewCBCEncrypter(block, IV).CryptBlocks(paded, paded)
@@ -39,7 +41,7 @@ func (a *AesCbcEncryptor) Encrypt(input io.Reader, output io.Writer, key []byte)
 			return err
 		}
 
-		// fmt.Println("write", n)
+		fmt.Println("write", n)
 	}
 
 	return nil
