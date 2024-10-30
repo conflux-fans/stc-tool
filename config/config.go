@@ -84,6 +84,7 @@ func GetPrivateKeys() []string {
 
 func loadPrivateKeys() []string {
 	privateKeyFile := _config.PrivateKeyFile
+	logger.Get().WithField("file", privateKeyFile).Debug("Load private keys from file")
 	content, err := os.ReadFile(privateKeyFile)
 	if err != nil {
 		panic(err)
