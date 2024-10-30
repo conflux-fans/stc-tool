@@ -19,7 +19,7 @@ type Encryptor interface {
 
 var (
 	aseCbcEncryptor aes.AesCbcEncryptor
-	aseCtrEncryptor aes.AesCtrEncryptor
+	aseCtrEncryptor aes.AesCtrEncryptor = *aes.NewAesCtrEncryptor(string(aes.IV))
 	emptyEncryptor  empty.EmptyEncryptor
 )
 

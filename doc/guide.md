@@ -77,7 +77,7 @@ storage-cli file encrypt --source <SOURCE_FILE> --output <OUTPUT_DIR> --cipher <
 storage-cli file encrypt \
    --source example.txt \
    --output ./encrypted \
-   --cipher aes \
+   --cipher AES_CTR \
    --password mypassword123456
 ```
 
@@ -114,7 +114,7 @@ storage-cli file decrypt --source <ENCRYPTED_FILE> --output <OUTPUT_DIR> --ciphe
 storage-cli file decrypt \
    --source encrypted/example.enc \
    --output ./decrypted \
-   --cipher aes \
+   --cipher AES_CTR \
    --password mypassword123456
 ```
 
@@ -166,7 +166,7 @@ storage-cli upload file --file example.txt
 ```shell
 storage-cli upload file \
    --file example.txt \
-   --cipher aes \
+   --cipher AES_CTR \
    --password mypassword123456
 ```
 
@@ -245,7 +245,7 @@ storage-cli verify --file example.txt
 ```shell
 storage-cli verify \
    --file example.txt \
-   --cipher aes \
+   --cipher AES_CTR \
    --password mypassword123456
 ```
 
