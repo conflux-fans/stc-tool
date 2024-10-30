@@ -66,7 +66,7 @@ storage-cli file encrypt --source <SOURCE_FILE> --output <OUTPUT_DIR> --cipher <
 | -------------------------- | ---- | ----------------------------- |
 | `--source <SOURCE_FILE>`   | 是   | 指定需要加密的源文件路径      |
 | `--output <OUTPUT_DIR>`    | 是   | 指定加密后文件的输出目录      |
-| `--cipher <CIPHER_METHOD>` | 是   | 指定加密算法，当前支持：`aes` |
+| `--cipher <CIPHER_METHOD>` | 是   | 指定加密算法，当前支持：`AES_CBC` |
 | `--password <PASSWORD>`    | 是   | 加密密码，至少16位字符        |
 
 ### 示例
@@ -103,7 +103,7 @@ storage-cli file decrypt --source <ENCRYPTED_FILE> --output <OUTPUT_DIR> --ciphe
 | --------------------------- | ---- | ------------------------------------------------------- |
 | `--source <ENCRYPTED_FILE>` | 是   | 指定需要解密的加密文件路径                              |
 | `--output <OUTPUT_DIR>`     | 是   | 指定解密后文件的输出目录                                |
-| `--cipher <CIPHER_METHOD>`  | 是   | 指定解密算法，需与加密时使用的方法一致，当前支持：`aes` |
+| `--cipher <CIPHER_METHOD>`  | 是   | 指定解密算法，需与加密时使用的方法一致，当前支持：`AES_CBC` |
 | `--password <PASSWORD>`     | 是   | 解密密码，需与加密时使用的密码一致                      |
 
 ### 示例
@@ -143,7 +143,7 @@ storage-cli upload file --file <FILE_NAME> [--cipher <CIPHER_METHOD> --password 
 | 选项                       | 必填 | 说明                               |
 | -------------------------- | ---- | ---------------------------------- |
 | `--file <FILE_NAME>`       | 是   | 需要上传的文件名称或路径。支持相对路径和绝对路径 |
-| `--cipher <CIPHER_METHOD>` | 否   | 加密算法。当需要加密上传时使用，当前支持：`aes` |
+| `--cipher <CIPHER_METHOD>` | 否   | 加密算法。当需要加密上传时使用，当前支持：`AES_CBC` |
 | `--password <PASSWORD>`    | 否   | 加密密码。使用加密上传时必须提供，建议使用强密码 |
 
 ### 注意事项
@@ -223,7 +223,7 @@ storage-cli verify --file <FILE_PATH> [--cipher <CIPHER_METHOD> --password <PASS
 | 选项                       | 必填 | 说明                                           |
 | -------------------------- | ---- | ---------------------------------------------- |
 | `--file <FILE_PATH>`       | 是   | 需要验证的文件路径。支持相对路径和绝对路径 |
-| `--cipher <CIPHER_METHOD>` | 否   | 文件加密算法。验证加密文件时需要提供，当前支持：`aes` |
+| `--cipher <CIPHER_METHOD>` | 否   | 文件加密算法。验证加密文件时需要提供，当前支持：`AES_CBC` |
 | `--password <PASSWORD>`    | 否   | 加密密码。验证加密文件时必须提供原始密码 |
 
 ### 注意事项
