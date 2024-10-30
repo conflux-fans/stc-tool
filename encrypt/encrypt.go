@@ -94,7 +94,7 @@ func DecryptFile(e Encryptor, source, outputDirPath string, key []byte) (string,
 	defer sf.Close()
 	// fmt.Printf("sf name %s\n", mustGetFileName(sf))
 
-	outputhPath := outputDirPath + mustGetFileName(sf) + ".decrypt"
+	outputhPath := path.Join(outputDirPath, mustGetFileName(sf)+".decrypt")
 
 	of, err := os.OpenFile(outputhPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
