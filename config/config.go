@@ -99,7 +99,11 @@ func loadPrivateKeys() []string {
 	if err != nil {
 		panic(err)
 	}
-	return strings.Split(string(content), "\n")
+	str := strings.TrimSpace(string(content))
+	if str == "" {
+		panic("private key file is empty")
+	}
+	return strings.Split(str, "\n")
 }
 
 func getDefaultPrivateKeyPath() string {
