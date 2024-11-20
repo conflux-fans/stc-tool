@@ -38,6 +38,7 @@ func loadViper[T any]() *T {
 type Config struct {
 	BlockChain struct {
 		URL              string `yaml:"url"`
+		ConfuraUrl       string `yaml:"confuraUrl"`
 		FlowContract     string `yaml:"flowContract"`
 		TemplateContract string `yaml:"templateContract"`
 		PmContract       string `yaml:"pmContract"`

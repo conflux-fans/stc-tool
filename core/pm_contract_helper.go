@@ -31,7 +31,7 @@ func NewOwnerOperator(contract common.Address) *PmContractHelper {
 		contractAddr: contract,
 	}
 
-	client := web3go.MustNewClientWithOption(config.Get().BlockChain.URL, web3go.ClientOption{
+	client := web3go.MustNewClientWithOption(config.Get().BlockChain.ConfuraUrl, web3go.ClientOption{
 		Option: providerOpt,
 	})
 	clientForContract, _ := client.ToClientForContract()
