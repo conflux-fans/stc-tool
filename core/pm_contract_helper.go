@@ -122,7 +122,7 @@ func (o *PmContractHelper) OwnerOf(tokenId *big.Int) (common.Address, error) {
 }
 
 func (o *PmContractHelper) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address, tokenIds []*big.Int) ([]*contracts.PermissionManagerTransfer, error) {
-	batch := 1000
+	batch := config.Get().BlockChain.GetLogsBatchSize
 	var result []*contracts.PermissionManagerTransfer
 	var wg sync.WaitGroup
 	var mu sync.Mutex

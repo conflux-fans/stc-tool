@@ -43,6 +43,7 @@ type Config struct {
 		TemplateContract string `yaml:"templateContract"`
 		PmContract       string `yaml:"pmContract"`
 		StartBlockNum    int64  `yaml:"startBlockNum"`
+		GetLogsBatchSize int    `yaml:"getLogsBatchSize"`
 	} `yaml:"blockChain"`
 	StorageNodes   []string `yaml:"storageNodes"`
 	KvNode         string   `yaml:"kvNode"`
