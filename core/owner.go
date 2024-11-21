@@ -79,10 +79,14 @@ func (o *OwnerOperator) GetOwnerHistory(name string) ([]common.Address, error) {
 
 	var result []common.Address
 	for i, log := range logs {
+		logger.Get().WithField("index", i).WithField("from", log.From).WithField("to", log.To).Debug("owner history")
 		if i > 0 && logs[i-1].To != log.From {
 			return nil, errors.New("Owner history is not continuous")
 		}
 		result = append(result, log.From)
+		if i == len(logs)-1 {
+			result = append(result, log.To)
+		}
 	}
 
 	return result, nil

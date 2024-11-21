@@ -20,6 +20,8 @@ go install github.com/wangdayong228/0g-storage-contracts/storage-cli
 
 ## 准备工作
 
+部署 [`PermissionManager.sol`](https://github.com/conflux-fans/zerog-storage-tool-contract) 合约
+
 运行命令前需要确保账户中有足够的 CFX 余额，否则无法正常运行。
 
 该工具提供了初始化账户余额的命令，可以用来为指定账户充值。
